@@ -100,8 +100,8 @@ model HigherEducationStudy {
   resumeId    String   @db.Uuid
   title       String
   institution String
-  start_date  DateTime
-  end_date    DateTime
+  startDate   DateTime
+  endDate     DateTime
 
   @@id([resumeId, title])
 }
