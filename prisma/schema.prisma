@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model JobOffer {
+  id           String           @id @default(uuid()) @db.Uuid
+  title        String
+  company      String
+  description  String
+  career       Career           @relation(fields: [careerId], references: [id])
+  careerId     String           @db.Uuid
+  applications JobApplication[]
+}
+
+model Career {
+  id            String           @id @default(uuid()) @db.Uuid
+  name          String           @unique
+  jobOffers     JobOffer[]
+  alumniResumes GraduateResume[]
+}
+
+model Graduate {
+  email           String           @id
+  names           String
+  surnames        String
+  jobApplications JobApplication[]
+  resumes         GraduateResume[]
+}
+
+model JobApplication {
+  jobOffer                JobOffer @relation(fields: [jobOfferId], references: [id])
+  jobOfferId              String   @db.Uuid
+  graduateWhoApplied      Graduate @relation(fields: [graduateWhoAppliedEmail], references: [email])
+  graduateWhoAppliedEmail String
+  applicationDate         DateTime
+
+  @@id([jobOfferId, graduateWhoAppliedEmail])
+}
+
+model Resume {
+  id                     String                 @id @default(uuid()) @db.Uuid
+  numberOfDownloads      Int
+  isVisible              Boolean
+  knownLanguages         Language[]
+  portfolio              PortfolioItem[]
+  higherEducationStudies HigherEducationStudy[]
+  softSkills             SoftSkill[]
+  technicalSkills        TechnicalSkill[]
+  ciapCourses            CiapCourse[]
+  positionsOfInterest    PositionOfInterest[]
+  industriesOfInterest   IndustryOfInterest[]
+  owner                  GraduateResume?
+}
+
+model CiapCourse {
+  id                 String   @id @default(uuid()) @db.Uuid
+  name               String
+  resumesListingThis Resume[]
+}
+
+model SoftSkill {
+  id                 String   @id @default(uuid()) @db.Uuid
+  name               String
+  resumesListingThis Resume[]
+}
+
+model TechnicalSkill {
+  resume   Resume @relation(fields: [resumeId], references: [id])
+  resumeId String @db.Uuid
+  name     String
+
+  @@id([resumeId, name])
+}
+
+model Language {
+  resume       Resume @relation(fields: [resumeId], references: [id])
+  resumeId     String @db.Uuid
+  name         String
+  masteryLevel Int
+
+  @@id([resumeId, name])
+}
+
+model PortfolioItem {
+  resume      Resume @relation(fields: [resumeId], references: [id])
+  resumeId    String @db.Uuid
+  title       String
+  description String
+
+  @@id([resumeId, title])
+}
+
+model HigherEducationStudy {
+  resume      Resume   @relation(fields: [resumeId], references: [id])
+  resumeId    String   @db.Uuid
+  title       String
+  institution String
+  start_date  DateTime
+  end_date    DateTime
+
+  @@id([resumeId, title])
+}
+
+model PositionOfInterest {
+  resume       Resume @relation(fields: [resumeId], references: [id])
+  resumeId     String @db.Uuid
+  positionName String
+
+  @@id([resumeId, positionName])
+}
+
+model IndustryOfInterest {
+  resume       Resume @relation(fields: [resumeId], references: [id])
+  resumeId     String @db.Uuid
+  industryName String
+
+  @@id([resumeId, industryName])
+}
+
+model GraduateResume {
+  graduate      Graduate @relation(fields: [graduateEmail], references: [email])
+  graduateEmail String
+  resume        Resume   @relation(fields: [resumeId], references: [id])
+  resumeId      String   @unique @db.Uuid
+  career        Career   @relation(fields: [careerId], references: [id])
+  careerId      String   @db.Uuid
+
+  @@id([graduateEmail, resumeId, careerId])
+}
