@@ -26,6 +26,7 @@ model Career {
 
 model Graduate {
   email           String           @id
+  password        String
   names           String
   surnames        String
   jobApplications JobApplication[]
@@ -46,7 +47,7 @@ model Resume {
   id                     String                 @id @default(uuid()) @db.Uuid
   numberOfDownloads      Int
   isVisible              Boolean
-  knownLanguages         Language[]
+  knownLanguages         ResumeLanguage[]
   portfolio              PortfolioItem[]
   higherEducationStudies HigherEducationStudy[]
   softSkills             SoftSkill[]
@@ -78,12 +79,18 @@ model TechnicalSkill {
 }
 
 model Language {
-  resume       Resume @relation(fields: [resumeId], references: [id])
-  resumeId     String @db.Uuid
-  name         String
+  name    String           @id
+  knownBy ResumeLanguage[]
+}
+
+model ResumeLanguage {
+  resume       Resume   @relation(fields: [resumeId], references: [id])
+  resumeId     String   @db.Uuid
+  language     Language @relation(fields: [languageName], references: [name])
+  languageName String
   masteryLevel Int
 
-  @@id([resumeId, name])
+  @@id([resumeId, languageName])
 }
 
 model PortfolioItem {
