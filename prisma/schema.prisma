@@ -8,13 +8,25 @@ datasource db {
 }
 
 model JobOffer {
-  id           String           @id @default(uuid()) @db.Uuid
-  title        String
-  company      String
-  description  String
-  career       Career           @relation(fields: [careerId], references: [id])
-  careerId     String           @db.Uuid
-  applications JobApplication[]
+  id               String           @id @default(uuid()) @db.Uuid
+  description      String
+  companyName      String
+  companyContact   String
+  companyLogo      Bytes
+  department       String
+  position         String
+  offerLocation    String
+  offerDate        DateTime
+  career           Career           @relation(fields: [careerId], references: [id])
+  careerId         String           @db.Uuid
+  applications     JobApplication[]
+  contractType     ContractType     @relation(fields: [contractTypeName], references: [name])
+  contractTypeName String
+}
+
+model ContractType {
+  name                String     @id
+  contractsOfThisType JobOffer[]
 }
 
 model Career {
