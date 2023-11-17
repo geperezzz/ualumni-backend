@@ -59,6 +59,7 @@ model Resume {
   id                     String                 @id @default(uuid()) @db.Uuid
   numberOfDownloads      Int
   isVisible              Boolean
+  aboutMe                String
   knownLanguages         ResumeLanguage[]
   portfolio              PortfolioItem[]
   higherEducationStudies HigherEducationStudy[]
