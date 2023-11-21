@@ -14,13 +14,16 @@ import {
 } from '@nestjs/common';
 import { LanguageService } from './language.service';
 import { LanguageDto } from './dto/languageDto.dto';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('language')
 @Controller('language')
 export class LanguageController {
   constructor(private readonly languageService: LanguageService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ description: 'Language created' })
   async create(@Body() languageDto: LanguageDto): Promise<any> {
     try {
       const data = await this.languageService.create(languageDto);
@@ -35,6 +38,7 @@ export class LanguageController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: 'Languages list' })
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
@@ -62,6 +66,7 @@ export class LanguageController {
 
   @Delete(':name')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: 'Language deleted' })
   async remove(@Param('name') name: string) {
     try {
       await this.languageService.remove(name);

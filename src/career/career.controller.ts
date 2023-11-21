@@ -16,13 +16,16 @@ import {
 import { CareerService } from './career.service';
 import { CreateCareerDto } from './dto/create-career.dto';
 import { UpdateCareerDto } from './dto/update-career.dto';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('career')
 @Controller('career')
 export class CareerController {
   constructor(private readonly careerService: CareerService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ description: 'Career created' })
   async create(@Body() createCareerDto: CreateCareerDto) {
     try {
       const data = await this.careerService.create(createCareerDto);
@@ -34,6 +37,7 @@ export class CareerController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: 'Careers list' })
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
@@ -60,6 +64,8 @@ export class CareerController {
   }
 
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: 'Career found' })
   async findOne(@Param('id') id: string): Promise<any> {
     try {
       const career = await this.careerService.findOne(id);
@@ -74,6 +80,7 @@ export class CareerController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: 'Career updated' })
   async update(
     @Param('id') id: string,
     @Body() updateCareerDto: UpdateCareerDto,
@@ -87,6 +94,7 @@ export class CareerController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: 'Career deleted' })
   async remove(@Param('id') id: string) {
     try {
       await this.careerService.remove(id);
