@@ -1,18 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { CreateLanguageDto } from './dto/create-language.dto';
+import { LanguageDto } from './dto/languageDto.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class LanguageService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(
-    createLanguageDto: CreateLanguageDto,
-  ): Promise<CreateLanguageDto> {
+  async create(languageDto: LanguageDto): Promise<LanguageDto> {
     try {
       const language = await this.prismaService.language.create({
         data: {
-          name: createLanguageDto.name,
+          name: languageDto.name,
         },
       });
       return language;

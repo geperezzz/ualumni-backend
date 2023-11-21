@@ -1,26 +1,96 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCareerDto } from './dto/create-career.dto';
 import { UpdateCareerDto } from './dto/update-career.dto';
+import { CareerDto } from './dto/careerDto.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class CareerService {
-  create(createCareerDto: CreateCareerDto) {
-    return 'This action adds a new career';
+  constructor(private readonly prismaService: PrismaService) {}
+
+  async create(createCareerDto: CreateCareerDto): Promise<CareerDto> {
+    try {
+      const career = await this.prismaService.career.create({
+        data: {
+          name: createCareerDto.name,
+        },
+      });
+      return career;
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
-  findAll() {
-    return `This action returns all career`;
+  async findAll(page: number, perPage: number): Promise<any> {
+    const totalCount = await this.prismaService.career.count();
+    const pageCount = Math.ceil(totalCount / perPage);
+
+    if (page < 1) {
+      page = 1;
+    } else if (page > pageCount) {
+      page = pageCount;
+    }
+
+    const data = await this.prismaService.career.findMany({
+      take: perPage,
+      skip: (page - 1) * perPage,
+    });
+
+    return {
+      page: page,
+      perPage: data.length,
+      pageCount,
+      totalCount,
+      items: data,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} career`;
+  async findOne(id: string): Promise<CareerDto> {
+    try {
+      const career = await this.prismaService.career.findUnique({
+        where: {
+          id,
+        },
+      });
+      if (!career) throw new Error('Career not found');
+      return career;
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
-  update(id: number, updateCareerDto: UpdateCareerDto) {
-    return `This action updates a #${id} career`;
+  async update(
+    id: string,
+    updateCareerDto: UpdateCareerDto,
+  ): Promise<CareerDto> {
+    try {
+      await this.findOne(id);
+      const career = await this.prismaService.career.update({
+        where: {
+          id,
+        },
+        data: {
+          name: updateCareerDto.name,
+        },
+      });
+      return career;
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} career`;
+  async remove(id: string): Promise<CareerDto> {
+    try {
+      await this.findOne(id);
+      const career = await this.prismaService.career.delete({
+        where: {
+          id,
+        },
+      });
+      return career;
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 }
+

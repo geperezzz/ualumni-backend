@@ -13,7 +13,7 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { LanguageService } from './language.service';
-import { CreateLanguageDto } from './dto/create-language.dto';
+import { LanguageDto } from './dto/languageDto.dto';
 
 @Controller('language')
 export class LanguageController {
@@ -21,9 +21,9 @@ export class LanguageController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createLanguageDto: CreateLanguageDto): Promise<any> {
+  async create(@Body() languageDto: LanguageDto): Promise<any> {
     try {
-      const data = await this.languageService.create(createLanguageDto);
+      const data = await this.languageService.create(languageDto);
       return {
         statusCode: HttpStatus.CREATED,
         data,
