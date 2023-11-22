@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { LanguageDto } from './dto/languageDto.dto';
+import { LanguageDto } from './dto/language.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PageDto } from 'src/common/dto/paginated-response.dto';
 
 @Injectable()
 export class LanguageService {
@@ -19,31 +20,35 @@ export class LanguageService {
     }
   }
 
-  async findAll(page: number, perPage: number): Promise<any> {
-    const totalCount = await this.prismaService.language.count();
-    const pageCount = Math.ceil(totalCount / perPage);
+  async findAll(page: number, perPage: number): Promise<PageDto<LanguageDto>> {
+    try {
+      const totalCount = await this.prismaService.language.count();
+      const pageCount = Math.ceil(totalCount / perPage);
 
-    if (page < 1) {
-      page = 1;
-    } else if (page > pageCount) {
-      page = pageCount;
+      if (page < 1) {
+        page = 1;
+      } else if (page > pageCount && pageCount > 0) {
+        page = pageCount;
+      }
+
+      const data = await this.prismaService.language.findMany({
+        take: perPage,
+        skip: (page - 1) * perPage,
+      });
+
+      return {
+        page: page,
+        perPage: data.length,
+        pageCount,
+        totalCount,
+        items: data,
+      };
+    } catch (error) {
+      throw new Error(error);
     }
-
-    const data = await this.prismaService.language.findMany({
-      take: perPage,
-      skip: (page - 1) * perPage,
-    });
-
-    return {
-      page: page,
-      perPage: data.length,
-      pageCount,
-      totalCount,
-      items: data,
-    };
   }
 
-  async remove(name: string) {
+  async remove(name: string): Promise<LanguageDto> {
     try {
       return await this.prismaService.language.delete({
         where: {

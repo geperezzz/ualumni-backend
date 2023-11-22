@@ -12,11 +12,18 @@ import {
   DefaultValuePipe,
   Query,
   ParseIntPipe,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { CareerService } from './career.service';
 import { CreateCareerDto } from './dto/create-career.dto';
 import { UpdateCareerDto } from './dto/update-career.dto';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiExtraModels,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { CareerResponseDto } from 'src/common/api/api-response';
 
 @ApiTags('career')
 @Controller('career')
@@ -26,6 +33,7 @@ export class CareerController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ description: 'Career created' })
+  @ApiExtraModels(CareerResponseDto)
   async create(@Body() createCareerDto: CreateCareerDto) {
     try {
       const data = await this.careerService.create(createCareerDto);
@@ -66,7 +74,7 @@ export class CareerController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Career found' })
-  async findOne(@Param('id') id: string): Promise<any> {
+  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<any> {
     try {
       const career = await this.careerService.findOne(id);
       return {
@@ -82,7 +90,7 @@ export class CareerController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Career updated' })
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateCareerDto: UpdateCareerDto,
   ) {
     try {
@@ -95,7 +103,7 @@ export class CareerController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Career deleted' })
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     try {
       await this.careerService.remove(id);
       return {
