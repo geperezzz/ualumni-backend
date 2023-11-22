@@ -13,8 +13,10 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { LanguageService } from './language.service';
-import { LanguageDto } from './dto/languageDto.dto';
+import { LanguageDto } from './dto/language.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ResponseDto } from 'src/common/dto/response.dto';
+import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 
 @ApiTags('language')
 @Controller('language')
@@ -24,7 +26,9 @@ export class LanguageController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ description: 'Language created' })
-  async create(@Body() languageDto: LanguageDto): Promise<any> {
+  async create(
+    @Body() languageDto: LanguageDto,
+  ): Promise<ResponseDto<LanguageDto>> {
     try {
       const data = await this.languageService.create(languageDto);
       return {
@@ -42,7 +46,7 @@ export class LanguageController {
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
-  ): Promise<any> {
+  ): Promise<PaginatedResponseDto<LanguageDto>> {
     try {
       if (perPage < 1)
         throw new HttpException(
@@ -67,12 +71,12 @@ export class LanguageController {
   @Delete(':name')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Language deleted' })
-  async remove(@Param('name') name: string) {
+  async remove(@Param('name') name: string): Promise<ResponseDto<LanguageDto>> {
     try {
-      await this.languageService.remove(name);
+      const language = await this.languageService.remove(name);
       return {
         statusCode: HttpStatus.OK,
-        data: null,
+        data: language,
       };
     } catch (error) {
       throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);

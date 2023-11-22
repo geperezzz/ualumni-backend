@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCareerDto } from './dto/create-career.dto';
 import { UpdateCareerDto } from './dto/update-career.dto';
-import { CareerDto } from './dto/careerDto.dto';
+import { CareerDto } from './dto/career.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -22,27 +22,31 @@ export class CareerService {
   }
 
   async findAll(page: number, perPage: number): Promise<any> {
-    const totalCount = await this.prismaService.career.count();
-    const pageCount = Math.ceil(totalCount / perPage);
+    try {
+      const totalCount = await this.prismaService.career.count();
+      const pageCount = Math.ceil(totalCount / perPage);
 
-    if (page < 1) {
-      page = 1;
-    } else if (page > pageCount) {
-      page = pageCount;
+      if (page < 1) {
+        page = 1;
+      } else if (page > pageCount && pageCount > 0) {
+        page = pageCount;
+      }
+
+      const data = await this.prismaService.career.findMany({
+        take: perPage,
+        skip: (page - 1) * perPage,
+      });
+
+      return {
+        page: page,
+        perPage: data.length,
+        pageCount,
+        totalCount,
+        items: data,
+      };
+    } catch (error) {
+      throw new Error(error);
     }
-
-    const data = await this.prismaService.career.findMany({
-      take: perPage,
-      skip: (page - 1) * perPage,
-    });
-
-    return {
-      page: page,
-      perPage: data.length,
-      pageCount,
-      totalCount,
-      items: data,
-    };
   }
 
   async findOne(id: string): Promise<CareerDto> {
@@ -93,4 +97,3 @@ export class CareerService {
     }
   }
 }
-
