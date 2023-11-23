@@ -30,29 +30,29 @@ model ContractType {
 }
 
 model Career {
-  id            String           @id @default(uuid()) @db.Uuid
-  name          String           @unique
+  id            String         @id @default(uuid()) @db.Uuid
+  name          String         @unique
   jobOffers     JobOffer[]
-  alumniResumes GraduateResume[]
+  alumniResumes AlumniResume[]
 }
 
-model Graduate {
+model Alumni {
   email           String           @id
   password        String
   names           String
   surnames        String
   jobApplications JobApplication[]
-  resumes         GraduateResume[]
+  resumes         AlumniResume[]
 }
 
 model JobApplication {
-  jobOffer                JobOffer @relation(fields: [jobOfferId], references: [id])
-  jobOfferId              String   @db.Uuid
-  graduateWhoApplied      Graduate @relation(fields: [graduateWhoAppliedEmail], references: [email])
-  graduateWhoAppliedEmail String
-  applicationDate         DateTime
+  jobOffer              JobOffer @relation(fields: [jobOfferId], references: [id])
+  jobOfferId            String   @db.Uuid
+  alumniWhoApplied      Alumni   @relation(fields: [alumniWhoAppliedEmail], references: [email])
+  alumniWhoAppliedEmail String
+  applicationDate       DateTime
 
-  @@id([jobOfferId, graduateWhoAppliedEmail])
+  @@id([jobOfferId, alumniWhoAppliedEmail])
 }
 
 model Resume {
@@ -68,7 +68,7 @@ model Resume {
   ciapCourses            CiapCourse[]
   positionsOfInterest    PositionOfInterest[]
   industriesOfInterest   IndustryOfInterest[]
-  owner                  GraduateResume?
+  owner                  AlumniResume?
 }
 
 model CiapCourse {
@@ -78,8 +78,7 @@ model CiapCourse {
 }
 
 model SoftSkill {
-  id                 String   @id @default(uuid()) @db.Uuid
-  name               String
+  name               String   @id
   resumesListingThis Resume[]
 }
 
@@ -142,13 +141,13 @@ model IndustryOfInterest {
   @@id([resumeId, industryName])
 }
 
-model GraduateResume {
-  graduate      Graduate @relation(fields: [graduateEmail], references: [email])
-  graduateEmail String
-  resume        Resume   @relation(fields: [resumeId], references: [id])
-  resumeId      String   @unique @db.Uuid
-  career        Career   @relation(fields: [careerId], references: [id])
-  careerId      String   @db.Uuid
+model AlumniResume {
+  alumni      Alumni @relation(fields: [alumniEmail], references: [email])
+  alumniEmail String
+  resume      Resume @relation(fields: [resumeId], references: [id])
+  resumeId    String @unique @db.Uuid
+  career      Career @relation(fields: [careerId], references: [id])
+  careerId    String @db.Uuid
 
-  @@id([graduateEmail, resumeId, careerId])
+  @@id([alumniEmail, resumeId, careerId])
 }
