@@ -4,6 +4,12 @@ import { UpdateCareerDto } from './dto/update-career.dto';
 import { CareerDto } from './dto/career.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
+import { Prisma } from '@prisma/client';
+import {
+  AlreadyExistsError,
+  NotFoundError,
+  UnexpectedError,
+} from 'src/common/error/service.error';
 
 @Injectable()
 export class CareerService {
@@ -11,18 +17,27 @@ export class CareerService {
 
   async create(createCareerDto: CreateCareerDto): Promise<CareerDto> {
     try {
-      const career = await this.prismaService.career.create({
+      return await this.prismaService.career.create({
         data: {
           name: createCareerDto.name,
         },
       });
-      return career;
     } catch (error) {
-      throw new Error(error);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new AlreadyExistsError(
+            `There already exists a career with the given \`name\` (${createCareerDto.name})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
-  async findAll(page: number, perPage: number): Promise<PageDto<CareerDto>> {
+  async findMany(page: number, perPage: number): Promise<PageDto<CareerDto>> {
     try {
       const totalCount = await this.prismaService.career.count();
       const pageCount = Math.ceil(totalCount / perPage);
@@ -46,55 +61,79 @@ export class CareerService {
         items: data,
       };
     } catch (error) {
-      throw new Error(error);
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
-  async findOne(id: string): Promise<CareerDto> {
+  async findOne(name: string): Promise<CareerDto | null> {
     try {
-      const career = await this.prismaService.career.findUnique({
+      return await this.prismaService.career.findUnique({
         where: {
-          id,
+          name,
         },
       });
-      if (!career) throw new Error('Career not found');
-      return career;
     } catch (error) {
-      throw new Error(error);
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
   async update(
-    id: string,
+    name: string,
     updateCareerDto: UpdateCareerDto,
   ): Promise<CareerDto> {
     try {
-      await this.findOne(id);
-      const career = await this.prismaService.career.update({
+      return await this.prismaService.career.update({
         where: {
-          id,
+          name,
         },
         data: {
           name: updateCareerDto.name,
         },
       });
-      return career;
     } catch (error) {
-      throw new Error(error);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundError(
+            `There is no career with the given \`name\` (${name})`,
+            { cause: error },
+          );
+        }
+        if (error.code === 'P2002') {
+          throw new AlreadyExistsError(
+            `Cannot update the \`name\` to \`${updateCareerDto.name}\`,there already exists a career with the given \`name\` (${updateCareerDto.name})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
-  async remove(id: string): Promise<CareerDto> {
+  async remove(name: string): Promise<CareerDto> {
     try {
-      await this.findOne(id);
-      const career = await this.prismaService.career.delete({
+      return await this.prismaService.career.delete({
         where: {
-          id,
+          name,
         },
       });
-      return career;
     } catch (error) {
-      throw new Error(error);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2001') {
+          throw new NotFoundError(
+            `There is no career with the given \`name\` (${name})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 }

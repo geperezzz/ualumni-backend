@@ -26,7 +26,9 @@ export class ContractTypeController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ description: 'Contract type created' })
-  async create(@Body() contractTypeDto: ContractTypeDto): Promise<ResponseDto<ContractTypeDto>> {
+  async create(
+    @Body() contractTypeDto: ContractTypeDto,
+  ): Promise<ResponseDto<ContractTypeDto>> {
     try {
       const data = await this.contractTypeService.create(contractTypeDto);
       return {
@@ -67,13 +69,15 @@ export class ContractTypeController {
 
   @Get(':name')
   @HttpCode(HttpStatus.OK)
-  async findOne(@Param('name') name: string): Promise<ResponseDto<ContractTypeDto>> {
+  async findOne(
+    @Param('name') name: string,
+  ): Promise<ResponseDto<ContractTypeDto>> {
     try {
       const data = await this.contractTypeService.findOne(name);
       return {
         statusCode: HttpStatus.OK,
-        data
-      }
+        data,
+      };
     } catch (error) {
       const message = error.response ? error.response : 'Bad Request';
       throw new HttpException(message, HttpStatus.BAD_REQUEST);

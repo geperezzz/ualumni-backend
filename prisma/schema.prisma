@@ -17,8 +17,8 @@ model JobOffer {
   position         String
   offerLocation    String
   offerDate        DateTime
-  career           Career           @relation(fields: [careerId], references: [id])
-  careerId         String           @db.Uuid
+  career           Career           @relation(fields: [careerName], references: [name])
+  careerName       String
   applications     JobApplication[]
   contractType     ContractType     @relation(fields: [contractTypeName], references: [name])
   contractTypeName String
@@ -30,8 +30,7 @@ model ContractType {
 }
 
 model Career {
-  id            String           @id @default(uuid()) @db.Uuid
-  name          String           @unique
+  name          String           @id
   jobOffers     JobOffer[]
   alumniResumes GraduateResume[]
 }
@@ -147,8 +146,8 @@ model GraduateResume {
   graduateEmail String
   resume        Resume   @relation(fields: [resumeId], references: [id])
   resumeId      String   @unique @db.Uuid
-  career        Career   @relation(fields: [careerId], references: [id])
-  careerId      String   @db.Uuid
+  career        Career   @relation(fields: [careerName], references: [name])
+  careerName    String
 
-  @@id([graduateEmail, resumeId, careerId])
+  @@id([graduateEmail, resumeId, careerName])
 }

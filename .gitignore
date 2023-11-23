@@ -3,4 +3,3 @@ node_modules
 .env
 .git
 dist
-src/common/api/api-response.ts

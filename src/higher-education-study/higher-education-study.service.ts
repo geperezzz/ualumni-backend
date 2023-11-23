@@ -16,7 +16,10 @@ export class HigherEducationStudyService {
     return `This action returns a #${id} higherEducationStudy`;
   }
 
-  update(id: number, updateHigherEducationStudyDto: UpdateHigherEducationStudyDto) {
+  update(
+    id: number,
+    updateHigherEducationStudyDto: UpdateHigherEducationStudyDto,
+  ) {
     return `This action updates a #${id} higherEducationStudy`;
   }
 

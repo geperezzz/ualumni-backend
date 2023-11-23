@@ -11,12 +11,21 @@ import {
   Query,
   DefaultValuePipe,
   ParseIntPipe,
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+  Put,
 } from '@nestjs/common';
 import { LanguageService } from './language.service';
 import { LanguageDto } from './dto/language.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
+import { CreateLanguageDto } from './dto/create-language.dto';
+import {
+  AlreadyExistsError,
+  NotFoundError,
+} from 'src/common/error/service.error';
 
 @ApiTags('language')
 @Controller('language')
@@ -27,34 +36,35 @@ export class LanguageController {
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ description: 'Language created' })
   async create(
-    @Body() languageDto: LanguageDto,
+    @Body() createLanguageDto: CreateLanguageDto,
   ): Promise<ResponseDto<LanguageDto>> {
     try {
-      const data = await this.languageService.create(languageDto);
+      const data = await this.languageService.create(createLanguageDto);
       return {
         statusCode: HttpStatus.CREATED,
         data,
       };
     } catch (error) {
-      throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
+      if (error instanceof AlreadyExistsError)
+        throw new BadRequestException(error.message, { cause: error });
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
     }
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Languages list' })
-  async findAll(
+  async findMany(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
   ): Promise<PaginatedResponseDto<LanguageDto>> {
+    if (perPage < 1)
+      throw new BadRequestException('Invalid number of items per page');
     try {
-      if (perPage < 1)
-        throw new HttpException(
-          'Invalid number of items per page',
-          HttpStatus.BAD_REQUEST,
-        );
-
-      const paginationResponse = await this.languageService.findAll(
+      const paginationResponse = await this.languageService.findMany(
         page,
         perPage,
       );
@@ -63,8 +73,55 @@ export class LanguageController {
         data: paginationResponse,
       };
     } catch (error) {
-      const message = error.response ? error.response : 'Bad Request';
-      throw new HttpException(message, HttpStatus.BAD_REQUEST);
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
+
+  @Get(':name')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: 'Language found' })
+  async findOne(
+    @Param('name') name: string,
+  ): Promise<ResponseDto<LanguageDto>> {
+    const language = await this.languageService.findOne(name);
+    if (!language)
+      throw new NotFoundException(
+        `There is no language with the given \`name\` (${name})`,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      data: language,
+    };
+  }
+
+  @Put(':name')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: 'Language updated' })
+  async update(
+    @Param('name') name: string,
+    @Body() updateLanguageDto: LanguageDto,
+  ): Promise<ResponseDto<LanguageDto>> {
+    try {
+      const updatedLanguage = await this.languageService.update(
+        name,
+        updateLanguageDto,
+      );
+      return {
+        statusCode: HttpStatus.OK,
+        data: updatedLanguage,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError)
+        throw new NotFoundException(error.message, { cause: error });
+      if (error instanceof AlreadyExistsError)
+        throw new BadRequestException(error.message, { cause: error });
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
     }
   }
 
@@ -73,13 +130,18 @@ export class LanguageController {
   @ApiOkResponse({ description: 'Language deleted' })
   async remove(@Param('name') name: string): Promise<ResponseDto<LanguageDto>> {
     try {
-      const language = await this.languageService.remove(name);
+      const deletedLanguage = await this.languageService.remove(name);
       return {
         statusCode: HttpStatus.OK,
-        data: language,
+        data: deletedLanguage,
       };
     } catch (error) {
-      throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
+      if (error instanceof NotFoundError)
+        throw new NotFoundException(error.message, { cause: error });
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
     }
   }
 }

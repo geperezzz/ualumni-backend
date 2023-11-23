@@ -3,25 +3,37 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   HttpStatus,
   HttpCode,
-  HttpException,
   DefaultValuePipe,
   Query,
   ParseIntPipe,
   ParseUUIDPipe,
   BadRequestException,
+  NotFoundException,
+  Put,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { CareerService } from './career.service';
 import { CreateCareerDto } from './dto/create-career.dto';
 import { UpdateCareerDto } from './dto/update-career.dto';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { CareerDto } from './dto/career.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
+import {
+  AlreadyExistsError,
+  NotFoundError,
+} from 'src/common/error/service.error';
 
 @ApiTags('career')
 @Controller('career')
@@ -38,21 +50,26 @@ export class CareerController {
       const data = await this.careerService.create(createCareerDto);
       return { statusCode: HttpStatus.CREATED, data };
     } catch (error) {
-      throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
+      if (error instanceof AlreadyExistsError)
+        throw new BadRequestException(error.message, { cause: error });
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
     }
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Careers list' })
-  async findAll(
+  async findMany(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
   ): Promise<PaginatedResponseDto<CareerDto>> {
     if (perPage < 1)
       throw new BadRequestException('Invalid number of items per page');
     try {
-      const paginationResponse = await this.careerService.findAll(
+      const paginationResponse = await this.careerService.findMany(
         page,
         perPage,
       );
@@ -61,57 +78,73 @@ export class CareerController {
         data: paginationResponse,
       };
     } catch (error) {
-      const message = error.response ? error.response : 'Bad Request';
-      throw new HttpException(message, HttpStatus.BAD_REQUEST);
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
     }
   }
 
-  @Get(':id')
+  @Get(':name')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Career found' })
-  async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<ResponseDto<CareerDto>> {
-    try {
-      const career = await this.careerService.findOne(id);
-      return {
-        statusCode: HttpStatus.OK,
-        data: career,
-      };
-    } catch (error) {
-      throw new HttpException('Bad request', HttpStatus.NOT_FOUND);
-    }
+  async findOne(@Param('name') name: string): Promise<ResponseDto<CareerDto>> {
+    const career = await this.careerService.findOne(name);
+    if (!career)
+      throw new NotFoundException(
+        `There is no career with the given \`name\` (${name})`,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      data: career,
+    };
   }
 
-  @Patch(':id')
+  @Put(':name')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Career updated' })
   async update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('name') name: string,
     @Body() updateCareerDto: UpdateCareerDto,
   ): Promise<ResponseDto<CareerDto>> {
     try {
-      const career = await this.careerService.update(id, updateCareerDto);
-      return { statusCode: HttpStatus.OK, data: career };
+      const updatedCareer = await this.careerService.update(
+        name,
+        updateCareerDto,
+      );
+      return { statusCode: HttpStatus.OK, data: updatedCareer };
     } catch (error) {
-      throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      if (error instanceof AlreadyExistsError) {
+        throw new BadRequestException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
     }
   }
 
-  @Delete(':id')
+  @Delete(':name')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Career deleted' })
-  async remove(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<ResponseDto<CareerDto>> {
+  async remove(@Param('name') name: string): Promise<ResponseDto<CareerDto>> {
     try {
-      const career = await this.careerService.remove(id);
+      const deletedCareer = await this.careerService.remove(name);
       return {
         statusCode: HttpStatus.OK,
-        data: career,
+        data: deletedCareer,
       };
     } catch (error) {
-      throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
     }
   }
 }

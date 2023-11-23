@@ -2,25 +2,42 @@ import { Injectable } from '@nestjs/common';
 import { LanguageDto } from './dto/language.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
+import { Prisma } from '@prisma/client';
+import {
+  AlreadyExistsError,
+  NotFoundError,
+  UnexpectedError,
+} from 'src/common/error/service.error';
+import { CreateLanguageDto } from './dto/create-language.dto';
+import { UpdateLanguageDto } from './dto/update-language.dto';
 
 @Injectable()
 export class LanguageService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(languageDto: LanguageDto): Promise<LanguageDto> {
+  async create(createLanguageDto: CreateLanguageDto): Promise<LanguageDto> {
     try {
-      const language = await this.prismaService.language.create({
+      return await this.prismaService.language.create({
         data: {
-          name: languageDto.name,
+          name: createLanguageDto.name,
         },
       });
-      return language;
     } catch (error) {
-      throw new Error(error);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new Error(
+            `There already exists a language with the given \`name\` (${createLanguageDto.name})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
-  async findAll(page: number, perPage: number): Promise<PageDto<LanguageDto>> {
+  async findMany(page: number, perPage: number): Promise<PageDto<LanguageDto>> {
     try {
       const totalCount = await this.prismaService.language.count();
       const pageCount = Math.ceil(totalCount / perPage);
@@ -44,7 +61,56 @@ export class LanguageService {
         items: data,
       };
     } catch (error) {
-      throw new Error(error);
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
+  async findOne(name: string): Promise<LanguageDto | null> {
+    try {
+      return await this.prismaService.language.findUnique({
+        where: {
+          name,
+        },
+      });
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
+  async update(
+    name: string,
+    updateLanguageDto: UpdateLanguageDto,
+  ): Promise<LanguageDto> {
+    try {
+      return await this.prismaService.language.update({
+        where: {
+          name,
+        },
+        data: {
+          name: updateLanguageDto.name,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundError(
+            `There is no language with the given \`name\` (${name})`,
+            { cause: error },
+          );
+        } else if (error.code === 'P2002') {
+          throw new AlreadyExistsError(
+            `Cannot update the \`name\` to \`${updateLanguageDto.name}\`, there already exists a language with the given \`name\` (${updateLanguageDto.name})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
@@ -56,7 +122,17 @@ export class LanguageService {
         },
       });
     } catch (error) {
-      throw new Error(error);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2001') {
+          throw new NotFoundError(
+            `There is no language with the given \`name\` (${name})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 }
