@@ -3,6 +3,7 @@ import { CreateCareerDto } from './dto/create-career.dto';
 import { UpdateCareerDto } from './dto/update-career.dto';
 import { CareerDto } from './dto/career.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PageDto } from 'src/common/dto/paginated-response.dto';
 
 @Injectable()
 export class CareerService {
@@ -21,7 +22,7 @@ export class CareerService {
     }
   }
 
-  async findAll(page: number, perPage: number): Promise<any> {
+  async findAll(page: number, perPage: number): Promise<PageDto<CareerDto>> {
     try {
       const totalCount = await this.prismaService.career.count();
       const pageCount = Math.ceil(totalCount / perPage);
