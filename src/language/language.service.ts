@@ -25,7 +25,7 @@ export class LanguageService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new Error(
+          throw new AlreadyExistsError(
             `There already exists a language with the given \`name\` (${createLanguageDto.name})`,
             { cause: error },
           );
@@ -123,7 +123,7 @@ export class LanguageService {
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2001') {
+        if (error.code === 'P2025') {
           throw new NotFoundError(
             `There is no language with the given \`name\` (${name})`,
             { cause: error },

@@ -10,7 +10,6 @@ import {
   DefaultValuePipe,
   Query,
   ParseIntPipe,
-  ParseUUIDPipe,
   BadRequestException,
   NotFoundException,
   Put,
@@ -42,7 +41,13 @@ export class CareerController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiCreatedResponse({ description: 'Career created' })
+  @ApiCreatedResponse({ description: 'The career was succesfully created' })
+  @ApiBadRequestResponse({
+    description: 'Already exist a career with the given name',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   async create(
     @Body() createCareerDto: CreateCareerDto,
   ): Promise<ResponseDto<CareerDto>> {
@@ -61,7 +66,15 @@ export class CareerController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ description: 'Careers list' })
+  @ApiOkResponse({
+    description: 'The list of careers was succesfully obtained',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid number of items per page requested',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   async findMany(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
@@ -87,7 +100,13 @@ export class CareerController {
 
   @Get(':name')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ description: 'Career found' })
+  @ApiOkResponse({ description: 'Career was succesfully found' })
+  @ApiNotFoundResponse({
+    description: 'The career with the requested name was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   async findOne(@Param('name') name: string): Promise<ResponseDto<CareerDto>> {
     const career = await this.careerService.findOne(name);
     if (!career)
@@ -102,7 +121,16 @@ export class CareerController {
 
   @Put(':name')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ description: 'Career updated' })
+  @ApiOkResponse({ description: 'Career was succesfully updated' })
+  @ApiNotFoundResponse({
+    description: 'The career with the requested name was not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Already exist a career with the given name',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   async update(
     @Param('name') name: string,
     @Body() updateCareerDto: UpdateCareerDto,
@@ -129,7 +157,13 @@ export class CareerController {
 
   @Delete(':name')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ description: 'Career deleted' })
+  @ApiOkResponse({ description: 'Career was succesfully delete' })
+  @ApiNotFoundResponse({
+    description: 'The career with the requested name was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   async remove(@Param('name') name: string): Promise<ResponseDto<CareerDto>> {
     try {
       const deletedCareer = await this.careerService.remove(name);

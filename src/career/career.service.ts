@@ -124,7 +124,7 @@ export class CareerService {
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2001') {
+        if (error.code === 'P2025') {
           throw new NotFoundError(
             `There is no career with the given \`name\` (${name})`,
             { cause: error },

@@ -7,7 +7,6 @@ import {
   Delete,
   HttpStatus,
   HttpCode,
-  HttpException,
   Query,
   DefaultValuePipe,
   ParseIntPipe,
@@ -18,7 +17,14 @@ import {
 } from '@nestjs/common';
 import { LanguageService } from './language.service';
 import { LanguageDto } from './dto/language.dto';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 import { CreateLanguageDto } from './dto/create-language.dto';
@@ -26,6 +32,7 @@ import {
   AlreadyExistsError,
   NotFoundError,
 } from 'src/common/error/service.error';
+import { UpdateLanguageDto } from './dto/update-language.dto';
 
 @ApiTags('language')
 @Controller('language')
@@ -34,7 +41,13 @@ export class LanguageController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiCreatedResponse({ description: 'Language created' })
+  @ApiCreatedResponse({ description: 'Language was succesfully create' })
+  @ApiBadRequestResponse({
+    description: 'Already exist a language with the given name',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   async create(
     @Body() createLanguageDto: CreateLanguageDto,
   ): Promise<ResponseDto<LanguageDto>> {
@@ -56,7 +69,15 @@ export class LanguageController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ description: 'Languages list' })
+  @ApiOkResponse({
+    description: 'The list of languages was succesfully obtained',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid number of items per page requested',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   async findMany(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
@@ -82,7 +103,13 @@ export class LanguageController {
 
   @Get(':name')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ description: 'Language found' })
+  @ApiOkResponse({ description: 'Language was succesfully found' })
+  @ApiNotFoundResponse({
+    description: 'The language with the requested name was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   async findOne(
     @Param('name') name: string,
   ): Promise<ResponseDto<LanguageDto>> {
@@ -99,10 +126,19 @@ export class LanguageController {
 
   @Put(':name')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ description: 'Language updated' })
+  @ApiOkResponse({ description: 'Language was succesfully updated' })
+  @ApiNotFoundResponse({
+    description: 'The language with the requested name was not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Already exist a language with the given name',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   async update(
     @Param('name') name: string,
-    @Body() updateLanguageDto: LanguageDto,
+    @Body() updateLanguageDto: UpdateLanguageDto,
   ): Promise<ResponseDto<LanguageDto>> {
     try {
       const updatedLanguage = await this.languageService.update(
@@ -127,7 +163,13 @@ export class LanguageController {
 
   @Delete(':name')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ description: 'Language deleted' })
+  @ApiOkResponse({ description: 'Language was succesfully delete' })
+  @ApiNotFoundResponse({
+    description: 'The language with the requested name was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   async remove(@Param('name') name: string): Promise<ResponseDto<LanguageDto>> {
     try {
       const deletedLanguage = await this.languageService.remove(name);
