@@ -4,6 +4,7 @@ import { LanguageModule } from './language/language.module';
 import { CareerModule } from './career/career.module';
 import { ContractTypeModule } from './contract-type/contract-type.module';
 import { HigherEducationStudyModule } from './higher-education-study/higher-education-study.module';
+import { CiapCoursesModule } from './ciap-courses/ciap-courses.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { HigherEducationStudyModule } from './higher-education-study/higher-educ
     CareerModule,
     ContractTypeModule,
     HigherEducationStudyModule,
+    CiapCoursesModule,
   ],
 })
 export class AppModule {}
