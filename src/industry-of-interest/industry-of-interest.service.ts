@@ -81,7 +81,7 @@ export class IndustryOfInterestService {
     try {
       return await this.prismaService.industryOfInterest.findUnique({
         where: {
-          industryName_resumeOwnerEmail: { industryName, resumeOwnerEmail },
+          resumeOwnerEmail_industryName: { industryName, resumeOwnerEmail },
         },
       });
     } catch (error) {
@@ -99,7 +99,7 @@ export class IndustryOfInterestService {
     try {
       return await this.prismaService.industryOfInterest.update({
         where: {
-          industryName_resumeOwnerEmail: { industryName, resumeOwnerEmail },
+          resumeOwnerEmail_industryName: { industryName, resumeOwnerEmail },
         },
         data: updateIndustryOfInterestDto,
       });
@@ -130,7 +130,7 @@ export class IndustryOfInterestService {
     try {
       return await this.prismaService.industryOfInterest.delete({
         where: {
-          industryName_resumeOwnerEmail: { industryName, resumeOwnerEmail },
+          resumeOwnerEmail_industryName: { industryName, resumeOwnerEmail },
         },
       });
     } catch (error) {

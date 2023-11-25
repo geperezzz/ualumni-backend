@@ -51,8 +51,6 @@ export class HigherEducationStudyController {
     @Body() createHigherEducationStudyDto: CreateHigherEducationStudyDto,
   ) {
     try {
-      console.log(createHigherEducationStudyDto)
-
       const data = await this.higherEducationStudyService.create(
         createHigherEducationStudyDto,
       );

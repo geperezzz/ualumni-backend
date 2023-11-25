@@ -22,7 +22,9 @@ export class HigherEducationStudyService {
           resumeOwnerEmail: createHigherEducationStudyDto.resumeOwnerEmail,
           title: createHigherEducationStudyDto.title,
           institution: createHigherEducationStudyDto.institution,
-          endDate: createHigherEducationStudyDto.endDate,
+          endDate: new Date(
+            createHigherEducationStudyDto.endDate,
+          ).toISOString(),
           isVisible: createHigherEducationStudyDto.isVisible,
         },
       });
