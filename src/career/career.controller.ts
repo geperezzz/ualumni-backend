@@ -43,7 +43,7 @@ export class CareerController {
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ description: 'The career was succesfully created' })
   @ApiBadRequestResponse({
-    description: 'Already exist a career with the given name',
+    description: 'Already exists a career with the given name',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',

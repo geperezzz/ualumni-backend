@@ -1,10 +1,15 @@
-import { IsNotEmpty, IsString, IsDate, IsUUID } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsDateString,
+  IsEmail,
+  IsBoolean,
+} from 'class-validator';
 
 export class CreateHigherEducationStudyDto {
   @IsNotEmpty()
-  @IsString()
-  @IsUUID()
-  resumeId: string;
+  @IsEmail()
+  resumeOwnerEmail: string;
 
   @IsNotEmpty()
   @IsString()
@@ -15,12 +20,10 @@ export class CreateHigherEducationStudyDto {
   institution: string;
 
   @IsNotEmpty()
-  @IsString()
-  @IsDate()
-  startDate: Date;
+  @IsDateString()
+  endDate: string;
 
   @IsNotEmpty()
-  @IsString()
-  @IsDate()
-  endDate: Date;
+  @IsBoolean()
+  isVisible: boolean;
 }

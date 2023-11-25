@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseIntPipe,
+  DefaultValuePipe,
+} from '@nestjs/common';
 import { CiapCoursesService } from './ciap-courses.service';
 import { CreateCiapCourseDto } from './dto/create-ciap-course.dto';
 import { UpdateCiapCourseDto } from './dto/update-ciap-course.dto';
@@ -13,8 +24,11 @@ export class CiapCoursesController {
   }
 
   @Get()
-  findAll() {
-    return this.ciapCoursesService.findAll();
+  findMany(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
+  ) {
+    return this.ciapCoursesService.findMany(page, perPage);
   }
 
   @Get(':id')
@@ -23,7 +37,10 @@ export class CiapCoursesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCiapCourseDto: UpdateCiapCourseDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCiapCourseDto: UpdateCiapCourseDto,
+  ) {
     return this.ciapCoursesService.update(+id, updateCiapCourseDto);
   }
 
