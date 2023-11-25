@@ -9,6 +9,7 @@ import {
   NotFoundException,
   BadRequestException,
   Put,
+  Query,
 } from '@nestjs/common';
 import { SoftSkillsService } from './soft-skills.service';
 import { CreateSoftSkillDto } from './dto/create-soft-skill.dto';
@@ -18,7 +19,9 @@ import { ResponseDto } from 'src/common/dto/response.dto';
 import {
   AlreadyExistsError,
   NotFoundError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
+import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
+import { PagedResponseDto } from 'src/common/dto/paged-response.dto';
 
 @Controller('soft-skills')
 export class SoftSkillsController {
@@ -45,11 +48,14 @@ export class SoftSkillsController {
   }
 
   @Get()
-  async findAll(): Promise<ResponseDto<SoftSkillDto[]>> {
-    let softSkills = await this.softSkillsService.findAll();
+  async findPage(
+    @Query() paginationParamsDto: PaginationParamsDto,
+  ): Promise<PagedResponseDto<SoftSkillDto>> {
+    let softSkillsPage =
+      await this.softSkillsService.findPage(paginationParamsDto);
     return {
       statusCode: HttpStatus.OK,
-      data: softSkills,
+      data: softSkillsPage,
     };
   }
 
@@ -62,6 +68,7 @@ export class SoftSkillsController {
     if (!softSkill) {
       throw new NotFoundException(
         `There is no soft skill with the given \`name\` (${name})`,
+        {},
       );
     }
 
