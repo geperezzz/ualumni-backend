@@ -30,15 +30,15 @@ model ContractType {
 }
 
 model Career {
-  name        String        @id
-  jobOffers   JobOffer[]
-  alumni      Graduate[]
-  graduatesIn GraduatesIn[]
-  category    Category[]
+  name            String            @id
+  jobOffers       JobOffer[]
+  alumni          Alumni[]
+  graduationDates GraduationDates[]
+  category        Category[]
 }
 
-model Graduate {
-  email           String           @id
+model Alumni {
+  email           String            @id
   password        String
   names           String
   surnames        String
@@ -47,15 +47,15 @@ model Graduate {
   jobApplications JobApplication[]
   career          Career[]
   resume          Resume?
-  graduatesIn     GraduatesIn[]
+  graduationDates GraduationDates[]
 }
 
-model GraduatesIn {
-  graduate      Graduate @relation(fields: [graduateEmail], references: [email])
-  graduateEmail String   @db.Uuid
+model GraduationDates {
+  graduate      Alumni   @relation(fields: [graduateEmail], references: [email])
+  graduateEmail String
   career        Career   @relation(fields: [careerName], references: [name])
   careerName    String
-  graduateDate  DateTime
+  graduateDate  DateTime @db.Date
 
   @@id([graduateEmail, careerName])
 }
@@ -63,7 +63,7 @@ model GraduatesIn {
 model JobApplication {
   jobOffer                JobOffer @relation(fields: [jobOfferId], references: [id])
   jobOfferId              String   @db.Uuid
-  graduateWhoApplied      Graduate @relation(fields: [graduateWhoAppliedEmail], references: [email])
+  graduateWhoApplied      Alumni   @relation(fields: [graduateWhoAppliedEmail], references: [email])
   graduateWhoAppliedEmail String
   applicationDate         DateTime
 
@@ -71,12 +71,11 @@ model JobApplication {
 }
 
 model Resume {
-  id                     String                 @default(uuid()) @db.Uuid
-  owner                  Graduate               @relation(fields: [ownerEmail], references: [email])
-  ownerEmail             String                 @unique
+  owner                  Alumni                 @relation(fields: [ownerEmail], references: [email])
+  ownerEmail             String                 @id
   numberOfDownloads      Int
   isVisible              Boolean
-  aboutMe                String
+  aboutMe                String?
   knownLanguages         ResumeLanguage[]
   portfolio              PortfolioItem[]
   higherEducationStudies HigherEducationStudy[]
@@ -85,8 +84,6 @@ model Resume {
   resumeCiapCourse       ResumeCiapCourse[]
   resumeSoftSkill        ResumeSoftSkill[]
   resumeTechnicalSkill   ResumeTechnicalSkill[]
-
-  @@id([id, ownerEmail])
 }
 
 model Category {
@@ -101,31 +98,28 @@ model CiapCourse {
 }
 
 model ResumeCiapCourse {
-  resume           Resume     @relation(fields: [resumeId, resumeOwnerEmail], references: [id, ownerEmail])
-  resumeId         String     @db.Uuid
+  resume           Resume     @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
   resumeOwnerEmail String
   ciapCourse       CiapCourse @relation(fields: [ciapCourseName], references: [name])
   ciapCourseName   String
   isVisible        Boolean
 
-  @@id([resumeId, resumeOwnerEmail, ciapCourseName])
+  @@id([resumeOwnerEmail, ciapCourseName])
 }
 
 model SoftSkill {
-  id              String            @id @default(uuid()) @db.Uuid
-  name            String
+  name            String            @id
   resumeSoftSkill ResumeSoftSkill[]
 }
 
 model ResumeSoftSkill {
-  resume           Resume    @relation(fields: [resumeId, resumeOwnerEmail], references: [id, ownerEmail])
-  resumeId         String    @db.Uuid
+  resume           Resume    @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
   resumeOwnerEmail String
-  softSkill        SoftSkill @relation(fields: [softSkillId], references: [id])
-  softSkillId      String    @db.Uuid
+  softSkill        SoftSkill @relation(fields: [softSkillName], references: [name])
+  softSkillName    String
   isVisible        Boolean
 
-  @@id([resumeId, resumeOwnerEmail, softSkillId])
+  @@id([resumeOwnerEmail, softSkillName])
 }
 
 model TechnicalSkill {
@@ -139,15 +133,14 @@ model TechnicalSkill {
 }
 
 model ResumeTechnicalSkill {
-  resume                 Resume         @relation(fields: [resumeId, resumeOwnerEmail], references: [id, ownerEmail])
-  resumeId               String         @db.Uuid
+  resume                 Resume         @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
   resumeOwnerEmail       String
   technicalSkill         TechnicalSkill @relation(fields: [technicalSkillName, technicalSkillCategory], references: [name, categoryName])
   technicalSkillName     String
   technicalSkillCategory String
   isVisible              Boolean
 
-  @@id([resumeId, technicalSkillName, resumeOwnerEmail, technicalSkillCategory])
+  @@id([technicalSkillName, resumeOwnerEmail, technicalSkillCategory])
 }
 
 model Language {
@@ -156,54 +149,51 @@ model Language {
 }
 
 model ResumeLanguage {
-  resume           Resume   @relation(fields: [resumeId, resumeOwnerEmail], references: [id, ownerEmail])
-  resumeId         String   @db.Uuid
+  resume           Resume   @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
   resumeOwnerEmail String
   language         Language @relation(fields: [languageName], references: [name])
   languageName     String
   masteryLevel     Int
   isVisible        Boolean
 
-  @@id([resumeId, languageName, resumeOwnerEmail])
+  @@id([languageName, resumeOwnerEmail])
 }
 
 model PortfolioItem {
-  resume           Resume  @relation(fields: [resumeId, resumeOwnerEmail], references: [id, ownerEmail])
-  resumeId         String  @db.Uuid
+  resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
   resumeOwnerEmail String
   title            String
-  description      String
+  sourceLink       String
   isVisible        Boolean
 
-  @@id([resumeId, title])
+  @@id([resumeOwnerEmail, title])
 }
 
 model HigherEducationStudy {
-  resume           Resume   @relation(fields: [resumeId, resumeOwnerEmail], references: [id, ownerEmail])
-  resumeId         String   @db.Uuid
+  resume           Resume   @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
   resumeOwnerEmail String
   title            String
   institution      String
   endDate          DateTime
   isVisible        Boolean
 
-  @@id([resumeId, title, resumeOwnerEmail])
+  @@id([title, resumeOwnerEmail])
 }
 
 model PositionOfInterest {
-  resume           Resume @relation(fields: [resumeId, resumeOwnerEmail], references: [id, ownerEmail])
-  resumeId         String @db.Uuid
+  resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
   resumeOwnerEmail String
   positionName     String
+  isVisible        Boolean
 
-  @@id([resumeId, positionName, resumeOwnerEmail])
+  @@id([positionName, resumeOwnerEmail])
 }
 
 model IndustryOfInterest {
-  resume           Resume @relation(fields: [resumeId, resumeOwnerEmail], references: [id, ownerEmail])
-  resumeId         String @db.Uuid
+  resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
   resumeOwnerEmail String
   industryName     String
+  isVisible        Boolean
 
-  @@id([resumeId, industryName, resumeOwnerEmail])
+  @@id([industryName, resumeOwnerEmail])
 }
