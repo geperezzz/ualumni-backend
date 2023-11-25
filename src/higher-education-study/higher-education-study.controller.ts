@@ -32,7 +32,6 @@ import {
 } from 'src/common/error/service.error';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { HigherEducationStudyDto } from './dto/higher-education-study.dto';
-import { title } from 'process';
 
 @Controller('higher-education-study')
 export class HigherEducationStudyController {
