@@ -3,7 +3,13 @@ import { CreateAlumniDto } from './dto/create-alumni.dto';
 import { UpdateAlumniDto } from './dto/update-alumni.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Alumni, Prisma } from '@prisma/client';
-import { AlreadyExistsError, NotFoundError, UnexpectedError } from 'src/common/error/service.error';
+import {
+  AlreadyExistsError,
+  NotFoundError,
+  UnexpectedError,
+} from 'src/common/errors/service.error';
+import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
+import { RandomPage } from 'src/common/interfaces/random-page.interface';
 
 @Injectable()
 export class AlumniService {
@@ -12,7 +18,12 @@ export class AlumniService {
   async create(createAlumniDto: CreateAlumniDto): Promise<Alumni> {
     try {
       return await this.prismaService.alumni.create({
-        data: createAlumniDto,
+        data: {
+          ...createAlumniDto,
+          resume: {
+            create: {},
+          },
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -29,13 +40,45 @@ export class AlumniService {
     }
   }
 
-  async findAll(): Promise<Alumni[]> {
+  async findPageRandomly({
+    pageNumber,
+    itemsPerPage,
+    randomizationSeed,
+  }: RandomPaginationParamsDto): Promise<RandomPage<Alumni>> {
+    randomizationSeed ??= Math.random();
+
     try {
-      return await this.prismaService.alumni.findMany();
+      let [_, items, numberOfItems] = await this.prismaService.$transaction([
+        this.prismaService.$queryRaw`
+          SELECT 0
+          FROM (
+            SELECT setseed(${randomizationSeed})
+          ) AS randomization_seed
+        `,
+        this.prismaService.$queryRaw<Alumni[]>`
+          SELECT *
+          FROM "Alumni"
+          ORDER BY random()
+          LIMIT ${itemsPerPage}
+          OFFSET ${itemsPerPage * (pageNumber - 1)}
+        `,
+        this.prismaService.alumni.count(),
+      ]);
+
+      return {
+        items,
+        meta: {
+          pageNumber,
+          itemsPerPage,
+          numberOfItems,
+          numberOfPages: Math.ceil(numberOfItems / itemsPerPage),
+          randomizationSeed,
+        },
+      };
     } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
-      }); 
+      });
     }
   }
 
@@ -47,7 +90,7 @@ export class AlumniService {
     } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
-      }); 
+      });
     }
   }
 
@@ -83,18 +126,31 @@ export class AlumniService {
 
   async remove(email: string): Promise<Alumni> {
     try {
-      return await this.prismaService.alumni.delete({
-        where: { email },
-      });
+      let [_, removedAlumni] = await this.prismaService.$transaction([
+        this.prismaService.alumni.update({
+          where: { email },
+          data: {
+            resume: {
+              delete: true,
+            },
+          },
+        }),
+        this.prismaService.alumni.delete({
+          where: { email },
+        }),
+      ]);
+
+      return removedAlumni;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2001') {
+        if (error.code === 'P2025') {
           throw new NotFoundError(
             `There is no alumni with the given \`email\` (${email})`,
             { cause: error },
           );
         }
       }
+      console.log(error);
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });

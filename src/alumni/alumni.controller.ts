@@ -9,14 +9,20 @@ import {
   HttpStatus,
   BadRequestException,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { AlumniService } from './alumni.service';
 import { CreateAlumniDto } from './dto/create-alumni.dto';
 import { UpdateAlumniDto } from './dto/update-alumni.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { AlumniDto } from './dto/alumni.dto';
-import { plainToClass } from 'class-transformer';
-import { AlreadyExistsError, NotFoundError } from 'src/common/error/service.error';
+import { plainToInstance } from 'class-transformer';
+import {
+  AlreadyExistsError,
+  NotFoundError,
+} from 'src/common/errors/service.error';
+import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
+import { RandomlyPagedResponseDto } from 'src/common/dto/randomly-paged-response.dto';
 
 @Controller('alumni')
 export class AlumniController {
@@ -28,7 +34,9 @@ export class AlumniController {
   ): Promise<ResponseDto<AlumniDto>> {
     try {
       let createdAlumni = await this.alumniService.create(createAlumniDto);
-      let createdAlumniDto = plainToClass(AlumniDto, createdAlumni, { excludeExtraneousValues: true });
+      let createdAlumniDto = plainToInstance(AlumniDto, createdAlumni, {
+        excludeExtraneousValues: true,
+      });
 
       return {
         statusCode: HttpStatus.CREATED,
@@ -43,16 +51,24 @@ export class AlumniController {
   }
 
   @Get()
-  async findAll(): Promise<ResponseDto<AlumniDto[]>> {
-    let alumni = await this.alumniService.findAll();
-    let alumniDtos = alumni.map((alumni) => {
-      let alumniDto = plainToClass(AlumniDto, alumni, { excludeExtraneousValues: true });
-      return alumniDto;
-    });
+  async findPageRandomly(
+    @Query() randomPaginationParamsDto: RandomPaginationParamsDto,
+  ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
+    let alumniRandomPage = await this.alumniService.findPageRandomly(
+      randomPaginationParamsDto,
+    );
+    let alumniDtoRandomPage = {
+      ...alumniRandomPage,
+      items: alumniRandomPage.items.map((alumni) =>
+        plainToInstance(AlumniDto, alumni, {
+          excludeExtraneousValues: true,
+        }),
+      ),
+    };
 
     return {
       statusCode: HttpStatus.OK,
-      data: alumniDtos,
+      data: alumniDtoRandomPage,
     };
   }
 
@@ -65,9 +81,12 @@ export class AlumniController {
     if (!alumni) {
       throw new NotFoundError(
         `There is no soft skill with the given \`email\` (${email})`,
+        {},
       );
     }
-    let alumniDto = plainToClass(AlumniDto, alumni, { excludeExtraneousValues: true });
+    let alumniDto = plainToInstance(AlumniDto, alumni, {
+      excludeExtraneousValues: true,
+    });
 
     return {
       statusCode: HttpStatus.OK,
@@ -81,8 +100,13 @@ export class AlumniController {
     @Body() updateAlumniDto: UpdateAlumniDto,
   ): Promise<ResponseDto<AlumniDto>> {
     try {
-      let updatedAlumni = await this.alumniService.update(email, updateAlumniDto);
-      let updatedAlumniDto = plainToClass(AlumniDto, updatedAlumni, { excludeExtraneousValues: true });
+      let updatedAlumni = await this.alumniService.update(
+        email,
+        updateAlumniDto,
+      );
+      let updatedAlumniDto = plainToInstance(AlumniDto, updatedAlumni, {
+        excludeExtraneousValues: true,
+      });
 
       return {
         statusCode: HttpStatus.CREATED,
@@ -103,7 +127,9 @@ export class AlumniController {
   async remove(@Param('email') email: string): Promise<ResponseDto<AlumniDto>> {
     try {
       let removedAlumni = await this.alumniService.remove(email);
-      let removedAlumniDto = plainToClass(AlumniDto, removedAlumni, { excludeExtraneousValues: true });
+      let removedAlumniDto = plainToInstance(AlumniDto, removedAlumni, {
+        excludeExtraneousValues: true,
+      });
 
       return {
         statusCode: HttpStatus.CREATED,
