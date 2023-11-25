@@ -6,6 +6,7 @@ import { CiapCourseDto } from './dto/ciap-course.dto';
 import { Prisma } from '@prisma/client';
 import {
   AlreadyExistsError,
+  NotFoundError,
   UnexpectedError,
 } from 'src/common/error/service.error';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
@@ -73,7 +74,7 @@ export class CiapCoursesService {
   async findOne(name: string): Promise<CiapCourseDto | null> {
     try {
       return await this.prismaService.ciapCourse.findUnique({
-        where: { name: name },
+        where: { name },
       });
     } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
@@ -82,11 +83,55 @@ export class CiapCoursesService {
     }
   }
 
-  update(id: number, updateCiapCourseDto: UpdateCiapCourseDto) {
-    return `This action updates a #${id} ciapCourse`;
+  async update(
+    name: string,
+    updateCiapCourseDto: UpdateCiapCourseDto,
+  ): Promise<CiapCourseDto> {
+    try {
+      return await this.prismaService.ciapCourse.update({
+        where: { name },
+        data: {
+          name: updateCiapCourseDto.name,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundError(
+            `There is no CIAP course with the given \`name\` (${name})`,
+            { cause: error },
+          );
+        }
+        if (error.code === 'P2002') {
+          throw new AlreadyExistsError(
+            `Cannot update the \`name\` to \`${updateCiapCourseDto.name}\`,there already exists a CIAP course with the given \`name\` (${updateCiapCourseDto.name})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} ciapCourse`;
+  async remove(name: string): Promise<CiapCourseDto> {
+    try {
+      return await this.prismaService.ciapCourse.delete({
+        where: { name },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundError(
+            `There is no CIAP course with the given \`name\` (${name})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
   }
 }

@@ -85,19 +85,18 @@ model Resume {
 }
 
 model CiapCourse {
-  id                 String             @id @default(uuid()) @db.Uuid
-  name               String
+  name               String             @id
   resumesListingThis ResumeCiapCourse[]
 }
 
 model ResumeCiapCourse {
   resume           Resume     @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
   resumeOwnerEmail String
-  course           CiapCourse @relation(fields: [courseId], references: [id])
-  courseId         String     @db.Uuid
+  course           CiapCourse @relation(fields: [courseName], references: [name])
+  courseName       String
   isVisible        Boolean
 
-  @@id([resumeOwnerEmail, courseId])
+  @@id([resumeOwnerEmail, courseName])
 }
 
 model SoftSkill {
