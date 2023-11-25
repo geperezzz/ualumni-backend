@@ -41,9 +41,9 @@ export class LanguageController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiCreatedResponse({ description: 'Language was succesfully create' })
+  @ApiCreatedResponse({ description: 'Language was succesfully created' })
   @ApiBadRequestResponse({
-    description: 'Already exist a language with the given name',
+    description: 'Already exists a language with the given name',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
@@ -131,7 +131,7 @@ export class LanguageController {
     description: 'The language with the requested name was not found',
   })
   @ApiBadRequestResponse({
-    description: 'Already exist a language with the given name',
+    description: 'Already exists a language with the given name',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
@@ -163,7 +163,7 @@ export class LanguageController {
 
   @Delete(':name')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ description: 'Language was succesfully delete' })
+  @ApiOkResponse({ description: 'Language was succesfully deleted' })
   @ApiNotFoundResponse({
     description: 'The language with the requested name was not found',
   })

@@ -1,7 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { ContractType } from '@prisma/client';
 
-export class ContractTypeDto {
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-}
+export type ContractTypeDto = ContractType;
+

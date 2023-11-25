@@ -1,25 +1,48 @@
 import { Injectable } from '@nestjs/common';
 import { ContractTypeDto } from './dto/contract-type.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateContractTypeDto } from './dto/create-contract-type.dto';
+import {
+  AlreadyExistsError,
+  NotFoundError,
+  UnexpectedError,
+} from 'src/common/error/service.error';
+import { Prisma } from '@prisma/client';
+import { PageDto } from 'src/common/dto/paginated-response.dto';
+import { UpdateContractTypeDto } from './dto/update-contract-type.dto';
 
 @Injectable()
 export class ContractTypeService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(contractTypeDto: ContractTypeDto): Promise<ContractTypeDto> {
+  async create(
+    createContractTypeDto: CreateContractTypeDto,
+  ): Promise<ContractTypeDto> {
     try {
-      const contractType = await this.prismaService.contractType.create({
+      return await this.prismaService.contractType.create({
         data: {
-          name: contractTypeDto.name,
+          name: createContractTypeDto.name,
         },
       });
-      return contractType;
     } catch (error) {
-      throw new Error(error);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new AlreadyExistsError(
+            `There already exists a contract type with the given \`name\` (${createContractTypeDto.name})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
-  async findAll(page: number, perPage: number) {
+  async findMany(
+    page: number,
+    perPage: number,
+  ): Promise<PageDto<ContractTypeDto>> {
     try {
       const totalCount = await this.prismaService.contractType.count();
       const pageCount = Math.ceil(totalCount / perPage);
@@ -43,23 +66,58 @@ export class ContractTypeService {
         items: data,
       };
     } catch (error) {
-      throw new Error(error);
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
-  async findOne(name: string): Promise<ContractTypeDto> {
+  async findOne(name: string): Promise<ContractTypeDto | null> {
     try {
-      const contractType = await this.prismaService.contractType.findUnique({
+      return await this.prismaService.contractType.findUnique({
         where: { name },
       });
-      if (!contractType) throw new Error('Contract type not found');
-      return contractType;
     } catch (error) {
-      throw new Error(error);
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
-  async remove(name: string) {
+  async update(
+    name: string,
+    updateContractTypeDto: UpdateContractTypeDto,
+  ): Promise<ContractTypeDto> {
+    try {
+      return await this.prismaService.contractType.update({
+        where: {
+          name,
+        },
+        data: {
+          name: updateContractTypeDto.name,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundError(
+            `There is no contract type with the given \`name\` (${name})`,
+            { cause: error },
+          );
+        } else if (error.code === 'P2002') {
+          throw new AlreadyExistsError(
+            `Cannot update the \`name\` to \`${updateContractTypeDto.name}\`, there already exists a contract type with the given \`name\` (${updateContractTypeDto.name})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
+  async remove(name: string): Promise<ContractTypeDto> {
     try {
       return await this.prismaService.contractType.delete({
         where: {
@@ -67,7 +125,17 @@ export class ContractTypeService {
         },
       });
     } catch (error) {
-      throw new Error(error);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundError(
+            `There is no contract type with the given \`name\` (${name})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 }
