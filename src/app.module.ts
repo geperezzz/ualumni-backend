@@ -5,6 +5,7 @@ import { CareerModule } from './career/career.module';
 import { ContractTypeModule } from './contract-type/contract-type.module';
 import { HigherEducationStudyModule } from './higher-education-study/higher-education-study.module';
 import { CiapCoursesModule } from './ciap-courses/ciap-courses.module';
+import { ResumeModule } from './resume/resume.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CiapCoursesModule } from './ciap-courses/ciap-courses.module';
     ContractTypeModule,
     HigherEducationStudyModule,
     CiapCoursesModule,
+    ResumeModule,
   ],
 })
 export class AppModule {}
