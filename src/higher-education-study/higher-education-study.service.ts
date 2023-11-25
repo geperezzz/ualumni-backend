@@ -81,7 +81,7 @@ export class HigherEducationStudyService {
     try {
       return await this.prismaService.higherEducationStudy.findUnique({
         where: {
-          title_resumeOwnerEmail: {
+          resumeOwnerEmail_title: {
             title,
             resumeOwnerEmail,
           },
@@ -102,14 +102,12 @@ export class HigherEducationStudyService {
     try {
       return await this.prismaService.higherEducationStudy.update({
         where: {
-          title_resumeOwnerEmail: {
+          resumeOwnerEmail_title: {
             title,
             resumeOwnerEmail,
           },
         },
-        data: {
-          
-        },
+        data: {},
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -139,7 +137,7 @@ export class HigherEducationStudyService {
     try {
       return await this.prismaService.higherEducationStudy.delete({
         where: {
-          title_resumeOwnerEmail: {
+          resumeOwnerEmail_title: {
             title,
             resumeOwnerEmail,
           },
