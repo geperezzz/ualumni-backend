@@ -28,6 +28,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import {
   AlreadyExistsError,
@@ -35,6 +36,7 @@ import {
 } from 'src/common/error/service.error';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 
+@ApiTags('ciap-courses')
 @Controller('ciap-courses')
 export class CiapCoursesController {
   constructor(private readonly ciapCoursesService: CiapCoursesService) {}
@@ -45,7 +47,7 @@ export class CiapCoursesController {
     description: 'The CIAP course was succesfully created',
   })
   @ApiBadRequestResponse({
-    description: 'Already exists a CIAP course with the given id',
+    description: 'Already exists a CIAP course with the given name',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
@@ -124,10 +126,10 @@ export class CiapCoursesController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'CIAP course was succesfully updated' })
   @ApiNotFoundResponse({
-    description: 'The CIAP course with the requested id was not found',
+    description: 'The CIAP course with the requested name was not found',
   })
   @ApiBadRequestResponse({
-    description: 'Already exist a CIAP course with the given id',
+    description: 'Already exist a CIAP course with the given name',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
