@@ -70,8 +70,16 @@ export class CiapCoursesService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} ciapCourse`;
+  async findOne(name: string): Promise<CiapCourseDto | null> {
+    try {
+      return await this.prismaService.ciapCourse.findUnique({
+        where: { name: name },
+      });
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
   }
 
   update(id: number, updateCiapCourseDto: UpdateCiapCourseDto) {
