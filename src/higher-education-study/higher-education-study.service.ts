@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import {
   AlreadyExistsError,
+  ForeignKeyError,
   NotFoundError,
   UnexpectedError,
 } from 'src/common/error/service.error';
@@ -15,11 +16,11 @@ import { PageDto } from 'src/common/dto/paginated-response.dto';
 export class HigherEducationStudyService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(createHigherEducationStudyDto: CreateHigherEducationStudyDto) {
+  async create(resumeOwnerEmail: string, createHigherEducationStudyDto: CreateHigherEducationStudyDto) {
     try {
       return await this.prismaService.higherEducationStudy.create({
         data: {
-          resumeOwnerEmail: createHigherEducationStudyDto.resumeOwnerEmail,
+          resumeOwnerEmail: resumeOwnerEmail,
           title: createHigherEducationStudyDto.title,
           institution: createHigherEducationStudyDto.institution,
           endDate: new Date(
@@ -32,14 +33,14 @@ export class HigherEducationStudyService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `There already exists a higher education study with the given \`title\` (${createHigherEducationStudyDto.title}) for the user \`email\` (${createHigherEducationStudyDto.resumeOwnerEmail})`,
+            `There already exists a higher education study with the given \`title\` (${createHigherEducationStudyDto.title}) for the user \`email\` (${resumeOwnerEmail})`,
             { cause: error },
           );
         }
         if (error.code === 'P2003') {
-          console.log('lmao')
-          throw new Error(
-            `There is no user with the given \`email\` (${createHigherEducationStudyDto.resumeOwnerEmail})`, { cause: error },
+          throw new ForeignKeyError(
+            `There is no user with the given \`email\` (${resumeOwnerEmail})`,
+            { cause: error },
           );
         }
       }
@@ -67,6 +68,7 @@ export class HigherEducationStudyService {
       }
 
       const data = await this.prismaService.higherEducationStudy.findMany({
+        where: { resumeOwnerEmail },
         take: perPage,
         skip: (page - 1) * perPage,
       });
@@ -130,7 +132,7 @@ export class HigherEducationStudyService {
         }
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `Cannot update the \`name\` to \`${updateHigherEducationStudyDto.title}\`,there already exists a higher education study with the given \`title\` (${updateHigherEducationStudyDto.title})`,
+            `Cannot update the higher education study, there already exists a higher education study with the given \`title\` (${updateHigherEducationStudyDto.title}) for the user \`email\` (${resumeOwnerEmail})`,
             { cause: error },
           );
         }

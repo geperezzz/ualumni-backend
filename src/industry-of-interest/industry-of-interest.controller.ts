@@ -29,6 +29,7 @@ import {
 } from '@nestjs/swagger';
 import {
   AlreadyExistsError,
+  ForeignKeyError,
   NotFoundError,
 } from 'src/common/error/service.error';
 import { IndustryOfInterestDto } from './dto/industry-of-interest.dto';
@@ -65,6 +66,8 @@ export class IndustryOfInterestController {
       };
     } catch (error) {
       if (error instanceof AlreadyExistsError)
+        throw new BadRequestException(error.message, { cause: error });
+      if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
       throw new InternalServerErrorException(
         'An unexpected situation ocurred',

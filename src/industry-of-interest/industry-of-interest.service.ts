@@ -3,6 +3,7 @@ import { CreateIndustryOfInterestDto } from './dto/create-industry-of-interest.d
 import { UpdateIndustryOfInterestDto } from './dto/update-industry-of-interest.dto';
 import {
   AlreadyExistsError,
+  ForeignKeyError,
   NotFoundError,
   UnexpectedError,
 } from 'src/common/error/service.error';
@@ -26,7 +27,13 @@ export class IndustryOfInterestService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `There already exists a industry of interest with the given \`name\` (${createIndustryOfInterestDto.industryName})`,
+            `There already exists a industry of interest with the given \`name\` (${createIndustryOfInterestDto.industryName}) for the user \`email\`: ${createIndustryOfInterestDto.resumeOwnerEmail}`,
+            { cause: error },
+          );
+        }
+        if (error.code === 'P2003') {
+          throw new ForeignKeyError(
+            `There is no user with the given \`email\` (${createIndustryOfInterestDto.resumeOwnerEmail})`,
             { cause: error },
           );
         }
@@ -107,13 +114,13 @@ export class IndustryOfInterestService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no industry of interest with the given \`name\` (${name})`,
+            `There is no industry of interest with the given \`name\` (${industryName})`,
             { cause: error },
           );
         } else if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `Cannot update the \`name\` to \`${updateIndustryOfInterestDto.industryName}\`, there already exists a industry of interest with the given \`name\` (${updateIndustryOfInterestDto.industryName})`,
-            { cause: error },
+            `Cannot update the \`name\` to \`${updateIndustryOfInterestDto.industryName}\`, there already exists a industry of interest with the given \`name\` (${updateIndustryOfInterestDto.industryName}) for the user \`email\`: ${updateIndustryOfInterestDto.resumeOwnerEmail}`,
+            
           );
         }
       }

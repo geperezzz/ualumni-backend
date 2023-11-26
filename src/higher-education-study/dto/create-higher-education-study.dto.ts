@@ -8,10 +8,6 @@ import {
 
 export class CreateHigherEducationStudyDto {
   @IsNotEmpty()
-  @IsEmail()
-  resumeOwnerEmail: string;
-
-  @IsNotEmpty()
   @IsString()
   title: string;
 

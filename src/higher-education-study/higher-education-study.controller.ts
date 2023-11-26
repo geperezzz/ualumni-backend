@@ -29,6 +29,7 @@ import {
 } from '@nestjs/swagger';
 import {
   AlreadyExistsError,
+  ForeignKeyError,
   NotFoundError,
 } from 'src/common/error/service.error';
 import { ResponseDto } from 'src/common/dto/response.dto';
@@ -50,10 +51,12 @@ export class HigherEducationStudyController {
     description: 'Already exists a higher education study with the given title',
   })
   async create(
+    @Param('email') resumeOwnerEmail: string,
     @Body() createHigherEducationStudyDto: CreateHigherEducationStudyDto,
   ) {
     try {
       const data = await this.higherEducationStudyService.create(
+        resumeOwnerEmail,
         createHigherEducationStudyDto,
       );
       return {
@@ -62,6 +65,8 @@ export class HigherEducationStudyController {
       };
     } catch (error) {
       if (error instanceof AlreadyExistsError)
+        throw new BadRequestException(error.message, { cause: error });
+      if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
       throw new InternalServerErrorException(
         'An unexpected situation ocurred',
@@ -91,7 +96,11 @@ export class HigherEducationStudyController {
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse =
-        await this.higherEducationStudyService.findMany(resumeOwnerEmail, page, perPage);
+        await this.higherEducationStudyService.findMany(
+          resumeOwnerEmail,
+          page,
+          perPage,
+        );
       return {
         statusCode: HttpStatus.OK,
         data: paginationResponse,
