@@ -4,31 +4,40 @@ import { UpdateTechnicalSkillDto } from './dto/update-technical-skill.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TechnicalSkillDto } from './dto/technical-skill.dto';
 import { Prisma } from '@prisma/client';
-import { AlreadyExistsError, ForeignKeyError, NotFoundError, UnexpectedError } from 'src/common/error/service.error';
+import {
+  AlreadyExistsError,
+  ForeignKeyError,
+  NotFoundError,
+  UnexpectedError,
+} from 'src/common/error/service.error';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
 
 @Injectable()
 export class TechnicalSkillService {
   constructor(private readonly prismaService: PrismaService) {}
 
-   async create(
+  async create(
+    categoryName: string,
     createTechnicalSkillDto: CreateTechnicalSkillDto,
   ): Promise<TechnicalSkillDto> {
     try {
       return await this.prismaService.technicalSkill.create({
-        data: createTechnicalSkillDto,
+        data: {
+          name: createTechnicalSkillDto.name,
+          categoryName: categoryName,
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `There already exists a technical skill with the given \`name\` (${createTechnicalSkillDto.name}) for the given \`category\` (${createTechnicalSkillDto.categoryName})`,
+            `There already exists a technical skill with the given \`name\` (${createTechnicalSkillDto.name}) for the given \`categoryName\` (${categoryName})`,
             { cause: error },
           );
         }
         if (error.code === 'P2003') {
           throw new ForeignKeyError(
-            `There is no category with the given \`categoryName\` (${createTechnicalSkillDto.categoryName})`,
+            `There is no category with the given \`categoryName\` (${categoryName})`,
             { cause: error },
           );
         }
@@ -115,7 +124,6 @@ export class TechnicalSkillService {
         } else if (error.code === 'P2002') {
           throw new AlreadyExistsError(
             `Cannot update the \`name\` to \`${updateTechnicalSkillDto.name}\`, there already exists a technical skill with the given \`name\` (${updateTechnicalSkillDto.name}) for the \`categoryName\`: ${updateTechnicalSkillDto.categoryName}`,
-            
           );
         }
       }
@@ -125,10 +133,7 @@ export class TechnicalSkillService {
     }
   }
 
-  async remove(
-    name: string,
-    categoryName: string,
-  ): Promise<TechnicalSkillDto> {
+  async remove(name: string, categoryName: string): Promise<TechnicalSkillDto> {
     try {
       return await this.prismaService.technicalSkill.delete({
         where: {
