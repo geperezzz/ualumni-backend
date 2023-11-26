@@ -10,6 +10,7 @@ import { ResumeModule } from './resume/resume.module';
 import { TechnicalSkillModule } from './technical-skill/technical-skill.module';
 import { SkillCategoryModule } from './skill-category/skill-category.module';
 import { ResumeCiapCoursesModule } from './resume-ciap-courses/resume-ciap-courses.module';
+import { ResumeSoftSkillModule } from './resume-soft-skill/resume-soft-skill.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ResumeCiapCoursesModule } from './resume-ciap-courses/resume-ciap-cours
     TechnicalSkillModule,
     SkillCategoryModule,
     ResumeCiapCoursesModule,
+    ResumeSoftSkillModule,
   ],
 })
 export class AppModule {}
