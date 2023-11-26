@@ -27,12 +27,14 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 import { AlreadyExistsError } from 'src/common/error/service.error';
 import { NotFoundError } from 'rxjs';
 
+@ApiTags('contract-type')
 @Controller('contract-type')
 export class ContractTypeController {
   constructor(private readonly contractTypeService: ContractTypeService) {}

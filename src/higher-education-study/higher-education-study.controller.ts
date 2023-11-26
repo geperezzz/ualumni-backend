@@ -25,6 +25,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import {
   AlreadyExistsError,
@@ -33,7 +34,8 @@ import {
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { HigherEducationStudyDto } from './dto/higher-education-study.dto';
 
-@Controller('higher-education-study')
+@ApiTags('higher-education-study')
+@Controller('user/:email/resume/higher-education-study')
 export class HigherEducationStudyController {
   constructor(
     private readonly higherEducationStudyService: HigherEducationStudyService,
@@ -81,6 +83,7 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async findMany(
+    @Param('email') resumeOwnerEmail: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
   ): Promise<any> {
@@ -88,7 +91,7 @@ export class HigherEducationStudyController {
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse =
-        await this.higherEducationStudyService.findMany(page, perPage);
+        await this.higherEducationStudyService.findMany(resumeOwnerEmail, page, perPage);
       return {
         statusCode: HttpStatus.OK,
         data: paginationResponse,
@@ -99,7 +102,7 @@ export class HigherEducationStudyController {
     }
   }
 
-  @Get(':resumeOwnerEmail/:title')
+  @Get(':title')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'Higher education study was succesfully found',
@@ -112,7 +115,7 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async findOne(
-    @Param('resumeOwnerEmail') resumeOwnerEmail: string,
+    @Param('email') resumeOwnerEmail: string,
     @Param('title') title: string,
   ) {
     const higherEducationStudy = await this.higherEducationStudyService.findOne(
@@ -130,7 +133,7 @@ export class HigherEducationStudyController {
     };
   }
 
-  @Patch(':resumeOwnerEmail/:title')
+  @Patch(':title')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'Higher education study was succesfully updated',
@@ -146,7 +149,7 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async update(
-    @Param('resumeOwnerEmail') resumeOwnerEmail: string,
+    @Param('email') resumeOwnerEmail: string,
     @Param('title') title: string,
     @Body() updateHigherEducationStudyDto: UpdateHigherEducationStudyDto,
   ) {
@@ -172,20 +175,20 @@ export class HigherEducationStudyController {
     }
   }
 
-  @Delete(':resumeOwnerEmail/:title')
+  @Delete(':title')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    description: 'Higher education study was succesfully delete',
+    description: 'Higher education study was succesfully deleted',
   })
   @ApiNotFoundResponse({
     description:
-      'The higher education study with the requested name was not found',
+      'The higher education study with the requested title was not found',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
   })
   async remove(
-    @Param('resumeOwnerEmail') resumeOwnerEmail: string,
+    @Param('email') resumeOwnerEmail: string,
     @Param('title') title: string,
   ): Promise<ResponseDto<HigherEducationStudyDto>> {
     try {

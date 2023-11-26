@@ -32,8 +32,14 @@ export class HigherEducationStudyService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `There already exists a higher education study with the given \`title\` (${createHigherEducationStudyDto.title})`,
+            `There already exists a higher education study with the given \`title\` (${createHigherEducationStudyDto.title}) for the user \`email\` (${createHigherEducationStudyDto.resumeOwnerEmail})`,
             { cause: error },
+          );
+        }
+        if (error.code === 'P2003') {
+          console.log('lmao')
+          throw new Error(
+            `There is no user with the given \`email\` (${createHigherEducationStudyDto.resumeOwnerEmail})`, { cause: error },
           );
         }
       }
@@ -44,11 +50,14 @@ export class HigherEducationStudyService {
   }
 
   async findMany(
+    resumeOwnerEmail: string,
     page: number,
     perPage: number,
   ): Promise<PageDto<HigherEducationStudyDto>> {
     try {
-      const totalCount = await this.prismaService.higherEducationStudy.count();
+      const totalCount = await this.prismaService.higherEducationStudy.count({
+        where: { resumeOwnerEmail },
+      });
       const pageCount = Math.ceil(totalCount / perPage);
 
       if (page < 1) {

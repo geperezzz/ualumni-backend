@@ -25,6 +25,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import {
   AlreadyExistsError,
@@ -33,6 +34,7 @@ import {
 import { IndustryOfInterestDto } from './dto/industry-of-interest.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 
+@ApiTags('industry-of-interest')
 @Controller('user/:email/resume/industry-of-interest')
 export class IndustryOfInterestController {
   constructor(
