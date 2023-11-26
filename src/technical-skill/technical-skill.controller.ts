@@ -9,7 +9,7 @@ import { AlreadyExistsError, ForeignKeyError, NotFoundError } from 'src/common/e
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 
 @ApiTags('technical-skill')
-@Controller('technical-skill')
+@Controller('skillCategory/:skillCategory/technical-skill')
 export class TechnicalSkillController {
   constructor(private readonly technicalSkillService: TechnicalSkillService) {}
 
@@ -25,10 +25,12 @@ export class TechnicalSkillController {
     description: 'An unexpected situation ocurred',
   })
   async create(
+    @Param('skillCategory') categoryName: string,
     @Body() createTechnicalSkillDto: CreateTechnicalSkillDto,
   ): Promise<ResponseDto<TechnicalSkillDto>> {
     try {
       const data = await this.technicalSkillService.create(
+        categoryName,
         createTechnicalSkillDto,
       );
       return {
@@ -50,7 +52,7 @@ export class TechnicalSkillController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    description: 'The list of industries of interest was succesfully obtained',
+    description: 'The list of technical skills was succesfully obtained',
   })
   @ApiBadRequestResponse({
     description: 'Invalid number of items per page requested',
@@ -59,7 +61,7 @@ export class TechnicalSkillController {
     description: 'An unexpected situation ocurred',
   })
   async findMany(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('skillCategory') categoryName: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
   ): Promise<PaginatedResponseDto<TechnicalSkillDto>> {
@@ -67,7 +69,7 @@ export class TechnicalSkillController {
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse = await this.technicalSkillService.findMany(
-        resumeOwnerEmail,
+        categoryName,
         page,
         perPage,
       );
@@ -83,7 +85,7 @@ export class TechnicalSkillController {
     }
   }
 
-  @Get(':categoryName/:name')
+  @Get('/:name')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'Technical skill was succesfully found',
@@ -96,7 +98,7 @@ export class TechnicalSkillController {
     description: 'An unexpected situation ocurred',
   })
   async findOne(
-    @Param('categoryName') categoryName: string,
+    @Param('skillCategory') categoryName: string,
     @Param('name') name: string,
   ) {
     const technicalSkill = await this.technicalSkillService.findOne(
@@ -106,7 +108,7 @@ export class TechnicalSkillController {
 
     if (!technicalSkill)
       throw new NotFoundException(
-        `There is no technical skill with the given \`name\` (${name})`,
+        `There is no technical skill with the given \`name\` (${name}) in the given \`categoryName\` (${categoryName})`,
       );
     return {
       statusCode: HttpStatus.OK,
@@ -114,10 +116,10 @@ export class TechnicalSkillController {
     };
   }
 
-  @Patch(':categoryName/:name')
+  @Patch('/:name')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    description: 'Industry of interest was succesfully updated',
+    description: 'Technical skill was succesfully updated',
   })
   @ApiNotFoundResponse({
     description:
@@ -130,15 +132,15 @@ export class TechnicalSkillController {
     description: 'An unexpected situation ocurred',
   })
   async update(
-    @Param('email') resumeOwnerEmail: string,
-    @Param('industryName') industryName: string,
+    @Param('skillCategory') categoryName: string,
+    @Param('name') name: string,
     @Body() updateTechnicalSkillDto: UpdateTechnicalSkillDto,
   ) {
     try {
       const updatedTechnicalSkill =
         await this.technicalSkillService.update(
-          resumeOwnerEmail,
-          industryName,
+          name,
+          categoryName,
           updateTechnicalSkillDto,
         );
       return { statusCode: HttpStatus.OK, data: updatedTechnicalSkill };
@@ -156,10 +158,10 @@ export class TechnicalSkillController {
     }
   }
 
-  @Delete(':industryName')
+  @Delete(':name')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    description: 'Industry of interest was succesfully deleted',
+    description: 'Technical skill was succesfully deleted',
   })
   @ApiNotFoundResponse({
     description:
@@ -169,14 +171,14 @@ export class TechnicalSkillController {
     description: 'An unexpected situation ocurred',
   })
   async remove(
-    @Param('email') resumeOwnerEmail: string,
-    @Param('industryName') industryName: string,
+    @Param('skillCategory') categoryName: string,
+    @Param('name') name: string,
   ): Promise<ResponseDto<TechnicalSkillDto>> {
     try {
       const deletedTechnicalSkill =
         await this.technicalSkillService.remove(
-          resumeOwnerEmail,
-          industryName,
+          name,
+          categoryName,
         );
       return {
         statusCode: HttpStatus.OK,
