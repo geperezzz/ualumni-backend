@@ -10,16 +10,21 @@ import {
 } from 'src/common/errors/service.error';
 import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 import { RandomPage } from 'src/common/interfaces/random-page.interface';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AlumniService {
   constructor(private prismaService: PrismaService) {}
 
   async create(createAlumniDto: CreateAlumniDto): Promise<Alumni> {
+    let salt = await bcrypt.genSalt();
+    let hashedPassword = await bcrypt.hash(createAlumniDto.password, salt);
+
     try {
       return await this.prismaService.alumni.create({
         data: {
           ...createAlumniDto,
+          password: hashedPassword,
           resume: {
             create: {},
           },
@@ -150,7 +155,6 @@ export class AlumniService {
           );
         }
       }
-      console.log(error);
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });
