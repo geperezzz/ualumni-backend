@@ -8,6 +8,7 @@ import { CiapCoursesModule } from './ciap-courses/ciap-courses.module';
 import { IndustryOfInterestModule } from './industry-of-interest/industry-of-interest.module';
 import { ResumeModule } from './resume/resume.module';
 import { TechnicalSkillModule } from './technical-skill/technical-skill.module';
+import { SkillCategoryModule } from './skill-category/skill-category.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { TechnicalSkillModule } from './technical-skill/technical-skill.module';
     IndustryOfInterestModule,
     ResumeModule,
     TechnicalSkillModule,
+    SkillCategoryModule,
   ],
 })
 export class AppModule {}
