@@ -9,6 +9,7 @@ import { IndustryOfInterestModule } from './industry-of-interest/industry-of-int
 import { ResumeModule } from './resume/resume.module';
 import { TechnicalSkillModule } from './technical-skill/technical-skill.module';
 import { SkillCategoryModule } from './skill-category/skill-category.module';
+import { ResumeCiapCoursesModule } from './resume-ciap-courses/resume-ciap-courses.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { SkillCategoryModule } from './skill-category/skill-category.module';
     ResumeModule,
     TechnicalSkillModule,
     SkillCategoryModule,
+    ResumeCiapCoursesModule,
   ],
 })
 export class AppModule {}
