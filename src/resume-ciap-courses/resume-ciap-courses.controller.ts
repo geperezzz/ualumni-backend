@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   HttpStatus,
@@ -16,17 +15,35 @@ import { ResumeCiapCoursesService } from './resume-ciap-courses.service';
 import { CreateResumeCiapCourseDto } from './dto/create-resume-ciap-course.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { ResumeCiapCourseDto } from './dto/resume-ciap-course.dto';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ForeignKeyError } from 'src/common/error/service.error';
 
 @ApiTags('resume-ciap-courses')
-@Controller('user/:email/resume/resume-ciap-courses')
+@Controller('user/:email/resume/ciap-courses')
 export class ResumeCiapCoursesController {
   constructor(
     private readonly resumeCiapCoursesService: ResumeCiapCoursesService,
   ) {}
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({
+    description: 'The CIAP course was succesfully added to the resume',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'There is no alumni with the given email, or there is no CIAP course with the given id',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   async create(
     @Param('email') ownerEmail: string,
     @Body() createResumeCiapCourseDto: CreateResumeCiapCourseDto,
@@ -53,6 +70,17 @@ export class ResumeCiapCoursesController {
   }
 
   @Get()
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description:
+      'The list of CIAP courses did by the alumni was succesfully obtained',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid number of items per page requested',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   async findAll(
     @Param('email') ownerEmail: string,
   ): Promise<ResponseDto<ResumeCiapCourseDto[]>> {
@@ -71,19 +99,30 @@ export class ResumeCiapCoursesController {
     }
   }
 
-  @Get(':name')
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'CIAP course did by the alumni was succesfully found',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'The CIAP course did by the alumni with the requested id was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   @HttpCode(HttpStatus.OK)
   async findOne(
     @Param('email') ownerEmail: string,
-    @Param('name') name: string,
+    @Param('id') id: string,
   ): Promise<ResponseDto<ResumeCiapCourseDto>> {
     const resumeCiapCourse = await this.resumeCiapCoursesService.findOne(
       ownerEmail,
-      name,
+      id,
     );
     if (!resumeCiapCourse) {
       throw new NotFoundException(
-        `There is no ciap course did by alumni with the \`email\` (${ownerEmail}) with the given \`name\` (${name})`,
+        `There is no ciap course did by alumni with the \`email\` (${ownerEmail}) with the given \`id\` (${id})`,
       );
     }
     return {
@@ -92,14 +131,25 @@ export class ResumeCiapCoursesController {
     };
   }
 
-  @Delete(':name')
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'CIAP course did by the alumni was succesfully delete',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'The CIAP course did by the alumni with the requested id was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
   async remove(
     @Param('email') ownerEmail: string,
-    @Param('name') name: string,
+    @Param('id') id: string,
   ): Promise<ResponseDto<ResumeCiapCourseDto>> {
     try {
       const deletedResumeCiapCourse =
-        await this.resumeCiapCoursesService.remove(ownerEmail, name);
+        await this.resumeCiapCoursesService.remove(ownerEmail, id);
       return {
         statusCode: HttpStatus.OK,
         data: deletedResumeCiapCourse,

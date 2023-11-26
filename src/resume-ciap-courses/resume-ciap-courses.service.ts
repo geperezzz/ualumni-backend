@@ -19,7 +19,7 @@ export class ResumeCiapCoursesService {
       return await this.prismaService.resumeCiapCourse.create({
         data: {
           isVisible: true,
-          courseName: createResumeCiapCourseDto.name,
+          courseId: createResumeCiapCourseDto.id,
           resumeOwnerEmail: ownerEmail,
         },
       });
@@ -27,7 +27,7 @@ export class ResumeCiapCoursesService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2003') {
           throw new ForeignKeyError(
-            `There is no alumni with the email (${ownerEmail}), or there is no CIAP course with the name (${createResumeCiapCourseDto.name}))`,
+            `There is no alumni with the email (${ownerEmail}), or there is no CIAP course with the id (${createResumeCiapCourseDto.id}))`,
             { cause: error },
           );
         }
@@ -54,14 +54,14 @@ export class ResumeCiapCoursesService {
 
   async findOne(
     ownerEmail: string,
-    name: string,
+    id: string,
   ): Promise<ResumeCiapCourseDto | null> {
     try {
       return await this.prismaService.resumeCiapCourse.findUnique({
         where: {
-          resumeOwnerEmail_courseName: {
+          resumeOwnerEmail_courseId: {
             resumeOwnerEmail: ownerEmail,
-            courseName: name,
+            courseId: id,
           },
         },
       });
@@ -72,13 +72,13 @@ export class ResumeCiapCoursesService {
     }
   }
 
-  async remove(ownerEmail: string, name: string): Promise<ResumeCiapCourseDto> {
+  async remove(ownerEmail: string, id: string): Promise<ResumeCiapCourseDto> {
     try {
       return await this.prismaService.resumeCiapCourse.delete({
         where: {
-          resumeOwnerEmail_courseName: {
+          resumeOwnerEmail_courseId: {
             resumeOwnerEmail: ownerEmail,
-            courseName: name,
+            courseId: id,
           },
         },
       });
@@ -86,7 +86,7 @@ export class ResumeCiapCoursesService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new ForeignKeyError(
-            `There is no ciap course did by alumni with the \`email\` (${ownerEmail}) with the given \`name\` (${name})`,
+            `There is no ciap course did by alumni with the \`email\` (${ownerEmail}) with the given \`id\` (${id})`,
             { cause: error },
           );
         }

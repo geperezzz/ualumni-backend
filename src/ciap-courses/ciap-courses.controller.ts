@@ -47,7 +47,7 @@ export class CiapCoursesController {
     description: 'The CIAP course was succesfully created',
   })
   @ApiBadRequestResponse({
-    description: 'Already exists a CIAP course with the given name',
+    description: 'Already exists a CIAP course with the given id',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
@@ -102,7 +102,7 @@ export class CiapCoursesController {
     }
   }
 
-  @Get(':name')
+  @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'CIAP course was succesfully found' })
   @ApiNotFoundResponse({
@@ -112,9 +112,9 @@ export class CiapCoursesController {
     description: 'An unexpected situation ocurred',
   })
   async findOne(
-    @Param('name') name: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<ResponseDto<CiapCourseDto>> {
-    const ciapCourse = await this.ciapCoursesService.findOne(name);
+    const ciapCourse = await this.ciapCoursesService.findOne(id);
     if (!ciapCourse)
       throw new BadRequestException(
         'The CIAP course with the requested id was not found',
@@ -122,25 +122,25 @@ export class CiapCoursesController {
     return { statusCode: HttpStatus.OK, data: ciapCourse };
   }
 
-  @Put(':name')
+  @Put(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'CIAP course was succesfully updated' })
   @ApiNotFoundResponse({
-    description: 'The CIAP course with the requested name was not found',
+    description: 'The CIAP course with the requested id was not found',
   })
   @ApiBadRequestResponse({
-    description: 'Already exist a CIAP course with the given name',
+    description: 'Already exist a CIAP course with the given id',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
   })
   async update(
-    @Param('name') name: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateCiapCourseDto: UpdateCiapCourseDto,
   ) {
     try {
       const updatedCiapCourse = await this.ciapCoursesService.update(
-        name,
+        id,
         updateCiapCourseDto,
       );
       return { statusCode: HttpStatus.OK, data: updatedCiapCourse };
@@ -158,20 +158,20 @@ export class CiapCoursesController {
     }
   }
 
-  @Delete(':name')
+  @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'CIAP course was succesfully delete' })
   @ApiNotFoundResponse({
-    description: 'The CIAP course with the requested name was not found',
+    description: 'The CIAP course with the requested id was not found',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
   })
   async remove(
-    @Param('name') name: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<ResponseDto<CiapCourseDto>> {
     try {
-      const deletedCiapCourse = await this.ciapCoursesService.remove(name);
+      const deletedCiapCourse = await this.ciapCoursesService.remove(id);
       return {
         statusCode: HttpStatus.OK,
         data: deletedCiapCourse,

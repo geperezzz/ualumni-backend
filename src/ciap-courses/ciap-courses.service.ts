@@ -20,14 +20,16 @@ export class CiapCoursesService {
     try {
       return await this.prismaService.ciapCourse.create({
         data: {
+          id: createCiapCourseDto.id,
           name: createCiapCourseDto.name,
+          date: new Date(createCiapCourseDto.date).toISOString(),
         },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `There already exists a CIAP course with the given \`name\` (${createCiapCourseDto.name})`,
+            `There already exists a CIAP course with the name and date (${createCiapCourseDto.name}, ${createCiapCourseDto.date})`,
             { cause: error },
           );
         }
@@ -71,10 +73,10 @@ export class CiapCoursesService {
     }
   }
 
-  async findOne(name: string): Promise<CiapCourseDto | null> {
+  async findOne(id: string): Promise<CiapCourseDto | null> {
     try {
       return await this.prismaService.ciapCourse.findUnique({
-        where: { name },
+        where: { id },
       });
     } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
@@ -84,27 +86,31 @@ export class CiapCoursesService {
   }
 
   async update(
-    name: string,
+    id: string,
     updateCiapCourseDto: UpdateCiapCourseDto,
   ): Promise<CiapCourseDto> {
     try {
       return await this.prismaService.ciapCourse.update({
-        where: { name },
+        where: { id },
         data: {
+          id: updateCiapCourseDto.id,
           name: updateCiapCourseDto.name,
+          date: updateCiapCourseDto.date
+            ? new Date(updateCiapCourseDto.date).toISOString()
+            : undefined,
         },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no CIAP course with the given \`name\` (${name})`,
+            `There is no CIAP course with the given \`id\` (${id})`,
             { cause: error },
           );
         }
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `Cannot update the \`name\` to \`${updateCiapCourseDto.name}\`,there already exists a CIAP course with the given \`name\` (${updateCiapCourseDto.name})`,
+            `Cannot update the \`name and date\` to \`${updateCiapCourseDto.name}, ${updateCiapCourseDto.date}\`,there already exists a CIAP course with the given \`name and date\` (${updateCiapCourseDto.name}, ${updateCiapCourseDto.date})`,
             { cause: error },
           );
         }
@@ -115,16 +121,16 @@ export class CiapCoursesService {
     }
   }
 
-  async remove(name: string): Promise<CiapCourseDto> {
+  async remove(id: string): Promise<CiapCourseDto> {
     try {
       return await this.prismaService.ciapCourse.delete({
-        where: { name },
+        where: { id },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no CIAP course with the given \`name\` (${name})`,
+            `There is no CIAP course with the given \`id\` (${id})`,
             { cause: error },
           );
         }

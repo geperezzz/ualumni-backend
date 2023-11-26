@@ -71,18 +71,20 @@ CREATE TABLE "Resume" (
 
 -- CreateTable
 CREATE TABLE "CiapCourse" (
+    "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
+    "date" DATE NOT NULL,
 
-    CONSTRAINT "CiapCourse_pkey" PRIMARY KEY ("name")
+    CONSTRAINT "CiapCourse_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "ResumeCiapCourse" (
     "resumeOwnerEmail" TEXT NOT NULL,
-    "courseName" TEXT NOT NULL,
+    "courseId" UUID NOT NULL,
     "isVisible" BOOLEAN NOT NULL,
 
-    CONSTRAINT "ResumeCiapCourse_pkey" PRIMARY KEY ("resumeOwnerEmail","courseName")
+    CONSTRAINT "ResumeCiapCourse_pkey" PRIMARY KEY ("resumeOwnerEmail","courseId")
 );
 
 -- CreateTable
@@ -189,6 +191,9 @@ CREATE TABLE "_CareerToSkillCategory" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "CiapCourse_name_date_key" ON "CiapCourse"("name", "date");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "_CareerToSkillCategory_AB_unique" ON "_CareerToSkillCategory"("A", "B");
 
 -- CreateIndex
@@ -219,7 +224,7 @@ ALTER TABLE "Resume" ADD CONSTRAINT "Resume_ownerEmail_fkey" FOREIGN KEY ("owner
 ALTER TABLE "ResumeCiapCourse" ADD CONSTRAINT "ResumeCiapCourse_resumeOwnerEmail_fkey" FOREIGN KEY ("resumeOwnerEmail") REFERENCES "Resume"("ownerEmail") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ResumeCiapCourse" ADD CONSTRAINT "ResumeCiapCourse_courseName_fkey" FOREIGN KEY ("courseName") REFERENCES "CiapCourse"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ResumeCiapCourse" ADD CONSTRAINT "ResumeCiapCourse_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "CiapCourse"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ResumeSoftSkill" ADD CONSTRAINT "ResumeSoftSkill_resumeOwnerEmail_fkey" FOREIGN KEY ("resumeOwnerEmail") REFERENCES "Resume"("ownerEmail") ON DELETE RESTRICT ON UPDATE CASCADE;
