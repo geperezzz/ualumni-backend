@@ -79,7 +79,7 @@ export class AlumniController {
     let alumni = await this.alumniService.findOne(email);
 
     if (!alumni) {
-      throw new NotFoundError(
+      throw new NotFoundException(
         `There is no soft skill with the given \`email\` (${email})`,
         {},
       );
