@@ -11,6 +11,7 @@ import {
 import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 import { RandomPage } from 'src/common/interfaces/random-page.interface';
 import * as bcrypt from 'bcrypt';
+import { FilteredRandomPaginationParams } from './dto/filtered-random-pagination-params.dto';
 
 @Injectable()
 export class AlumniService {
@@ -91,26 +92,55 @@ export class AlumniService {
     pageNumber,
     itemsPerPage,
     randomizationSeed,
-  }: RandomPaginationParamsDto): Promise<RandomPage<Alumni>> {
+    alumniName,
+    careersNames,
+    positionsOfInterest,
+    skillsNames,
+  }: FilteredRandomPaginationParams): Promise<RandomPage<Alumni>> {
     randomizationSeed ??= Math.random();
-
+    if (typeof careersNames === 'string') {
+      careersNames = new Array(careersNames);
+    }
+    if (typeof positionsOfInterest === 'string') {
+      positionsOfInterest = new Array(positionsOfInterest);
+    }
+    if (typeof skillsNames === 'string') {
+      skillsNames = new Array(skillsNames);
+    }
     try {
-      let [_, items, numberOfItems] = await this.prismaService.$transaction([
-        this.prismaService.$queryRaw`
+      let [_, __, items, numberOfItems] = await this.prismaService.$transaction(
+        [
+          this.prismaService.$queryRaw`
+          CREATE EXTENSION IF NOT EXISTS unaccent
+        `,
+          this.prismaService.$queryRaw`
           SELECT 0
           FROM (
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.prismaService.$queryRaw<Alumni[]>`
-          SELECT *
-          FROM "Alumni"
+          this.prismaService.$queryRaw<Alumni[]>`
+          SELECT email, password, names, surnames
+          FROM "Alumni" a LEFT JOIN "Resume" r ON a."email" = r."ownerEmail"
+          LEFT JOIN "PositionOfInterest" p ON r."ownerEmail" = p."resumeOwnerEmail"
+          LEFT JOIN "ResumeTechnicalSkill" rt ON r."ownerEmail" = rt."resumeOwnerEmail"
+          LEFT JOIN "Graduation" g ON a."email" = g."alumniEmail"
+          WHERE CONCAT(unaccent(a.names), ' ', unaccent(a.surnames)) ILIKE unaccent(${
+            alumniName ? `%${alumniName.replaceAll(' ', '%')}%` : '%'
+          })
+          AND ${
+            careersNames
+              ? Prisma.sql`g."careerName" IN (${Prisma.join(careersNames)})`
+              : Prisma.sql`TRUE`
+          }
+          GROUP BY email
           ORDER BY random()
           LIMIT ${itemsPerPage}
           OFFSET ${itemsPerPage * (pageNumber - 1)}
         `,
-        this.prismaService.alumni.count(),
-      ]);
+          this.prismaService.alumni.count(),
+        ],
+      );
 
       return {
         items,

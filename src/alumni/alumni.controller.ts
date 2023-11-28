@@ -77,8 +77,7 @@ export class AlumniController {
   async findPageRandomlyFiltered(
     @Query() filteredRandomPaginationParams: FilteredRandomPaginationParams,
   ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
-    console.log(filteredRandomPaginationParams.careersNames);
-    let alumniRandomPage = await this.alumniService.findPageRandomly(
+    let alumniRandomPage = await this.alumniService.findPageRandomlyFiltered(
       filteredRandomPaginationParams,
     );
     let alumniDtoRandomPage = {

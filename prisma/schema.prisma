@@ -32,7 +32,7 @@ model ContractType {
 model Career {
   name            String          @id
   jobOffers       JobOffer[]
-  graduationDates Graduation[]
+  graduation      Graduation[]
   skillCategories SkillCategory[]
 }
 
@@ -45,7 +45,7 @@ model Alumni {
   address         String
   jobApplications JobApplication[]
   resume          Resume?
-  graduationDates Graduation[]
+  graduation      Graduation[]
 }
 
 model Graduation {
