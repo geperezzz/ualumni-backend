@@ -85,6 +85,28 @@ export class PortfolioItemService {
     }
   }
 
+  async findOne(
+    title: string,
+    resumeOwnerEmail: string,
+    sourceLink: string,
+  ): Promise<PortfolioItemDto | null> {
+    try {
+      return await this.prismaService.portfolioItem.findUnique({
+        where: {
+          resumeOwnerEmail_title: {
+            title,
+            resumeOwnerEmail,
+           
+          },
+        },
+      });
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
   async remove(
     title: string,
     resumeOwnerEmail: string,
