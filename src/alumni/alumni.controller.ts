@@ -23,6 +23,7 @@ import {
 } from 'src/common/errors/service.error';
 import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 import { RandomlyPagedResponseDto } from 'src/common/dto/randomly-paged-response.dto';
+import { FilteredRandomPaginationParams } from './dto/filtered-random-pagination-params.dto';
 
 @Controller('alumni')
 export class AlumniController {
@@ -56,6 +57,29 @@ export class AlumniController {
   ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
     let alumniRandomPage = await this.alumniService.findPageRandomly(
       randomPaginationParamsDto,
+    );
+    let alumniDtoRandomPage = {
+      ...alumniRandomPage,
+      items: alumniRandomPage.items.map((alumni) =>
+        plainToInstance(AlumniDto, alumni, {
+          excludeExtraneousValues: true,
+        }),
+      ),
+    };
+
+    return {
+      statusCode: HttpStatus.OK,
+      data: alumniDtoRandomPage,
+    };
+  }
+
+  @Get('filter')
+  async findPageRandomlyFiltered(
+    @Query() filteredRandomPaginationParams: FilteredRandomPaginationParams,
+  ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
+    console.log(filteredRandomPaginationParams.careersNames);
+    let alumniRandomPage = await this.alumniService.findPageRandomly(
+      filteredRandomPaginationParams,
     );
     let alumniDtoRandomPage = {
       ...alumniRandomPage,

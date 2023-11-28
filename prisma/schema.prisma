@@ -32,7 +32,7 @@ model ContractType {
 model Career {
   name            String          @id
   jobOffers       JobOffer[]
-  graduations     Graduation[]
+  graduationDates Graduation[]
   skillCategories SkillCategory[]
 }
 
@@ -41,9 +41,11 @@ model Alumni {
   password        String
   names           String
   surnames        String
+  telephoneNumber String
+  address         String
   jobApplications JobApplication[]
   resume          Resume?
-  graduations     Graduation[]
+  graduationDates Graduation[]
 }
 
 model Graduation {
@@ -85,7 +87,10 @@ model Resume {
 model CiapCourse {
   id                 String             @id @default(uuid()) @db.Uuid
   name               String
+  date               DateTime           @db.Date
   resumesListingThis ResumeCiapCourse[]
+
+  @@unique([name, date])
 }
 
 model ResumeCiapCourse {
@@ -124,7 +129,6 @@ model TechnicalSkill {
   category           SkillCategory          @relation(fields: [categoryName], references: [name])
   categoryName       String
   resumesListingThis ResumeTechnicalSkill[]
-  resumeOwnerEmail   String
 
   @@id([name, categoryName])
 }
@@ -160,7 +164,7 @@ model PortfolioItem {
   resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
   resumeOwnerEmail String
   title            String
-  description      String
+  sourceLink       String
   isVisible        Boolean
 
   @@id([resumeOwnerEmail, title])
@@ -171,7 +175,6 @@ model HigherEducationStudy {
   resumeOwnerEmail String
   title            String
   institution      String
-  startDate        DateTime @db.Date
   endDate          DateTime @db.Date
   isVisible        Boolean
 

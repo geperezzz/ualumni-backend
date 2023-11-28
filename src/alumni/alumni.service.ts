@@ -87,6 +87,48 @@ export class AlumniService {
     }
   }
 
+  async findPageRandomlyFiltered({
+    pageNumber,
+    itemsPerPage,
+    randomizationSeed,
+  }: RandomPaginationParamsDto): Promise<RandomPage<Alumni>> {
+    randomizationSeed ??= Math.random();
+
+    try {
+      let [_, items, numberOfItems] = await this.prismaService.$transaction([
+        this.prismaService.$queryRaw`
+          SELECT 0
+          FROM (
+            SELECT setseed(${randomizationSeed})
+          ) AS randomization_seed
+        `,
+        this.prismaService.$queryRaw<Alumni[]>`
+          SELECT *
+          FROM "Alumni"
+          ORDER BY random()
+          LIMIT ${itemsPerPage}
+          OFFSET ${itemsPerPage * (pageNumber - 1)}
+        `,
+        this.prismaService.alumni.count(),
+      ]);
+
+      return {
+        items,
+        meta: {
+          pageNumber,
+          itemsPerPage,
+          numberOfItems,
+          numberOfPages: Math.ceil(numberOfItems / itemsPerPage),
+          randomizationSeed,
+        },
+      };
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
   async findOne(email: string): Promise<Alumni | null> {
     try {
       return await this.prismaService.alumni.findFirst({

@@ -16,4 +16,12 @@ export class CreateAlumniDto {
   @IsString()
   @IsNotEmpty()
   surnames: string;
+
+  @IsString()
+  @IsNotEmpty()
+  telephoneNumber: string;
+
+  @IsString()
+  @IsNotEmpty()
+  address: string;
 }

@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 import { PaginationParamsDto } from './pagination-params.dto';
 
 export class RandomPaginationParamsDto extends PaginationParamsDto {
