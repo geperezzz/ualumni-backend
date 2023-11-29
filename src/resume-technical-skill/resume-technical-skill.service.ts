@@ -87,13 +87,15 @@ export class ResumeTechnicalSkillService {
   async findOne(
     skillName: string,
     resumeOwnerEmail: string,
+    skillCategoryName: string,
   ): Promise<ResumeTechnicalSkillDto | null> {
     try {
       return await this.prismaService.resumeTechnicalSkill.findUnique({
         where: {
-          skillName_resumeOwnerEmail: {
+          resumeOwnerEmail_skillName_skillCategoryName: {
             skillName,
             resumeOwnerEmail,
+            skillCategoryName,
           },
         },
       });
@@ -107,15 +109,17 @@ export class ResumeTechnicalSkillService {
   async update(
     skillName: string,
     resumeOwnerEmail: string,
+    skillCategoryName: string,
     updateResumeTechnicalSkillDto: UpdateResumeTechnicalSkillDto,
   ): Promise<ResumeTechnicalSkillDto> {
     try {
       return await this.prismaService.resumeTechnicalSkill.update({
         where: {
-          resumeOwnerEmail_skillName: {
+          resumeOwnerEmail_skillName_skillCategoryName: {
             skillName,
             resumeOwnerEmail,
-          
+          skillCategoryName
+
           },
         },
         data: updateResumeTechnicalSkillDto,
@@ -144,13 +148,15 @@ export class ResumeTechnicalSkillService {
   async remove(
     skillName: string,
     resumeOwnerEmail: string,
+    skillCategoryName: string,
     ): Promise<ResumeTechnicalSkillDto> {
     try {
       return await this.prismaService.resumeTechnicalSkill.delete({
         where: {
-          resumeOwnerEmail_skillName: {
+          resumeOwnerEmail_skillName_skillCategoryName: {
             resumeOwnerEmail,
             skillName,
+            skillCategoryName
           },
         },
       });
