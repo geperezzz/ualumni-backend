@@ -10,7 +10,6 @@ import { SessionSerializer } from './session/session.serializer';
     AlumniModule,
     PassportModule.register({
       session: true,
-      property: 'alumni',
     }),
   ],
   controllers: [AuthController],
