@@ -19,11 +19,17 @@ export class FilteredRandomPaginationParams extends RandomPaginationParamsDto {
   @IsOptional()
   @Type(() => String)
   @Expose({ name: 'skills' })
-  skillsNames?: string[];
+  skillsNames?: string[] | string;
 
   @IsString({ each: true })
   @IsOptional()
   @Type(() => String)
   @Expose({ name: 'position' })
-  positionsOfInterest?: string[];
+  positionsOfInterest?: string[] | string;
+
+  @IsString({ each: true })
+  @IsOptional()
+  @Type(() => String)
+  @Expose({ name: 'industry' })
+  industryOfInterest?: string[] | string;
 }

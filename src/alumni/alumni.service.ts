@@ -99,13 +99,13 @@ export class AlumniService {
   }: FilteredRandomPaginationParams): Promise<RandomPage<Alumni>> {
     randomizationSeed ??= Math.random();
     if (typeof careersNames === 'string') {
-      careersNames = new Array(careersNames);
+      careersNames = [careersNames];
     }
     if (typeof positionsOfInterest === 'string') {
-      positionsOfInterest = new Array(positionsOfInterest);
+      positionsOfInterest = [positionsOfInterest];
     }
     if (typeof skillsNames === 'string') {
-      skillsNames = new Array(skillsNames);
+      skillsNames = [skillsNames];
     }
     try {
       let [_, __, items, numberOfItems] = await this.prismaService.$transaction(
@@ -120,14 +120,16 @@ export class AlumniService {
           ) AS randomization_seed
         `,
           this.prismaService.$queryRaw<Alumni[]>`
-          SELECT email, password, names, surnames
+          SELECT a.*, r.*
           FROM "Alumni" a LEFT JOIN "Resume" r ON a."email" = r."ownerEmail"
           LEFT JOIN "PositionOfInterest" p ON r."ownerEmail" = p."resumeOwnerEmail"
+          LEFT JOIN "IndustryOfInterest" i ON r."ownerEmail" = i."resumeOwnerEmail"
           LEFT JOIN "ResumeTechnicalSkill" rt ON r."ownerEmail" = rt."resumeOwnerEmail"
           LEFT JOIN "Graduation" g ON a."email" = g."alumniEmail"
           WHERE CONCAT(unaccent(a.names), ' ', unaccent(a.surnames)) ILIKE unaccent(${
             alumniName ? `%${alumniName.replaceAll(' ', '%')}%` : '%'
           })
+          AND r."isVisible" = TRUE
           AND ${
             careersNames
               ? Prisma.sql`g."careerName" IN (${Prisma.join(careersNames)})`
@@ -233,3 +235,31 @@ export class AlumniService {
     }
   }
 }
+
+
+
+/*WITH filtered_by_visibility AS (
+	SELECT a."email", a."names", a."surnames", g."careerName", p."positionName", i."industryName", rt."skillName" 
+	FROM "Alumni" a LEFT JOIN "Resume" r ON a."email" = r."ownerEmail"
+	LEFT JOIN "PositionOfInterest" p ON r."ownerEmail" = p."resumeOwnerEmail"
+	LEFT JOIN "IndustryOfInterest" i ON r."ownerEmail" = i."resumeOwnerEmail"
+	LEFT JOIN "ResumeTechnicalSkill" rt ON r."ownerEmail" = rt."resumeOwnerEmail"
+	LEFT JOIN "Graduation" g ON a."email" = g."alumniEmail"
+	WHERE r."isVisible" = TRUE
+		AND p."isVisible" = TRUE
+		AND i."isVisible" = TRUE
+		AND rt."isVisible" = TRUE
+), filtered_by_name AS (
+	SELECT "email", "careerName", "positionName", "industryName", "skillName"
+	FROM filtered_by_visibility
+	WHERE CONCAT(unaccent("names"), ' ', unaccent("surnames")) ILIKE unaccent('%')
+), filtered_by_career AS (
+	SELECT "email", "positionName", "industryName", "skillName"
+	FROM filtered_by_name
+	WHERE "careerName" IN ('Derecho', 'Educación')
+	GROUP BY "email", "positionName", "industryName", "skillName"
+	HAVING COUNT(*) = 2
+)
+
+SELECT "email"
+FROM filtered_by_name;*/ 
