@@ -39,6 +39,9 @@ export class ResumeService {
           numberOfDownloads: updateResumeDto.numberOfDownloads,
           isVisible: updateResumeDto.isVisible,
           aboutMe: updateResumeDto.aboutMe,
+          visibleSince: updateResumeDto.isVisible
+            ? new Date().toISOString()
+            : undefined,
         },
       });
     } catch (error) {
