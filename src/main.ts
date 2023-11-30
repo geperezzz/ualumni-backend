@@ -21,14 +21,14 @@ async function bootstrap() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        maxAge: configService.getOrThrow('SESSION_COOKIE_MAX_AGE_MS'),
+        maxAge: parseInt(configService.getOrThrow('SESSION_COOKIE_MAX_AGE_MS')),
         httpOnly: configService.getOrThrow('SESSION_COOKIE_HTTP_ONLY'),
         sameSite: configService.getOrThrow('SESSION_COOKIE_SAME_SITE'),
       },
       store: new PrismaSessionStore(prismaClient, {
-        checkPeriod: configService.getOrThrow(
+        checkPeriod: parseInt(configService.getOrThrow(
           'SESSION_COOKIE_STORE_CHECK_PERIOD_MS',
-        ),
+        )),
       }),
     }),
   );
