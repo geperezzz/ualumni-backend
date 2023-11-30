@@ -16,7 +16,10 @@ import { AlumniService } from 'src/alumni/alumni.service';
 import { plainToInstance } from 'class-transformer';
 import { AlumniDto } from 'src/alumni/dto/alumni.dto';
 import { AlreadyExistsError } from 'src/common/errors/service.error';
+import { ApiTags } from '@nestjs/swagger';
+import { LoginDto } from './dto/login.dto';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private alumniService: AlumniService) {}
@@ -43,7 +46,7 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  login(): Record<string, any> {
+  login(@Body() loginDto: LoginDto): Record<string, any> {
     return {
       statusCode: HttpStatus.OK,
       message: 'Successfully logged in',

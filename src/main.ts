@@ -6,6 +6,7 @@ import * as passport from 'passport';
 import { PrismaService } from './prisma/prisma.service';
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 import { ConfigService } from '@nestjs/config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -42,6 +43,15 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('UAlumni API')
+    .setDescription('API for UAlumni')
+    .setVersion('0.1')
+    .addTag('UAlumni')
+    .build();
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api', app, swaggerDocument);
 
   await app.listen(configService.getOrThrow('BACKEND_PORT'), configService.getOrThrow('BACKEND_HOSTNAME'));
 }
