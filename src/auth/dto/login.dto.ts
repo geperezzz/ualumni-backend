@@ -1,11 +1,11 @@
-import { IsDefined, IsEmail, IsNotEmpty, IsString } from "class-validator"
+import { IsDefined, IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class LoginDto {
   @IsEmail()
   @IsDefined()
-  alumniEmail: string
+  alumniEmail: string;
 
   @IsString()
   @IsNotEmpty()
-  password: string
+  password: string;
 }
