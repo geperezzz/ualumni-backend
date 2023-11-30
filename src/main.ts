@@ -12,7 +12,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  app.enableCors({ origin: configService.getOrThrow('FRONTEND_URL') });
+  app.enableCors({
+    origin: configService.getOrThrow('FRONTEND_URL'),
+    credentials: true,
+  });
 
   const prismaClient = app.get(PrismaService);
   app.use(
@@ -27,9 +30,9 @@ async function bootstrap() {
         sameSite: configService.getOrThrow('SESSION_COOKIE_SAME_SITE'),
       },
       store: new PrismaSessionStore(prismaClient, {
-        checkPeriod: parseInt(configService.getOrThrow(
-          'SESSION_COOKIE_STORE_CHECK_PERIOD_MS',
-        )),
+        checkPeriod: parseInt(
+          configService.getOrThrow('SESSION_COOKIE_STORE_CHECK_PERIOD_MS'),
+        ),
       }),
     }),
   );
@@ -53,6 +56,9 @@ async function bootstrap() {
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, swaggerDocument);
 
-  await app.listen(configService.getOrThrow('BACKEND_PORT'), configService.getOrThrow('BACKEND_HOSTNAME'));
+  await app.listen(
+    configService.getOrThrow('BACKEND_PORT'),
+    configService.getOrThrow('BACKEND_HOSTNAME'),
+  );
 }
 bootstrap();
