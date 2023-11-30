@@ -4,6 +4,9 @@ import { AlumniModule } from './alumni/alumni.module';
 import { JobApplicationsModule } from './job-applications/job-applications.module';
 import { JobOffersModule } from './job-offers/job-offers.module';
 import { GraduationsModule } from './graduations/graduations.module';
+import { AuthModule } from './auth/auth.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -12,6 +15,8 @@ import { GraduationsModule } from './graduations/graduations.module';
     JobApplicationsModule,
     JobOffersModule,
     GraduationsModule,
+    AuthModule,
+    ConfigModule.forRoot(),
   ],
 })
 export class AppModule {}

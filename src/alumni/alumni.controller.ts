@@ -80,7 +80,7 @@ export class AlumniController {
 
     if (!alumni) {
       throw new NotFoundException(
-        `There is no soft skill with the given \`email\` (${email})`,
+        `There is no alumni with the given \`email\` (${email})`,
         {},
       );
     }

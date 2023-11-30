@@ -46,6 +46,13 @@ model Alumni {
   graduations     Graduation[]
 }
 
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt DateTime
+}
+
 model Graduation {
   career         Career   @relation(fields: [careerName], references: [name])
   careerName     String
