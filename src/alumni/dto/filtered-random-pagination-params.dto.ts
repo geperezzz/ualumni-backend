@@ -1,41 +1,50 @@
-import { Expose, Type } from 'class-transformer';
-import { IsArray, IsOptional, IsString } from 'class-validator';
+import { Expose, Transform, Type } from 'class-transformer';
+import { IsOptional, IsString } from 'class-validator';
 import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 
 export class FilteredRandomPaginationParams extends RandomPaginationParamsDto {
   @IsString({ each: true })
   @IsOptional()
-  @Type(() => String)
+  @Transform(({ value }) => {
+    if (value) return [value];
+  })
   @Expose({ name: 'careers' })
-  careersNames?: string[] | string;
+  careersNames?: string[] | undefined;
 
   @IsString()
   @IsOptional()
-  @Type(() => String)
   @Expose({ name: 'name' })
-  alumniName?: string;
+  alumniName?: string | undefined;
 
   @IsString({ each: true })
   @IsOptional()
-  @Type(() => String)
+  @Transform(({ value }) => {
+    if (value) return [value];
+  })
   @Expose({ name: 'skills' })
-  skillsNames?: string[] | string;
+  skillsNames?: string[] | undefined;
 
   @IsString({ each: true })
   @IsOptional()
-  @Type(() => String)
+  @Transform(({ value }) => {
+    if (value) return [value];
+  })
   @Expose({ name: 'positions' })
-  positionsOfInterest?: string[] | string;
+  positionsOfInterest?: string[] | undefined;
 
   @IsString({ each: true })
   @IsOptional()
-  @Type(() => String)
+  @Transform(({ value }) => {
+    if (value) return [value];
+  })
   @Expose({ name: 'industries' })
-  industriesOfInterest?: string[] | string;
+  industriesOfInterest?: string[] | undefined;
 
   @IsString({ each: true })
   @IsOptional()
-  @Type(() => String)
+  @Transform(({ value }) => {
+    if (value) return [value];
+  })
   @Expose({ name: 'categories' })
-  skillCategories?: string[] | string;
+  skillCategories?: string[] | undefined;
 }

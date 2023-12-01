@@ -108,21 +108,7 @@ export class AlumniService {
     skillCategories,
   }: FilteredRandomPaginationParams): Promise<RandomPage<Alumni>> {
     randomizationSeed ??= Math.random();
-    if (typeof careersNames === 'string') {
-      careersNames = [careersNames];
-    }
-    if (typeof positionsOfInterest === 'string') {
-      positionsOfInterest = [positionsOfInterest];
-    }
-    if (typeof skillsNames === 'string') {
-      skillsNames = [skillsNames];
-    }
-    if (typeof industriesOfInterest === 'string') {
-      industriesOfInterest = [industriesOfInterest];
-    }
-    if (typeof skillCategories === 'string') {
-      skillCategories = [skillCategories];
-    }
+
     try {
       let [_, __, filteredAlumni] = await this.prismaService.$transaction([
         this.prismaService.$queryRaw`
@@ -134,7 +120,7 @@ export class AlumniService {
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.prismaService.$queryRaw<Alumni[]>`
+        this.prismaService.$queryRaw<{ email: string; totalCount: number }[]>`
           WITH filtered_by_visibility AS (
             SELECT a."email", a."names", a."surnames", g."careerName", p."positionName", i."industryName", rt."skillName", rt."skillCategoryName"
             FROM "Alumni" a LEFT JOIN "Resume" r ON a."email" = r."ownerEmail"
@@ -233,7 +219,7 @@ export class AlumniService {
                 : Prisma.empty
             }
           ), filtered_by_skill_categories AS (
-            SELECT "email"
+            SELECT "email", COUNT("email") AS "filteredAlumniCount"
             FROM filtered_by_skills
             ${
               skillCategories
@@ -250,15 +236,24 @@ export class AlumniService {
                     HAVING COUNT(*) = ${skillCategories.length}`
                 : Prisma.empty
             }
+          ), filtered_total_count AS (
+            SELECT MAX("filteredAlumniCount") AS "totalCount"
+            FROM filtered_by_skill_categories
+        
           )
          
-          SELECT *
-          FROM filtered_by_skill_categories
+          SELECT "email", "totalCount"
+          FROM filtered_by_skill_categories, filtered_total_count
+          GROUP BY "email", "totalCount"
           ORDER BY random()
+          LIMIT ${itemsPerPage}
+          OFFSET ${itemsPerPage * (pageNumber - 1)}
         `,
       ]);
-
-      const numberOfItems = filteredAlumni.length;
+      const stringTotalCount = filteredAlumni[0]
+        ? filteredAlumni[0].totalCount.toString()
+        : '0n';
+      const numberOfItems = Number(stringTotalCount.replace('n', ''));
 
       const items = await this.prismaService.alumni.findMany({
         where: {
@@ -281,8 +276,6 @@ export class AlumniService {
           },
           graduation: true,
         },
-        take: itemsPerPage,
-        skip: itemsPerPage * (pageNumber - 1),
       });
 
       return {

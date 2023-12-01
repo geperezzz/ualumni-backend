@@ -1,5 +1,5 @@
 import { Expose, Transform, Type } from 'class-transformer';
-import { IsInt, IsOptional } from 'class-validator';
+import { IsInt } from 'class-validator';
 
 export const DEFAULT_PAGE_NUMBER = 1;
 export const DEFAULT_ITEMS_PER_PAGE = 10;
