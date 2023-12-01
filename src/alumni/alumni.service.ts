@@ -21,12 +21,17 @@ export class AlumniService {
     let hashedPassword = await bcrypt.hash(createAlumniDto.password, salt);
 
     try {
-      return await this.prismaService.alumni.create({
+      return await this.prismaService.user.create({
         data: {
           ...createAlumniDto,
           password: hashedPassword,
-          resume: {
-            create: {},
+          role: 'ALUMNI',
+          associatedAlumni: {
+            create: {
+              resume: {
+                create: {},
+              },
+            },
           },
         },
       });
@@ -131,19 +136,9 @@ export class AlumniService {
 
   async remove(email: string): Promise<Alumni> {
     try {
-      let [_, removedAlumni] = await this.prismaService.$transaction([
-        this.prismaService.alumni.update({
-          where: { email },
-          data: {
-            resume: {
-              delete: true,
-            },
-          },
-        }),
-        this.prismaService.alumni.delete({
-          where: { email },
-        }),
-      ]);
+      let removedAlumni = this.prismaService.user.delete({
+        where: { email },
+      });
 
       return removedAlumni;
     } catch (error) {

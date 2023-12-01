@@ -1,34 +1,30 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
-import { AlumniService } from 'src/alumni/alumni.service';
 import * as bcrypt from 'bcrypt';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class LocalAuthStrategy extends PassportStrategy(Strategy) {
-  constructor(private alumniService: AlumniService) {
+  constructor(private usersService: UsersService) {
     super({
-      usernameField: 'alumniEmail',
+      usernameField: 'email',
       session: true,
     });
   }
 
-  async validate(alumniEmail: string, password: string) {
-    let alumni = await this.alumniService.findOne(alumniEmail);
+  async validate(email: string, password: string) {
+    let user = await this.usersService.findOne(email);
 
-    if (!alumni) {
-      throw new UnauthorizedException(
-        `There is no alumni with \`email\` equal to \`${alumniEmail}\``,
-      );
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials', {});
     }
 
-    let isPasswordCorrect = await bcrypt.compare(password, alumni.password);
+    let isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) {
-      throw new UnauthorizedException(
-        `Incorrect password (${password}) for alumni with \`email\` equal to \`${alumniEmail}\``,
-      );
+      throw new UnauthorizedException('Invalid credentials', {});
     }
 
-    return alumni;
+    return user;
   }
 }
