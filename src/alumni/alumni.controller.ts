@@ -82,11 +82,11 @@ export class AlumniController {
     );
     let alumniDtoRandomPage = {
       ...alumniRandomPage,
-      items: alumniRandomPage.items.map((alumni) =>
+      items: alumniRandomPage.items /*.map((alumni) =>
         plainToInstance(AlumniDto, alumni, {
           excludeExtraneousValues: true,
         }),
-      ),
+      ),*/,
     };
 
     return {
