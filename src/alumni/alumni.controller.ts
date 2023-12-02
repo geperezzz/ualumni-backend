@@ -10,6 +10,8 @@ import {
   BadRequestException,
   NotFoundException,
   Query,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { AlumniService } from './alumni.service';
 import { CreateAlumniDto } from './dto/create-alumni.dto';
@@ -23,12 +25,20 @@ import {
 } from 'src/common/errors/service.error';
 import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 import { RandomlyPagedResponseDto } from 'src/common/dto/randomly-paged-response.dto';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { SessionAuthGuard } from 'src/auth/session/session.guard';
+import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
+import { SessionUser } from 'src/auth/session/session-user.decorator';
+import { User } from '@prisma/client';
 
 @Controller('alumni')
+@UseGuards(SessionAuthGuard, PermissionsGuard)
 export class AlumniController {
   constructor(private readonly alumniService: AlumniService) {}
 
   @Post()
+  @Allowed('admin')
   async create(
     @Body() createAlumniDto: CreateAlumniDto,
   ): Promise<ResponseDto<AlumniDto>> {
@@ -51,6 +61,8 @@ export class AlumniController {
   }
 
   @Get()
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
   async findPageRandomly(
     @Query() randomPaginationParamsDto: RandomPaginationParamsDto,
   ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
@@ -72,7 +84,32 @@ export class AlumniController {
     };
   }
 
+  @Get('me')
+  @Allowed('alumni')
+  async findMe(
+    @SessionUser() user: User
+  ): Promise<ResponseDto<AlumniDto>> {
+    let alumni = await this.alumniService.findOne(user.email);
+
+    if (!alumni) {
+      throw new NotFoundException(
+        `There is no alumni with the given \`email\` (${user.email})`,
+        {},
+      );
+    }
+    let alumniDto = plainToInstance(AlumniDto, alumni, {
+      excludeExtraneousValues: true,
+    });
+
+    return {
+      statusCode: HttpStatus.OK,
+      data: alumniDto,
+    };
+  }
+
   @Get(':email')
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
   async findOne(
     @Param('email') email: string,
   ): Promise<ResponseDto<AlumniDto>> {
@@ -94,7 +131,38 @@ export class AlumniController {
     };
   }
 
+  @Patch('me')
+  @Allowed('alumni')
+  async updateMe(
+    @SessionUser() user: User,
+    @Body() updateAlumniDto: UpdateAlumniDto,
+  ): Promise<ResponseDto<AlumniDto>> {
+    try {
+      let updatedAlumni = await this.alumniService.update(
+        user.email,
+        updateAlumniDto,
+      );
+      let updatedAlumniDto = plainToInstance(AlumniDto, updatedAlumni, {
+        excludeExtraneousValues: true,
+      });
+
+      return {
+        statusCode: HttpStatus.CREATED,
+        data: updatedAlumniDto,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      if (error instanceof AlreadyExistsError) {
+        throw new BadRequestException(error.message, { cause: error });
+      }
+      throw error;
+    }
+  }
+
   @Patch(':email')
+  @Allowed('admin')
   async update(
     @Param('email') email: string,
     @Body() updateAlumniDto: UpdateAlumniDto,
@@ -123,7 +191,29 @@ export class AlumniController {
     }
   }
 
+  @Delete('me')
+  @Allowed('alumni')
+  async removeMe(@SessionUser() user: User): Promise<ResponseDto<AlumniDto>> {
+    try {
+      let removedAlumni = await this.alumniService.remove(user.email);
+      let removedAlumniDto = plainToInstance(AlumniDto, removedAlumni, {
+        excludeExtraneousValues: true,
+      });
+
+      return {
+        statusCode: HttpStatus.CREATED,
+        data: removedAlumniDto,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      throw error;
+    }
+  }
+
   @Delete(':email')
+  @Allowed('admin')
   async remove(@Param('email') email: string): Promise<ResponseDto<AlumniDto>> {
     try {
       let removedAlumni = await this.alumniService.remove(email);

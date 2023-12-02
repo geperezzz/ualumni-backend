@@ -10,6 +10,7 @@ import {
   BadRequestException,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { SoftSkillsService } from './soft-skills.service';
 import { CreateSoftSkillDto } from './dto/create-soft-skill.dto';
@@ -22,12 +23,18 @@ import {
 } from 'src/common/errors/service.error';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import { PagedResponseDto } from 'src/common/dto/paged-response.dto';
+import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionAuthGuard } from 'src/auth/session/session.guard';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @Controller('soft-skills')
+@UseGuards(SessionAuthGuard, PermissionsGuard)
 export class SoftSkillsController {
   constructor(private readonly softSkillsService: SoftSkillsService) {}
 
   @Post()
+  @Allowed('admin')
   async create(
     @Body()
     createSoftSkillDto: CreateSoftSkillDto,
@@ -48,6 +55,8 @@ export class SoftSkillsController {
   }
 
   @Get()
+  @SessionNotRequired()
+  @Allowed('all')
   async findPage(
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PagedResponseDto<SoftSkillDto>> {
@@ -60,6 +69,8 @@ export class SoftSkillsController {
   }
 
   @Get(':name')
+  @SessionNotRequired()
+  @Allowed('all')
   async findOne(
     @Param('name') name: string,
   ): Promise<ResponseDto<SoftSkillDto>> {
@@ -79,6 +90,7 @@ export class SoftSkillsController {
   }
 
   @Put(':name')
+  @Allowed('admin')
   async update(
     @Param('name') name: string,
     @Body()
@@ -105,6 +117,7 @@ export class SoftSkillsController {
   }
 
   @Delete(':name')
+  @Allowed('admin')
   async remove(
     @Param('name') name: string,
   ): Promise<ResponseDto<SoftSkillDto>> {

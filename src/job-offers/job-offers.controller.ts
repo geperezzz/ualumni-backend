@@ -11,6 +11,7 @@ import {
   BadRequestException,
   HttpStatus,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { JobOffersService } from './job-offers.service';
 import { CreateJobOfferDto } from './dto/create-job-offer.dto';
@@ -20,12 +21,18 @@ import {
   AlreadyExistsError,
   NotFoundError,
 } from 'src/common/errors/service.error';
+import { SessionAuthGuard } from 'src/auth/session/session.guard';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @Controller('job-offers')
+@UseGuards(SessionAuthGuard, PermissionsGuard)
 export class JobOffersController {
   constructor(private readonly jobOffersService: JobOffersService) {}
 
   @Post()
+  @Allowed('admin')
   async create(@Body() createJobOfferDto: CreateJobOfferDto) {
     try {
       let createdJobOffer =
@@ -47,6 +54,8 @@ export class JobOffersController {
   }
 
   @Get()
+  @SessionNotRequired()
+  @Allowed('all')
   async findPageRandomly(
     @Query() randomPaginationParamsDto: RandomPaginationParamsDto,
   ) {
@@ -60,6 +69,8 @@ export class JobOffersController {
   }
 
   @Get(':id')
+  @SessionNotRequired()
+  @Allowed('all')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     let jobOffer = await this.jobOffersService.findOne(id);
 
@@ -77,6 +88,7 @@ export class JobOffersController {
   }
 
   @Patch(':id')
+  @Allowed('admin')
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateJobOfferDto: UpdateJobOfferDto,
@@ -103,6 +115,7 @@ export class JobOffersController {
   }
 
   @Delete(':id')
+  @Allowed('admin')
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     try {
       let removedJobOffer = await this.jobOffersService.remove(id);

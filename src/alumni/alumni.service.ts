@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateAlumniDto } from './dto/create-alumni.dto';
 import { UpdateAlumniDto } from './dto/update-alumni.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Alumni, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import {
   AlreadyExistsError,
   NotFoundError,
@@ -11,6 +11,7 @@ import {
 import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 import { RandomPage } from 'src/common/interfaces/random-page.interface';
 import * as bcrypt from 'bcrypt';
+import { Alumni } from './alumni.type';
 
 @Injectable()
 export class AlumniService {
@@ -34,6 +35,12 @@ export class AlumniService {
             },
           },
         },
+        select: {
+          email: true,
+          names: true,
+          surnames: true,
+          password: true
+        }
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -68,6 +75,7 @@ export class AlumniService {
         this.prismaService.$queryRaw<Alumni[]>`
           SELECT *
           FROM "Alumni"
+            INNER JOIN "User" USING ("email")
           ORDER BY random()
           LIMIT ${itemsPerPage}
           OFFSET ${itemsPerPage * (pageNumber - 1)}
@@ -94,9 +102,20 @@ export class AlumniService {
 
   async findOne(email: string): Promise<Alumni | null> {
     try {
-      return await this.prismaService.alumni.findFirst({
+      let result = await this.prismaService.alumni.findFirst({
         where: { email },
+        select: {
+          associatedUser: {
+            select: {
+              email: true,
+              password: true,
+              names: true,
+              surnames: true
+            }
+          }
+        }
       });
+      return result?.associatedUser ?? null;
     } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
@@ -109,10 +128,25 @@ export class AlumniService {
     updateAlumniDto: UpdateAlumniDto,
   ): Promise<Alumni> {
     try {
-      return await this.prismaService.alumni.update({
+      let result = await this.prismaService.alumni.update({
         where: { email },
-        data: updateAlumniDto,
+        data: {
+          associatedUser: {
+            update: updateAlumniDto
+          }
+        },
+        select: {
+          associatedUser: {
+            select: {
+              email: true,
+              password: true,
+              names: true,
+              surnames: true
+            }
+          }
+        }
       });
+      return result.associatedUser;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
@@ -136,11 +170,15 @@ export class AlumniService {
 
   async remove(email: string): Promise<Alumni> {
     try {
-      let removedAlumni = this.prismaService.user.delete({
+      return this.prismaService.user.delete({
         where: { email },
+        select: {
+          email: true,
+          password: true,
+          names: true,
+          surnames: true
+        }
       });
-
-      return removedAlumni;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
