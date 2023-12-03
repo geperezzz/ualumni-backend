@@ -1,4 +1,8 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 
@@ -9,7 +13,7 @@ export class LocalAuthGuard extends AuthGuard('local') {
     if (!canActivate) {
       throw new UnauthorizedException();
     }
-    
+
     let request = context.switchToHttp().getRequest<Request>();
     await super.logIn(request);
     return true;

@@ -53,6 +53,8 @@ model User {
 model Alumni {
   associatedUser  User             @relation(fields: [email], references: [email], onUpdate: Cascade, onDelete: Cascade)
   email           String           @id
+  address         String?
+  telephoneNumber String?
   jobApplications JobApplication[]
   resume          Resume?
   graduations     Graduation[]
@@ -90,6 +92,7 @@ model Resume {
   ownerEmail             String                 @id
   numberOfDownloads      Int                    @default(0)
   isVisible              Boolean                @default(true)
+  visibleSince           DateTime               @default(now()) @db.Date
   aboutMe                String?
   knownLanguages         ResumeLanguage[]
   portfolio              PortfolioItem[]
@@ -104,7 +107,10 @@ model Resume {
 model CiapCourse {
   id                 String             @id @default(uuid()) @db.Uuid
   name               String
+  date               DateTime           @db.Date
   resumesListingThis ResumeCiapCourse[]
+
+  @@unique([name, date])
 }
 
 model ResumeCiapCourse {
@@ -143,7 +149,6 @@ model TechnicalSkill {
   category           SkillCategory          @relation(fields: [categoryName], references: [name])
   categoryName       String
   resumesListingThis ResumeTechnicalSkill[]
-  resumeOwnerEmail   String
 
   @@id([name, categoryName])
 }
@@ -179,7 +184,7 @@ model PortfolioItem {
   resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
   resumeOwnerEmail String
   title            String
-  description      String
+  sourceLink       String
   isVisible        Boolean
 
   @@id([resumeOwnerEmail, title])
@@ -190,7 +195,6 @@ model HigherEducationStudy {
   resumeOwnerEmail String
   title            String
   institution      String
-  startDate        DateTime @db.Date
   endDate          DateTime @db.Date
   isVisible        Boolean
 

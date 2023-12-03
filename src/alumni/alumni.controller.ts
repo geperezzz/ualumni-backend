@@ -86,9 +86,7 @@ export class AlumniController {
 
   @Get('me')
   @Allowed('alumni')
-  async findMe(
-    @SessionUser() user: User
-  ): Promise<ResponseDto<AlumniDto>> {
+  async findMe(@SessionUser() user: User): Promise<ResponseDto<AlumniDto>> {
     let alumni = await this.alumniService.findOne(user.email);
 
     if (!alumni) {

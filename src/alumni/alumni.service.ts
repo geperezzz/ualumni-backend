@@ -39,8 +39,8 @@ export class AlumniService {
           email: true,
           names: true,
           surnames: true,
-          password: true
-        }
+          password: true,
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -110,10 +110,10 @@ export class AlumniService {
               email: true,
               password: true,
               names: true,
-              surnames: true
-            }
-          }
-        }
+              surnames: true,
+            },
+          },
+        },
       });
       return result?.associatedUser ?? null;
     } catch (error) {
@@ -132,8 +132,8 @@ export class AlumniService {
         where: { email },
         data: {
           associatedUser: {
-            update: updateAlumniDto
-          }
+            update: updateAlumniDto,
+          },
         },
         select: {
           associatedUser: {
@@ -141,10 +141,10 @@ export class AlumniService {
               email: true,
               password: true,
               names: true,
-              surnames: true
-            }
-          }
-        }
+              surnames: true,
+            },
+          },
+        },
       });
       return result.associatedUser;
     } catch (error) {
@@ -176,8 +176,8 @@ export class AlumniService {
           email: true,
           password: true,
           names: true,
-          surnames: true
-        }
+          surnames: true,
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
