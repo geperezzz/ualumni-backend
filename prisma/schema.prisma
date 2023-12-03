@@ -73,7 +73,7 @@ model Resume {
   ownerEmail             String                 @id
   numberOfDownloads      Int                    @default(0)
   isVisible              Boolean                @default(true)
-  visibleSince           DateTime               @db.Date
+  visibleSince           DateTime               @default(now()) @db.Date
   aboutMe                String?
   knownLanguages         ResumeLanguage[]
   portfolio              PortfolioItem[]

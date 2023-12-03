@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { ResumeDto } from './dto/resume.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -61,8 +61,8 @@ export class ResumeService {
   }
 
   //automatic hiding of resumes older than a month
-  @Cron(CronExpression.EVERY_12_HOURS)
-  async handleCron() {
+  @Cron(CronExpression.EVERY_10_SECONDS)
+  async hidingResumes() {
     //calculate a month ago
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
