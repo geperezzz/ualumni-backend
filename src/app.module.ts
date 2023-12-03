@@ -19,6 +19,10 @@ import { SkillCategoryModule } from './skill-category/skill-category.module';
 import { ResumeCiapCoursesModule } from './resume-ciap-courses/resume-ciap-courses.module';
 import { ResumeSoftSkillModule } from './resume-soft-skill/resume-soft-skill.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { PrismaModule } from './prisma/prisma.module';
+import { PortfolioItemModule } from './portfolio-item/portfolio-item.module';
+import { ResumeLanguageModule } from './resume-language/resume-language.module';
+import { ResumeTechnicalSkillModule } from './resume-technical-skill/resume-technical-skill.module';
 
 @Module({
   imports: [
@@ -43,6 +47,10 @@ import { ScheduleModule } from '@nestjs/schedule';
     SkillCategoryModule,
     ResumeCiapCoursesModule,
     ResumeSoftSkillModule,
+    PrismaModule,
+    PortfolioItemModule,
+    ResumeLanguageModule,
+    ResumeTechnicalSkillModule,
   ],
 })
 export class AppModule {}
