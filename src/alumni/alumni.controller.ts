@@ -23,7 +23,6 @@ import {
   AlreadyExistsError,
   NotFoundError,
 } from 'src/common/errors/service.error';
-import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 import { RandomlyPagedResponseDto } from 'src/common/dto/randomly-paged-response.dto';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
@@ -31,6 +30,8 @@ import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
 import { User } from '@prisma/client';
+import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
+import { FilterParams } from './dto/filtered-random-pagination-params.dto';
 
 @Controller('alumni')
 @UseGuards(SessionAuthGuard, PermissionsGuard)
@@ -65,9 +66,11 @@ export class AlumniController {
   @Allowed('admin', 'visitor')
   async findPageRandomly(
     @Query() randomPaginationParamsDto: RandomPaginationParamsDto,
+    @Query() filterParams: FilterParams,
   ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
     let alumniRandomPage = await this.alumniService.findPageRandomly(
       randomPaginationParamsDto,
+      filterParams,
     );
     let alumniDtoRandomPage = {
       ...alumniRandomPage,
@@ -76,6 +79,31 @@ export class AlumniController {
           excludeExtraneousValues: true,
         }),
       ),
+    };
+
+    return {
+      statusCode: HttpStatus.OK,
+      data: alumniDtoRandomPage,
+    };
+  }
+
+  @Get('resume')
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
+  async findPageWithResumeRandomly(
+    @Query() randomPaginationParamsDto: RandomPaginationParamsDto,
+    @Query() filterParams: FilterParams,
+  ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
+    let alumniRandomPage = await this.alumniService.findPageWithResumeRandomly(
+      randomPaginationParamsDto,
+      filterParams,
+    );
+    let alumniDtoRandomPage = {
+      ...alumniRandomPage,
+      items: alumniRandomPage.items.map((alumni) => {
+        const { password, ...alumniWithoutPassword } = alumni;
+        return alumniWithoutPassword;
+      }),
     };
 
     return {
