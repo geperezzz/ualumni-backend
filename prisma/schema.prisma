@@ -30,14 +30,14 @@ model ContractType {
 }
 
 model Career {
-  name            String            @id
+  name            String          @id
   jobOffers       JobOffer[]
-  graduationDates GraduationDates[]
+  graduation      Graduation[]
   skillCategories SkillCategory[]
 }
 
 model Alumni {
-  email           String            @id
+  email           String           @id
   password        String
   names           String
   surnames        String
@@ -45,10 +45,10 @@ model Alumni {
   address         String
   jobApplications JobApplication[]
   resume          Resume?
-  graduationDates GraduationDates[]
+  graduation      Graduation[]
 }
 
-model GraduationDates {
+model Graduation {
   career         Career   @relation(fields: [careerName], references: [name])
   careerName     String
   alumni         Alumni   @relation(fields: [alumniEmail], references: [email])
