@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('ADMIN', 'ALUMNI');
+
 -- CreateTable
 CREATE TABLE "JobOffer" (
     "id" UUID NOT NULL,
@@ -30,24 +33,42 @@ CREATE TABLE "Career" (
 );
 
 -- CreateTable
-CREATE TABLE "Alumni" (
+CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "names" TEXT NOT NULL,
     "surnames" TEXT NOT NULL,
-    "telephoneNumber" TEXT NOT NULL,
-    "address" TEXT NOT NULL,
+    "role" "Role" NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("email")
+);
+
+-- CreateTable
+CREATE TABLE "Alumni" (
+    "email" TEXT NOT NULL,
+    "address" TEXT,
+    "telephoneNumber" TEXT,
 
     CONSTRAINT "Alumni_pkey" PRIMARY KEY ("email")
 );
 
 -- CreateTable
-CREATE TABLE "GraduationDates" (
+CREATE TABLE "Session" (
+    "id" TEXT NOT NULL,
+    "sid" TEXT NOT NULL,
+    "data" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Session_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Graduation" (
     "careerName" TEXT NOT NULL,
     "alumniEmail" TEXT NOT NULL,
     "graduationDate" DATE NOT NULL,
 
-    CONSTRAINT "GraduationDates_pkey" PRIMARY KEY ("careerName","alumniEmail")
+    CONSTRAINT "Graduation_pkey" PRIMARY KEY ("careerName","alumniEmail")
 );
 
 -- CreateTable
@@ -64,6 +85,7 @@ CREATE TABLE "Resume" (
     "ownerEmail" TEXT NOT NULL,
     "numberOfDownloads" INTEGER NOT NULL DEFAULT 0,
     "isVisible" BOOLEAN NOT NULL DEFAULT true,
+    "visibleSince" DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "aboutMe" TEXT,
 
     CONSTRAINT "Resume_pkey" PRIMARY KEY ("ownerEmail")
@@ -191,6 +213,9 @@ CREATE TABLE "_CareerToSkillCategory" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Session_sid_key" ON "Session"("sid");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "CiapCourse_name_date_key" ON "CiapCourse"("name", "date");
 
 -- CreateIndex
@@ -206,10 +231,13 @@ ALTER TABLE "JobOffer" ADD CONSTRAINT "JobOffer_careerName_fkey" FOREIGN KEY ("c
 ALTER TABLE "JobOffer" ADD CONSTRAINT "JobOffer_contractTypeName_fkey" FOREIGN KEY ("contractTypeName") REFERENCES "ContractType"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "GraduationDates" ADD CONSTRAINT "GraduationDates_careerName_fkey" FOREIGN KEY ("careerName") REFERENCES "Career"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Alumni" ADD CONSTRAINT "Alumni_email_fkey" FOREIGN KEY ("email") REFERENCES "User"("email") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "GraduationDates" ADD CONSTRAINT "GraduationDates_alumniEmail_fkey" FOREIGN KEY ("alumniEmail") REFERENCES "Alumni"("email") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Graduation" ADD CONSTRAINT "Graduation_careerName_fkey" FOREIGN KEY ("careerName") REFERENCES "Career"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Graduation" ADD CONSTRAINT "Graduation_alumniEmail_fkey" FOREIGN KEY ("alumniEmail") REFERENCES "Alumni"("email") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "JobApplication" ADD CONSTRAINT "JobApplication_jobOfferId_fkey" FOREIGN KEY ("jobOfferId") REFERENCES "JobOffer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -218,7 +246,7 @@ ALTER TABLE "JobApplication" ADD CONSTRAINT "JobApplication_jobOfferId_fkey" FOR
 ALTER TABLE "JobApplication" ADD CONSTRAINT "JobApplication_alumniWhoAppliedEmail_fkey" FOREIGN KEY ("alumniWhoAppliedEmail") REFERENCES "Alumni"("email") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Resume" ADD CONSTRAINT "Resume_ownerEmail_fkey" FOREIGN KEY ("ownerEmail") REFERENCES "Alumni"("email") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Resume" ADD CONSTRAINT "Resume_ownerEmail_fkey" FOREIGN KEY ("ownerEmail") REFERENCES "Alumni"("email") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ResumeCiapCourse" ADD CONSTRAINT "ResumeCiapCourse_resumeOwnerEmail_fkey" FOREIGN KEY ("resumeOwnerEmail") REFERENCES "Resume"("ownerEmail") ON DELETE RESTRICT ON UPDATE CASCADE;
