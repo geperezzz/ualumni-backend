@@ -16,7 +16,10 @@ import { PageDto } from 'src/common/dto/paginated-response.dto';
 export class HigherEducationStudyService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(resumeOwnerEmail: string, createHigherEducationStudyDto: CreateHigherEducationStudyDto) {
+  async create(
+    resumeOwnerEmail: string,
+    createHigherEducationStudyDto: CreateHigherEducationStudyDto,
+  ) {
     try {
       return await this.prismaService.higherEducationStudy.create({
         data: {

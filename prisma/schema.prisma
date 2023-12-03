@@ -30,25 +30,44 @@ model ContractType {
 }
 
 model Career {
-  name            String            @id
+  name            String          @id
   jobOffers       JobOffer[]
-  graduationDates GraduationDates[]
+  graduations     Graduation[]
   skillCategories SkillCategory[]
 }
 
-model Alumni {
-  email           String            @id
-  password        String
-  names           String
-  surnames        String
-  telephoneNumber String
-  address         String
-  jobApplications JobApplication[]
-  resume          Resume?
-  graduationDates GraduationDates[]
+enum Role {
+  ADMIN
+  ALUMNI
 }
 
-model GraduationDates {
+model User {
+  email            String  @id
+  password         String
+  names            String
+  surnames         String
+  role             Role
+  associatedAlumni Alumni?
+}
+
+model Alumni {
+  associatedUser  User             @relation(fields: [email], references: [email], onUpdate: Cascade, onDelete: Cascade)
+  email           String           @id
+  address         String?
+  telephoneNumber String?
+  jobApplications JobApplication[]
+  resume          Resume?
+  graduations     Graduation[]
+}
+
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt DateTime
+}
+
+model Graduation {
   career         Career   @relation(fields: [careerName], references: [name])
   careerName     String
   alumni         Alumni   @relation(fields: [alumniEmail], references: [email])
@@ -69,7 +88,7 @@ model JobApplication {
 }
 
 model Resume {
-  owner                  Alumni                 @relation(fields: [ownerEmail], references: [email])
+  owner                  Alumni                 @relation(fields: [ownerEmail], references: [email], onUpdate: Cascade, onDelete: Cascade)
   ownerEmail             String                 @id
   numberOfDownloads      Int                    @default(0)
   isVisible              Boolean                @default(true)

@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { CreateResumeSoftSkillDto } from './dto/create-resume-soft-skill.dto';
 import { UpdateResumeSoftSkillDto } from './dto/update-resume-soft-skill.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AlreadyExistsError, ForeignKeyError, NotFoundError, UnexpectedError } from 'src/common/error/service.error';
+import {
+  AlreadyExistsError,
+  ForeignKeyError,
+  NotFoundError,
+  UnexpectedError,
+} from 'src/common/error/service.error';
 import { Prisma } from '@prisma/client';
 import { ResumeSoftSkillDto } from './dto/resume-soft-skill.dto';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
@@ -11,7 +16,10 @@ import { PageDto } from 'src/common/dto/paginated-response.dto';
 export class ResumeSoftSkillService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(resumeOwnerEmail: string, createResumeSoftSkillDto: CreateResumeSoftSkillDto) {
+  async create(
+    resumeOwnerEmail: string,
+    createResumeSoftSkillDto: CreateResumeSoftSkillDto,
+  ) {
     try {
       return await this.prismaService.resumeSoftSkill.create({
         data: {

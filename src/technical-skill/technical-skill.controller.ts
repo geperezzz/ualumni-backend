@@ -1,11 +1,38 @@
-import { Controller, Query, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, BadRequestException, InternalServerErrorException, NotFoundException, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
+import {
+  Controller,
+  Query,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+  ParseIntPipe,
+  DefaultValuePipe,
+} from '@nestjs/common';
 import { TechnicalSkillService } from './technical-skill.service';
 import { CreateTechnicalSkillDto } from './dto/create-technical-skill.dto';
 import { UpdateTechnicalSkillDto } from './dto/update-technical-skill.dto';
-import { ApiBadRequestResponse, ApiCreatedResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { TechnicalSkillDto } from './dto/technical-skill.dto';
-import { AlreadyExistsError, ForeignKeyError, NotFoundError } from 'src/common/error/service.error';
+import {
+  AlreadyExistsError,
+  ForeignKeyError,
+  NotFoundError,
+} from 'src/common/error/service.error';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 
 @ApiTags('technical-skill')
@@ -91,8 +118,7 @@ export class TechnicalSkillController {
     description: 'Technical skill was succesfully found',
   })
   @ApiNotFoundResponse({
-    description:
-      'The technical skill for the requested alumni was not found',
+    description: 'The technical skill for the requested alumni was not found',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
@@ -122,8 +148,7 @@ export class TechnicalSkillController {
     description: 'Technical skill was succesfully updated',
   })
   @ApiNotFoundResponse({
-    description:
-      'The technical skill with the requested name was not found',
+    description: 'The technical skill with the requested name was not found',
   })
   @ApiBadRequestResponse({
     description: 'Already exists a technical skill with the given title',
@@ -137,12 +162,11 @@ export class TechnicalSkillController {
     @Body() updateTechnicalSkillDto: UpdateTechnicalSkillDto,
   ) {
     try {
-      const updatedTechnicalSkill =
-        await this.technicalSkillService.update(
-          name,
-          categoryName,
-          updateTechnicalSkillDto,
-        );
+      const updatedTechnicalSkill = await this.technicalSkillService.update(
+        name,
+        categoryName,
+        updateTechnicalSkillDto,
+      );
       return { statusCode: HttpStatus.OK, data: updatedTechnicalSkill };
     } catch (error) {
       if (error instanceof NotFoundError) {
@@ -164,8 +188,7 @@ export class TechnicalSkillController {
     description: 'Technical skill was succesfully deleted',
   })
   @ApiNotFoundResponse({
-    description:
-      'The technical skill with the requested name was not found',
+    description: 'The technical skill with the requested name was not found',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
@@ -175,11 +198,10 @@ export class TechnicalSkillController {
     @Param('name') name: string,
   ): Promise<ResponseDto<TechnicalSkillDto>> {
     try {
-      const deletedTechnicalSkill =
-        await this.technicalSkillService.remove(
-          name,
-          categoryName,
-        );
+      const deletedTechnicalSkill = await this.technicalSkillService.remove(
+        name,
+        categoryName,
+      );
       return {
         statusCode: HttpStatus.OK,
         data: deletedTechnicalSkill,

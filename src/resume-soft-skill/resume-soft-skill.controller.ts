@@ -19,8 +19,18 @@ import {
 import { ResumeSoftSkillService } from './resume-soft-skill.service';
 import { CreateResumeSoftSkillDto } from './dto/create-resume-soft-skill.dto';
 import { UpdateResumeSoftSkillDto } from './dto/update-resume-soft-skill.dto';
-import { ApiBadRequestResponse, ApiCreatedResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { AlreadyExistsError, ForeignKeyError } from 'src/common/error/service.error';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  AlreadyExistsError,
+  ForeignKeyError,
+} from 'src/common/error/service.error';
 import { NotFoundError } from 'src/common/error/service.error';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { ResumeSoftSkillDto } from './dto/resume-soft-skill.dto';
