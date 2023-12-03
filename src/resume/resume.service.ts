@@ -62,7 +62,7 @@ export class ResumeService {
 
   //automatic hiding of resumes older than a month
   @Cron(CronExpression.EVERY_10_SECONDS)
-  async hidingResumes() {
+  async hideResumes() {
     //calculate a month ago
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
