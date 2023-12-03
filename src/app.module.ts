@@ -11,10 +11,12 @@ import { TechnicalSkillModule } from './technical-skill/technical-skill.module';
 import { SkillCategoryModule } from './skill-category/skill-category.module';
 import { ResumeCiapCoursesModule } from './resume-ciap-courses/resume-ciap-courses.module';
 import { ResumeSoftSkillModule } from './resume-soft-skill/resume-soft-skill.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     PrismaModule,
+    ScheduleModule.forRoot(),
     LanguageModule,
     CareerModule,
     ContractTypeModule,

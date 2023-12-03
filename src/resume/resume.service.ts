@@ -4,6 +4,7 @@ import { ResumeDto } from './dto/resume.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { NotFoundError, UnexpectedError } from 'src/common/error/service.error';
 import { Prisma } from '@prisma/client';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class ResumeService {
@@ -39,6 +40,9 @@ export class ResumeService {
           numberOfDownloads: updateResumeDto.numberOfDownloads,
           isVisible: updateResumeDto.isVisible,
           aboutMe: updateResumeDto.aboutMe,
+          visibleSince: updateResumeDto.isVisible
+            ? new Date().toISOString()
+            : undefined,
         },
       });
     } catch (error) {
@@ -54,5 +58,19 @@ export class ResumeService {
         cause: error,
       });
     }
+  }
+
+  //automatic hiding of resumes older than a month
+  @Cron(CronExpression.EVERY_10_SECONDS)
+  async hideResumes() {
+    //calculate a month ago
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    //update resume.isVisible older than a month
+    const resumes = await this.prismaService.resume.updateMany({
+      where: { visibleSince: { lte: oneMonthAgo } },
+      data: { isVisible: false },
+    });
   }
 }
