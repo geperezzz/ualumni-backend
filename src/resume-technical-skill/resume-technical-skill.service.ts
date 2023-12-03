@@ -16,13 +16,17 @@ import { PageDto } from 'src/common/dto/paginated-response.dto';
 export class ResumeTechnicalSkillService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(resumeOwnerEmail: string, createResumeTechnicalSkillDto: CreateResumeTechnicalSkillDto) {
+  async create(
+    resumeOwnerEmail: string,
+    skillCategory: string,
+    createResumeTechnicalSkillDto: CreateResumeTechnicalSkillDto,
+  ) {
     try {
       return await this.prismaService.resumeTechnicalSkill.create({
         data: {
           resumeOwnerEmail: resumeOwnerEmail,
+          skillCategoryName: skillCategory,
           skillName: createResumeTechnicalSkillDto.skillName,
-          skillCategoryName: createResumeTechnicalSkillDto.skillCategoryName,
           isVisible: createResumeTechnicalSkillDto.isVisible,
         },
       });
@@ -85,9 +89,9 @@ export class ResumeTechnicalSkillService {
   }
 
   async findOne(
-    skillName: string,
     resumeOwnerEmail: string,
     skillCategoryName: string,
+    skillName: string,
   ): Promise<ResumeTechnicalSkillDto | null> {
     try {
       return await this.prismaService.resumeTechnicalSkill.findUnique({
@@ -107,9 +111,9 @@ export class ResumeTechnicalSkillService {
   }
 
   async update(
-    skillName: string,
     resumeOwnerEmail: string,
     skillCategoryName: string,
+    skillName: string,
     updateResumeTechnicalSkillDto: UpdateResumeTechnicalSkillDto,
   ): Promise<ResumeTechnicalSkillDto> {
     try {
@@ -118,8 +122,7 @@ export class ResumeTechnicalSkillService {
           resumeOwnerEmail_skillName_skillCategoryName: {
             skillName,
             resumeOwnerEmail,
-          skillCategoryName
-
+            skillCategoryName,
           },
         },
         data: updateResumeTechnicalSkillDto,
@@ -146,17 +149,17 @@ export class ResumeTechnicalSkillService {
   }
 
   async remove(
-    skillName: string,
     resumeOwnerEmail: string,
     skillCategoryName: string,
-    ): Promise<ResumeTechnicalSkillDto> {
+    skillName: string,
+  ): Promise<ResumeTechnicalSkillDto> {
     try {
       return await this.prismaService.resumeTechnicalSkill.delete({
         where: {
           resumeOwnerEmail_skillName_skillCategoryName: {
             resumeOwnerEmail,
             skillName,
-            skillCategoryName
+            skillCategoryName,
           },
         },
       });
