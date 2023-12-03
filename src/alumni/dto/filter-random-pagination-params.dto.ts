@@ -1,7 +1,8 @@
 import { Expose, Transform, Type } from 'class-transformer';
 import { IsOptional, IsString } from 'class-validator';
+import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 
-export class FilterParams {
+export class FilterRandomPaginationParamsDto extends RandomPaginationParamsDto {
   @IsString({ each: true })
   @IsOptional()
   @Transform(({ value }) => {

@@ -13,8 +13,7 @@ import { RandomPage } from 'src/common/interfaces/random-page.interface';
 import * as bcrypt from 'bcrypt';
 import { Alumni } from './alumni.type';
 import { AlumniDto } from './dto/alumni.dto';
-import { FilterParams } from './dto/filtered-random-pagination-params.dto';
-
+import { FilterRandomPaginationParamsDto } from './dto/filter-random-pagination-params.dto';
 @Injectable()
 export class AlumniService {
   constructor(private prismaService: PrismaService) {}
@@ -59,17 +58,17 @@ export class AlumniService {
     }
   }
 
-  async findPageRandomly(
-    { pageNumber, itemsPerPage, randomizationSeed }: RandomPaginationParamsDto,
-    {
-      alumniName,
-      careersNames,
-      positionsOfInterest,
-      skillsNames,
-      industriesOfInterest,
-      skillCategories,
-    }: FilterParams,
-  ): Promise<RandomPage<AlumniDto>> {
+  async findPageRandomly({
+    pageNumber,
+    itemsPerPage,
+    randomizationSeed,
+    alumniName,
+    careersNames,
+    positionsOfInterest,
+    skillsNames,
+    industriesOfInterest,
+    skillCategories,
+  }: FilterRandomPaginationParamsDto): Promise<RandomPage<AlumniDto>> {
     randomizationSeed ??= Math.random();
 
     try {
@@ -254,17 +253,17 @@ export class AlumniService {
     }
   }
 
-  async findPageWithResumeRandomly(
-    { pageNumber, itemsPerPage, randomizationSeed }: RandomPaginationParamsDto,
-    {
-      alumniName,
-      careersNames,
-      positionsOfInterest,
-      skillsNames,
-      industriesOfInterest,
-      skillCategories,
-    }: FilterParams,
-  ): Promise<RandomPage<Alumni>> {
+  async findPageWithResumeRandomly({
+    pageNumber,
+    itemsPerPage,
+    randomizationSeed,
+    alumniName,
+    careersNames,
+    positionsOfInterest,
+    skillsNames,
+    industriesOfInterest,
+    skillCategories,
+  }: FilterRandomPaginationParamsDto): Promise<RandomPage<Alumni>> {
     randomizationSeed ??= Math.random();
 
     try {
