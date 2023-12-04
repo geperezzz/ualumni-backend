@@ -6,7 +6,7 @@ export class FilterRandomPaginationParamsDto extends RandomPaginationParamsDto {
   @IsString({ each: true })
   @IsOptional()
   @Transform(({ value }) => {
-    if (value) return [value];
+    if (typeof value === 'string') return [value];
   })
   @Expose({ name: 'careers' })
   careersNames?: string[] | undefined;
@@ -19,7 +19,7 @@ export class FilterRandomPaginationParamsDto extends RandomPaginationParamsDto {
   @IsString({ each: true })
   @IsOptional()
   @Transform(({ value }) => {
-    if (value) return [value];
+    if (typeof value === 'string') return [value];
   })
   @Expose({ name: 'skills' })
   skillsNames?: string[] | undefined;
@@ -27,7 +27,7 @@ export class FilterRandomPaginationParamsDto extends RandomPaginationParamsDto {
   @IsString({ each: true })
   @IsOptional()
   @Transform(({ value }) => {
-    if (value) return [value];
+    if (typeof value === 'string') return [value];
   })
   @Expose({ name: 'positions' })
   positionsOfInterest?: string[] | undefined;
@@ -35,7 +35,7 @@ export class FilterRandomPaginationParamsDto extends RandomPaginationParamsDto {
   @IsString({ each: true })
   @IsOptional()
   @Transform(({ value }) => {
-    if (value) return [value];
+    if (typeof value === 'string') return [value];
   })
   @Expose({ name: 'industries' })
   industriesOfInterest?: string[] | undefined;
@@ -43,7 +43,7 @@ export class FilterRandomPaginationParamsDto extends RandomPaginationParamsDto {
   @IsString({ each: true })
   @IsOptional()
   @Transform(({ value }) => {
-    if (value) return [value];
+    if (typeof value === 'string') return [value];
   })
   @Expose({ name: 'categories' })
   skillCategories?: string[] | undefined;
