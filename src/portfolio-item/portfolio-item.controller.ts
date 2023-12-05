@@ -37,10 +37,8 @@ import { PortfolioItemDto } from './dto/portfolio-item.dto';
 
 @ApiTags('portfolio-item')
 @Controller('user/:email/resume/portfolio-item')
-export class PortfolioItemController{
-  constructor(
-    private readonly portfolioItemService: PortfolioItemService,
-  ) {}
+export class PortfolioItemController {
+  constructor(private readonly portfolioItemService: PortfolioItemService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -78,8 +76,7 @@ export class PortfolioItemController{
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    description:
-      'The list of Portfolio items was succesfully obtained',
+    description: 'The list of Portfolio items was succesfully obtained',
   })
   @ApiBadRequestResponse({
     description: 'Invalid number of items per page requested',
@@ -87,21 +84,17 @@ export class PortfolioItemController{
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
   })
-  
-
   @Get(':title')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'A Portfolio item was succesfully found',
   })
   @ApiNotFoundResponse({
-    description:
-      'The Portfolio item for the requested alumni was not found',
+    description: 'The Portfolio item for the requested alumni was not found',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
   })
- 
   async findOne(
     @Param('email') resumeOwnerEmail: string,
     @Param('title') title: string,
@@ -110,8 +103,7 @@ export class PortfolioItemController{
     const portfolioItem = await this.portfolioItemService.findOne(
       title,
       resumeOwnerEmail,
-      sourceLink
-      
+      sourceLink,
     );
 
     if (!portfolioItem)
@@ -130,8 +122,7 @@ export class PortfolioItemController{
     description: 'Portfolio item was succesfully updated',
   })
   @ApiNotFoundResponse({
-    description:
-      'The Portfolio item with the requested name was not found',
+    description: 'The Portfolio item with the requested name was not found',
   })
   @ApiBadRequestResponse({
     description: 'Already exist a Portfolio itemstudy with the given title',
@@ -172,8 +163,7 @@ export class PortfolioItemController{
     description: 'Portfolio item was succesfully deleted',
   })
   @ApiNotFoundResponse({
-    description:
-      'The Portfolio item with the requested title was not found',
+    description: 'The Portfolio item with the requested title was not found',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',

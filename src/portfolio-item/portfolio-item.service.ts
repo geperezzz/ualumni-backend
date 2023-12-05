@@ -12,12 +12,14 @@ import {
 import { PortfolioItemDto } from './dto/portfolio-item.dto';
 import { PortfolioItem } from './entities/portfolio-item.entity';
 
-
 @Injectable()
 export class PortfolioItemService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(resumeOwnerEmail: string, createPortfolioItemDto: CreatePortfolioItemDto) {
+  async create(
+    resumeOwnerEmail: string,
+    createPortfolioItemDto: CreatePortfolioItemDto,
+  ) {
     try {
       return await this.prismaService.portfolioItem.create({
         data: {
@@ -48,7 +50,6 @@ export class PortfolioItemService {
     }
   }
 
- 
   async update(
     title: string,
     resumeOwnerEmail: string,
@@ -60,7 +61,7 @@ export class PortfolioItemService {
           resumeOwnerEmail_title: {
             title,
             resumeOwnerEmail,
-             },
+          },
         },
         data: {},
       });
@@ -96,7 +97,6 @@ export class PortfolioItemService {
           resumeOwnerEmail_title: {
             title,
             resumeOwnerEmail,
-           
           },
         },
       });

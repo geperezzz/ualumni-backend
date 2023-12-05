@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Resume" ALTER COLUMN "isVisible" SET DEFAULT false,
+ALTER COLUMN "visibleSince" SET DATA TYPE TIMESTAMP(3);

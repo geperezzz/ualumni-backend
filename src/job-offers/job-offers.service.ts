@@ -10,6 +10,7 @@ import {
 import { JobOffer, Prisma } from '@prisma/client';
 import { RandomPage } from 'src/common/interfaces/random-page.interface';
 import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
+import { JobOffersFilterParamsDto } from './dto/job-offers-filter-params.dto';
 
 @Injectable()
 export class JobOffersService {
@@ -48,11 +49,10 @@ export class JobOffersService {
     }
   }
 
-  async findPageRandomly({
-    pageNumber,
-    itemsPerPage,
-    randomizationSeed,
-  }: RandomPaginationParamsDto): Promise<RandomPage<JobOffer>> {
+  async findPageRandomly(
+    { pageNumber, itemsPerPage, randomizationSeed }: RandomPaginationParamsDto,
+    filterParams: JobOffersFilterParamsDto,
+  ): Promise<RandomPage<JobOffer>> {
     randomizationSeed ??= Math.random();
 
     try {
@@ -64,8 +64,47 @@ export class JobOffersService {
           ) AS randomization_seed
         `,
         this.prismaService.$queryRaw<JobOffer[]>`
-          SELECT *
-          FROM "JobOffer"
+          SELECT j.*
+          FROM "JobOffer" AS j
+            LEFT JOIN "JobOfferTechnicalSkill" AS jots ON j."id" = jots."jobOfferId"
+          WHERE
+            j."isVisible" = TRUE
+            ${
+              filterParams.companyName
+                ? Prisma.sql`AND j."companyName" ILIKE '%' || ${filterParams.companyName} || '%'`
+                : Prisma.empty
+            }
+            ${
+              filterParams.careersNames
+                ? Prisma.sql`AND j."careerName" ILIKE ANY (ARRAY[${Prisma.join(
+                    filterParams.careersNames,
+                  )}])`
+                : Prisma.empty
+            }
+            ${
+              filterParams.skills
+                ? Prisma.sql`AND (${Prisma.join(
+                    filterParams.skills.map(({ categoryName, skillName }) => {
+                      return Prisma.sql`(jots."technicalSkillCategoryName" ILIKE ${categoryName} AND jots."technicalSkillName" ILIKE ${skillName})`;
+                    }),
+                    ' OR ',
+                  )})`
+                : Prisma.empty
+            }
+            ${
+              filterParams.positions
+                ? Prisma.sql`AND j."position" ILIKE ANY (ARRAY[${Prisma.join(
+                    filterParams.positions,
+                  )}])`
+                : Prisma.empty
+            }
+            ${
+              filterParams.contracts
+                ? Prisma.sql`AND j."contractTypeName" ILIKE ANY (ARRAY[${Prisma.join(
+                    filterParams.contracts,
+                  )}])`
+                : Prisma.empty
+            }
           ORDER BY random()
           LIMIT ${itemsPerPage}
           OFFSET ${itemsPerPage * (pageNumber - 1)}
