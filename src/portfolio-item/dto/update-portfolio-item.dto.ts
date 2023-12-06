@@ -11,13 +11,12 @@ export class UpdatePortfolioItemDto {
   @IsOptional()
   resumeOwnerEmail?: string;
 
-  
   @IsString()
   title: string;
 
-   @IsString()
+  @IsString()
   sourceLink: string;
-  
+
   @IsBoolean()
   isVisible: boolean;
 }

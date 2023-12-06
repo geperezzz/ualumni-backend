@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsBase64,
+  IsBoolean,
   IsDate,
   IsOptional,
   IsString,
@@ -52,4 +53,14 @@ export class UpdateJobOfferDto {
   @IsString()
   @IsOptional()
   contractTypeName?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  @Type(() => Boolean)
+  isVisible?: boolean;
+
+  @IsDate()
+  @IsOptional()
+  @Type(() => Date)
+  visibleSince: Date;
 }

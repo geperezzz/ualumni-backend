@@ -8,7 +8,7 @@ datasource db {
 }
 
 model JobOffer {
-  id               String           @id @default(uuid()) @db.Uuid
+  id               String                   @id @default(uuid()) @db.Uuid
   description      String
   companyName      String
   companyContact   String
@@ -17,11 +17,24 @@ model JobOffer {
   position         String
   offerLocation    String
   offerTimestamp   DateTime
-  career           Career           @relation(fields: [careerName], references: [name])
+  isVisible        Boolean                  @default(true)
+  visibleSince     DateTime                 @default(now())
+  career           Career                   @relation(fields: [careerName], references: [name])
   careerName       String
   applications     JobApplication[]
-  contractType     ContractType     @relation(fields: [contractTypeName], references: [name])
+  contractType     ContractType             @relation(fields: [contractTypeName], references: [name])
   contractTypeName String
+  technicalSkills  JobOfferTechnicalSkill[]
+}
+
+model JobOfferTechnicalSkill {
+  jobOffer                   JobOffer       @relation(fields: [jobOfferId], references: [id])
+  jobOfferId                 String         @db.Uuid
+  technicalSkill             TechnicalSkill @relation(fields: [technicalSkillName, technicalSkillCategoryName], references: [name, categoryName])
+  technicalSkillName         String
+  technicalSkillCategoryName String
+
+  @@id([jobOfferId, technicalSkillName, technicalSkillCategoryName])
 }
 
 model ContractType {
@@ -91,8 +104,8 @@ model Resume {
   owner                  Alumni                 @relation(fields: [ownerEmail], references: [email], onUpdate: Cascade, onDelete: Cascade)
   ownerEmail             String                 @id
   numberOfDownloads      Int                    @default(0)
-  isVisible              Boolean                @default(true)
-  visibleSince           DateTime               @default(now()) @db.Date
+  isVisible              Boolean                @default(false)
+  visibleSince           DateTime               @default(now())
   aboutMe                String?
   knownLanguages         ResumeLanguage[]
   portfolio              PortfolioItem[]
@@ -145,10 +158,11 @@ model SkillCategory {
 }
 
 model TechnicalSkill {
-  name               String
-  category           SkillCategory          @relation(fields: [categoryName], references: [name])
-  categoryName       String
-  resumesListingThis ResumeTechnicalSkill[]
+  name                 String
+  category             SkillCategory            @relation(fields: [categoryName], references: [name])
+  categoryName         String
+  resumesListingThis   ResumeTechnicalSkill[]
+  jobOffersListingThis JobOfferTechnicalSkill[]
 
   @@id([name, categoryName])
 }

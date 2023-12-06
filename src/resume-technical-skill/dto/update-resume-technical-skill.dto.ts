@@ -1,9 +1,4 @@
-import {
-  IsString,
-  IsEmail,
-  IsBoolean,
-  IsOptional,
-} from 'class-validator';
+import { IsString, IsEmail, IsBoolean, IsOptional } from 'class-validator';
 
 export class UpdateResumeTechnicalSkillDto {
   @IsEmail()

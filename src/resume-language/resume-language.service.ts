@@ -16,7 +16,10 @@ import { PageDto } from 'src/common/dto/paginated-response.dto';
 export class ResumeLanguageService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(resumeOwnerEmail: string, createResumeLanguageDto: CreateResumeLanguageDto) {
+  async create(
+    resumeOwnerEmail: string,
+    createResumeLanguageDto: CreateResumeLanguageDto,
+  ) {
     try {
       return await this.prismaService.resumeLanguage.create({
         data: {
@@ -112,7 +115,7 @@ export class ResumeLanguageService {
     try {
       return await this.prismaService.resumeLanguage.update({
         where: {
-            resumeOwnerEmail_languageName: {
+          resumeOwnerEmail_languageName: {
             languageName,
             resumeOwnerEmail,
           },
@@ -147,7 +150,7 @@ export class ResumeLanguageService {
     try {
       return await this.prismaService.resumeLanguage.delete({
         where: {
-            resumeOwnerEmail_languageName: {
+          resumeOwnerEmail_languageName: {
             languageName,
             resumeOwnerEmail,
           },
