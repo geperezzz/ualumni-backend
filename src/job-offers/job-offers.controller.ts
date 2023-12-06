@@ -26,7 +26,9 @@ import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 import { JobOffersFilterParamsDto } from './dto/job-offers-filter-params.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Job Offers')
 @Controller('job-offers')
 @UseGuards(SessionAuthGuard, PermissionsGuard)
 export class JobOffersController {

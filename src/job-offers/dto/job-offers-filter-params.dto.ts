@@ -1,4 +1,5 @@
-import { Expose, Transform, Type, plainToInstance } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
+import { Expose, Transform, plainToInstance } from 'class-transformer';
 import {
   IsNotEmpty,
   IsOptional,
@@ -17,21 +18,28 @@ export class JobOfferFilterSkillDto {
 }
 
 export class JobOffersFilterParamsDto {
+  @ApiProperty({ name: 'company' })
   @IsString()
   @IsOptional()
   @Expose({ name: 'company' })
   companyName?: string;
 
+  @ApiProperty({ name: 'careers' })
   @IsString({ each: true })
   @IsOptional()
-  @Transform(({ value }) => value?.split(','))
+  @Transform(({ value }) => typeof value === 'string' ? [value] : value)
   @Expose({ name: 'careers' })
   careersNames?: string[];
 
+  @ApiProperty({ name: 'skills', type: Array<string> })
   @ValidateNested({ each: true })
   @IsOptional()
   @Transform(({ value }) => {
-    return value?.split(',')?.map((categoryWithSkill: string) => {
+    if (typeof value === 'string') {
+      value = [value];
+    }
+
+    return value?.map((categoryWithSkill: string) => {
       const [categoryName, skillName] = categoryWithSkill.split(':');
       return plainToInstance(JobOfferFilterSkillDto, {
         categoryName,
@@ -43,11 +51,11 @@ export class JobOffersFilterParamsDto {
 
   @IsString({ each: true })
   @IsOptional()
-  @Transform(({ value }) => value?.split(','))
+  @Transform(({ value }) => typeof value === 'string' ? [value] : value)
   positions?: string[];
 
   @IsString({ each: true })
   @IsOptional()
-  @Transform(({ value }) => value?.split(','))
+  @Transform(({ value }) => typeof value === 'string' ? [value] : value)
   contracts?: string[];
 }
