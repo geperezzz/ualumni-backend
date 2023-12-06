@@ -83,16 +83,6 @@ export class JobOffersService {
                   : Prisma.empty
               }
               ${
-                filterParams.skills
-                  ? Prisma.sql`AND (${Prisma.join(
-                      filterParams.skills.map(({ categoryName, skillName }) => {
-                        return Prisma.sql`(jots."technicalSkillCategoryName" ILIKE ${categoryName} AND jots."technicalSkillName" ILIKE ${skillName})`;
-                      }),
-                      ' AND ',
-                    )})`
-                  : Prisma.empty
-              }
-              ${
                 filterParams.positions
                   ? Prisma.sql`AND j."position" ILIKE ANY (ARRAY[${Prisma.join(
                       filterParams.positions,
@@ -104,6 +94,18 @@ export class JobOffersService {
                   ? Prisma.sql`AND j."contractTypeName" ILIKE ANY (ARRAY[${Prisma.join(
                       filterParams.contracts,
                     )}])`
+                  : Prisma.empty
+              }
+            GROUP BY j."id"
+            HAVING
+              ${
+                filterParams.skills
+                  ? Prisma.sql`${Prisma.join(
+                      filterParams.skills.map(({ categoryName, skillName }) => {
+                        return Prisma.sql`bool_or(jots."technicalSkillCategoryName" ILIKE ${categoryName} AND jots."technicalSkillName" ILIKE ${skillName})`;
+                      }),
+                      ' AND ',
+                    )}`
                   : Prisma.empty
               }
           ), filtered_job_offers_count AS (
