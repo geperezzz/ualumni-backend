@@ -56,61 +56,70 @@ export class JobOffersService {
     randomizationSeed ??= Math.random();
 
     try {
-      let [_, items, numberOfItems] = await this.prismaService.$transaction([
+      let [_, itemsWithTotalCount] = await this.prismaService.$transaction([
         this.prismaService.$queryRaw`
           SELECT 0
           FROM (
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.prismaService.$queryRaw<JobOffer[]>`
-          SELECT j.*
-          FROM "JobOffer" AS j
-            LEFT JOIN "JobOfferTechnicalSkill" AS jots ON j."id" = jots."jobOfferId"
-          WHERE
-            j."isVisible" = TRUE
-            ${
-              filterParams.companyName
-                ? Prisma.sql`AND j."companyName" ILIKE '%' || ${filterParams.companyName} || '%'`
-                : Prisma.empty
-            }
-            ${
-              filterParams.careersNames
-                ? Prisma.sql`AND j."careerName" ILIKE ANY (ARRAY[${Prisma.join(
-                    filterParams.careersNames,
-                  )}])`
-                : Prisma.empty
-            }
-            ${
-              filterParams.skills
-                ? Prisma.sql`AND (${Prisma.join(
-                    filterParams.skills.map(({ categoryName, skillName }) => {
-                      return Prisma.sql`(jots."technicalSkillCategoryName" ILIKE ${categoryName} AND jots."technicalSkillName" ILIKE ${skillName})`;
-                    }),
-                    ' OR ',
-                  )})`
-                : Prisma.empty
-            }
-            ${
-              filterParams.positions
-                ? Prisma.sql`AND j."position" ILIKE ANY (ARRAY[${Prisma.join(
-                    filterParams.positions,
-                  )}])`
-                : Prisma.empty
-            }
-            ${
-              filterParams.contracts
-                ? Prisma.sql`AND j."contractTypeName" ILIKE ANY (ARRAY[${Prisma.join(
-                    filterParams.contracts,
-                  )}])`
-                : Prisma.empty
-            }
+        this.prismaService.$queryRaw<(JobOffer & { count: number })[]>`
+          WITH filtered_job_offers AS (
+            SELECT j.*
+            FROM "JobOffer" AS j
+              LEFT JOIN "JobOfferTechnicalSkill" AS jots ON j."id" = jots."jobOfferId"
+            WHERE
+              j."isVisible" = TRUE
+              ${
+                filterParams.companyName
+                  ? Prisma.sql`AND j."companyName" ILIKE '%' || ${filterParams.companyName} || '%'`
+                  : Prisma.empty
+              }
+              ${
+                filterParams.careersNames
+                  ? Prisma.sql`AND j."careerName" ILIKE ANY (ARRAY[${Prisma.join(
+                      filterParams.careersNames,
+                    )}])`
+                  : Prisma.empty
+              }
+              ${
+                filterParams.skills
+                  ? Prisma.sql`AND (${Prisma.join(
+                      filterParams.skills.map(({ categoryName, skillName }) => {
+                        return Prisma.sql`(jots."technicalSkillCategoryName" ILIKE ${categoryName} AND jots."technicalSkillName" ILIKE ${skillName})`;
+                      }),
+                      ' AND ',
+                    )})`
+                  : Prisma.empty
+              }
+              ${
+                filterParams.positions
+                  ? Prisma.sql`AND j."position" ILIKE ANY (ARRAY[${Prisma.join(
+                      filterParams.positions,
+                    )}])`
+                  : Prisma.empty
+              }
+              ${
+                filterParams.contracts
+                  ? Prisma.sql`AND j."contractTypeName" ILIKE ANY (ARRAY[${Prisma.join(
+                      filterParams.contracts,
+                    )}])`
+                  : Prisma.empty
+              }
+          ), filtered_job_offers_count AS (
+            SELECT COUNT(*) AS count
+            FROM filtered_job_offers
+          )
+          SELECT *
+          FROM filtered_job_offers, filtered_job_offers_count
           ORDER BY random()
           LIMIT ${itemsPerPage}
           OFFSET ${itemsPerPage * (pageNumber - 1)}
         `,
-        this.prismaService.jobOffer.count(),
       ]);
+
+      const numberOfItems = Number(itemsWithTotalCount.length ? itemsWithTotalCount[0].count : 0);
+      const items = itemsWithTotalCount.map(({ count, ...jobOffer }) => jobOffer);
 
       return {
         items,
