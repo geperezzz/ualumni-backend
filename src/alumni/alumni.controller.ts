@@ -11,7 +11,6 @@ import {
   NotFoundException,
   Query,
   UseGuards,
-  Req,
 } from '@nestjs/common';
 import { AlumniService } from './alumni.service';
 import { CreateAlumniDto } from './dto/create-alumni.dto';
@@ -31,7 +30,9 @@ import { SessionNotRequired } from 'src/auth/session/session-not-required.decora
 import { SessionUser } from 'src/auth/session/session-user.decorator';
 import { User } from '@prisma/client';
 import { FilterRandomPaginationParamsDto } from './dto/filter-random-pagination-params.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Alumni')
 @Controller('alumni')
 @UseGuards(SessionAuthGuard, PermissionsGuard)
 export class AlumniController {
