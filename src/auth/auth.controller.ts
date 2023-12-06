@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   HttpStatus,
   Post,
   Req,
@@ -55,6 +56,16 @@ export class AuthController {
       statusCode: HttpStatus.OK,
       message: 'Successfully logged in',
     };
+  }
+
+  @Get('login-status')
+  @UseGuards(SessionAuthGuard, PermissionsGuard)
+  @Allowed('admin', 'alumni')
+  amILoggedIn() {
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'You are logged in'
+    }
   }
 
   @Post('logout')
