@@ -61,13 +61,13 @@ export class ResumeService {
   }
 
   //automatic hiding of resumes older than a month
-  @Cron(CronExpression.EVERY_10_SECONDS)
-  async hideResumes() {
+  @Cron(CronExpression.EVERY_12_HOURS)
+  async hide() {
     //calculate a month ago
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-    //update resume.isVisible older than a month
+    //update resume.visibleSince older than a month
     const resumes = await this.prismaService.resume.updateMany({
       where: { visibleSince: { lte: oneMonthAgo } },
       data: { isVisible: false },

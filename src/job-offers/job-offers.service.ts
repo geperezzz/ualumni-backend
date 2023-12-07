@@ -12,6 +12,7 @@ import { RandomPage } from 'src/common/interfaces/random-page.interface';
 import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 import { JobOffersFilterParamsDto } from './dto/job-offers-filter-params.dto';
 import { JobOffer } from './job-offer.type';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class JobOffersService {
@@ -253,5 +254,19 @@ export class JobOffersService {
         cause: error,
       });
     }
+  }
+
+  //automatic hiding of jobOffers older than a month
+  @Cron(CronExpression.EVERY_12_HOURS)
+  async hide() {
+    //calculate a month ago
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    //update jobOffer.visibleSince older than a month
+    const jobOffers = await this.prismaService.jobOffer.updateMany({
+      where: { visibleSince: { lte: oneMonthAgo } },
+      data: { isVisible: false },
+    });
   }
 }
