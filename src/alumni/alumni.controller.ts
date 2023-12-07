@@ -29,8 +29,9 @@ import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
 import { User } from '@prisma/client';
-import { FilterRandomPaginationParamsDto } from './dto/filter-random-pagination-params.dto';
+import { AlumniFilterParamsDto } from './dto/alumni-filter-params.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 
 @ApiTags('Alumni')
 @Controller('alumni')
@@ -65,10 +66,12 @@ export class AlumniController {
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   async findPageRandomly(
-    @Query() filterRandomPaginationParamsDto: FilterRandomPaginationParamsDto,
+    @Query() alumniFilterParamsDto: AlumniFilterParamsDto,
+    @Query() randomPaginationParamsDto: RandomPaginationParamsDto,
   ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
     let alumniRandomPage = await this.alumniService.findPageRandomly(
-      filterRandomPaginationParamsDto,
+      randomPaginationParamsDto,
+      alumniFilterParamsDto,
     );
     let alumniDtoRandomPage = {
       ...alumniRandomPage,
@@ -89,10 +92,12 @@ export class AlumniController {
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   async findPageWithResumeRandomly(
-    @Query() filterRandomPaginationParamsDto: FilterRandomPaginationParamsDto,
+    @Query() alumniFilterParamsDto: AlumniFilterParamsDto,
+    @Query() randomPaginationParamsDto: RandomPaginationParamsDto,
   ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
     let alumniRandomPage = await this.alumniService.findPageWithResumeRandomly(
-      filterRandomPaginationParamsDto,
+      randomPaginationParamsDto,
+      alumniFilterParamsDto,
     );
     let alumniDtoRandomPage = {
       ...alumniRandomPage,
