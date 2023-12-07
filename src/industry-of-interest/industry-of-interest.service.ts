@@ -17,23 +17,28 @@ export class IndustryOfInterestService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(
+    resumeOwnerEmail: string,
     createIndustryOfInterestDto: CreateIndustryOfInterestDto,
   ): Promise<IndustryOfInterestDto> {
     try {
       return await this.prismaService.industryOfInterest.create({
-        data: createIndustryOfInterestDto,
+        data: {
+          resumeOwnerEmail: resumeOwnerEmail,
+          industryName: createIndustryOfInterestDto.industryName,
+          isVisible: createIndustryOfInterestDto.isVisible,
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `There already exists a industry of interest with the given \`name\` (${createIndustryOfInterestDto.industryName}) for the user \`email\`: ${createIndustryOfInterestDto.resumeOwnerEmail}`,
+            `There already exists a industry of interest with the given \`name\` (${createIndustryOfInterestDto.industryName}) for the user \`email\`: ${resumeOwnerEmail}`,
             { cause: error },
           );
         }
         if (error.code === 'P2003') {
           throw new ForeignKeyError(
-            `There is no user with the given \`email\` (${createIndustryOfInterestDto.resumeOwnerEmail})`,
+            `There is no user with the given \`email\` (${resumeOwnerEmail})`,
             { cause: error },
           );
         }
