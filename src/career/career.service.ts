@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateCareerDto } from './dto/create-career.dto';
 import { UpdateCareerDto } from './dto/update-career.dto';
 import { CareerDto } from './dto/career.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
 import { Prisma } from '@prisma/client';
 import {

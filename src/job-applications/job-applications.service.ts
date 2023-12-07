@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateJobApplicationDto } from './dto/create-job-application.dto';
 import { UpdateJobApplicationDto } from './dto/update-job-application.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { JobApplication, Prisma } from '@prisma/client';
 import {
   AlreadyExistsError,

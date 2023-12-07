@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateHigherEducationStudyDto } from './dto/create-higher-education-study.dto';
 import { UpdateHigherEducationStudyDto } from './dto/update-higher-education-study.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { Prisma } from '@prisma/client';
 import {
   AlreadyExistsError,

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSkillCategoryDto } from './dto/create-skill-category.dto';
 import { UpdateSkillCategoryDto } from './dto/update-skill-category.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { SkillCategoryDto } from './dto/skill-category.dto';
 import { Prisma } from '@prisma/client';
 import {

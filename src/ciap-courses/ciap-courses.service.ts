@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCiapCourseDto } from './dto/create-ciap-course.dto';
 import { UpdateCiapCourseDto } from './dto/update-ciap-course.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { CiapCourseDto } from './dto/ciap-course.dto';
 import { Prisma } from '@prisma/client';
 import {

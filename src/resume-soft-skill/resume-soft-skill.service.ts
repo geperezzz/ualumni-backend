@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateResumeSoftSkillDto } from './dto/create-resume-soft-skill.dto';
 import { UpdateResumeSoftSkillDto } from './dto/update-resume-soft-skill.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/ualumni-database/prisma.service';
 import {
   AlreadyExistsError,
   ForeignKeyError,

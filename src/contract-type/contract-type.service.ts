@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ContractTypeDto } from './dto/contract-type.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { CreateContractTypeDto } from './dto/create-contract-type.dto';
 import {
   AlreadyExistsError,

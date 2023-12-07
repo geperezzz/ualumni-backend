@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { LanguageDto } from './dto/language.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
 import { Prisma } from '@prisma/client';
 import {

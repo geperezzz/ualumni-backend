@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateResumeTechnicalSkillDto } from './dto/create-resume-technical-skill.dto';
 import { UpdateResumeTechnicalSkillDto } from './dto/update-resume-technical-skill.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { Prisma } from '@prisma/client';
 import {
   AlreadyExistsError,

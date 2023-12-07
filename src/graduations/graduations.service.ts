@@ -3,7 +3,7 @@ import { CreateGraduationDto } from './dto/create-graduation.dto';
 import { UpdateGraduationDto } from './dto/update-graduation.dto';
 import { Graduation, Prisma } from '@prisma/client';
 import { Page } from 'src/common/interfaces/page.interface';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/ualumni-database/prisma.service';
 import {
   AlreadyExistsError,
   NotFoundError,

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTechnicalSkillDto } from './dto/create-technical-skill.dto';
 import { UpdateTechnicalSkillDto } from './dto/update-technical-skill.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { TechnicalSkillDto } from './dto/technical-skill.dto';
 import { Prisma } from '@prisma/client';
 import {

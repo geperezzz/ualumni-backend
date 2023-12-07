@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { SkillCategoryService } from './skill-category.service';
 import { SkillCategoryController } from './skill-category.controller';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { PrismaModule } from 'src/ualumni-database/ualumni-database.module';
 
 @Module({
   imports: [PrismaModule],

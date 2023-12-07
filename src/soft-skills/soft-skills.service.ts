@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, SoftSkill } from '@prisma/client';
 import { CreateSoftSkillDto } from './dto/create-soft-skill.dto';
 import { UpdateSoftSkillDto } from './dto/update-soft-skill.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/ualumni-database/prisma.service';
 import {
   AlreadyExistsError,
   NotFoundError,
