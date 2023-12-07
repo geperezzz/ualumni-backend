@@ -64,8 +64,8 @@ export class AuthController {
   amILoggedIn() {
     return {
       statusCode: HttpStatus.OK,
-      message: 'You are logged in'
-    }
+      message: 'You are logged in',
+    };
   }
 
   @Post('logout')

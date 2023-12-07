@@ -27,7 +27,7 @@ export class JobOffersFilterParamsDto {
   @ApiProperty({ name: 'careers' })
   @IsString({ each: true })
   @IsOptional()
-  @Transform(({ value }) => typeof value === 'string' ? [value] : value)
+  @Transform(({ value }) => (typeof value === 'string' ? [value] : value))
   @Expose({ name: 'careers' })
   careersNames?: string[];
 
@@ -51,11 +51,11 @@ export class JobOffersFilterParamsDto {
 
   @IsString({ each: true })
   @IsOptional()
-  @Transform(({ value }) => typeof value === 'string' ? [value] : value)
+  @Transform(({ value }) => (typeof value === 'string' ? [value] : value))
   positions?: string[];
 
   @IsString({ each: true })
   @IsOptional()
-  @Transform(({ value }) => typeof value === 'string' ? [value] : value)
+  @Transform(({ value }) => (typeof value === 'string' ? [value] : value))
   contracts?: string[];
 }
