@@ -42,6 +42,7 @@ import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
 import { User } from '@prisma/client';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @ApiTags('higher-education-study')
 @Controller('alumni')
@@ -156,6 +157,7 @@ export class HigherEducationStudyController {
   }
 
   @Get(':alumniEmail/higher-education-studies')
+  @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -224,6 +226,7 @@ export class HigherEducationStudyController {
   }
 
   @Get(':alumniEmail/higher-education-studies/:title')
+  @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
