@@ -15,6 +15,7 @@ import {
   NotFoundException,
   InternalServerErrorException,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ResumeLanguageService } from './resume-language.service';
 import { CreateResumeLanguageDto } from './dto/create-resume-language.dto';
@@ -34,13 +35,20 @@ import {
 } from 'src/common/error/service.error';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { ResumeLanguageDto } from './dto/resume-language.dto';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { SessionAuthGuard } from 'src/auth/session/session.guard';
+import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionUser } from 'src/auth/session/session-user.decorator';
+import { User } from '@prisma/client';
 
 @ApiTags('resume-language')
-@Controller('user/:email/resume/resume-language')
+@Controller('alumni')
+@UseGuards(SessionAuthGuard, PermissionsGuard)
 export class ResumeLanguageController {
   constructor(private readonly resumeLanguageService: ResumeLanguageService) {}
 
-  @Post()
+  @Post('me/resume/language')
+  @Allowed('alumni')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
     description: 'The language was succesfully added',
@@ -48,7 +56,41 @@ export class ResumeLanguageController {
   @ApiBadRequestResponse({
     description: 'Already exists a language with the given name',
   })
-  async create(
+  async addMine(
+    @SessionUser() user: User,
+    @Body() CreateResumeLanguageDto: CreateResumeLanguageDto,
+  ) {
+    try {
+      const data = await this.resumeLanguageService.create(
+        user.email,
+        CreateResumeLanguageDto,
+      );
+      return {
+        statusCode: HttpStatus.CREATED,
+        data,
+      };
+    } catch (error) {
+      if (error instanceof AlreadyExistsError)
+        throw new BadRequestException(error.message, { cause: error });
+      if (error instanceof ForeignKeyError)
+        throw new BadRequestException(error.message, { cause: error });
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
+
+  @Post(':email/resume/language')
+  @Allowed('admin')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({
+    description: 'The language was succesfully added',
+  })
+  @ApiBadRequestResponse({
+    description: 'Already exists a language with the given name',
+  })
+  async add(
     @Param('email') resumeOwnerEmail: string,
     @Body() CreateResumeLanguageDto: CreateResumeLanguageDto,
   ) {
