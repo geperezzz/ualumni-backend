@@ -5,36 +5,18 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { NotFoundError, UnexpectedError } from 'src/common/error/service.error';
 import { Prisma } from '@prisma/client';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { Resume } from './resume.type';
 
 @Injectable()
 export class ResumeService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async findOne(email: string): Promise<ResumeDto | null> {
+  async update(
+    email: string,
+    updateResumeDto: UpdateResumeDto,
+  ): Promise<Resume> {
     try {
-      return await this.prismaService.resume.findUnique({
-        where: { ownerEmail: email },
-        include: {
-          knownLanguages: true,
-          portfolio: true,
-          higherEducationStudies: true,
-          technicalSkills: true,
-          softSkills: true,
-          ciapCourses: true,
-          positionsOfInterest: true,
-          industriesOfInterest: true,
-        },
-      });
-    } catch (error) {
-      throw new UnexpectedError('An unexpected situation ocurred', {
-        cause: error,
-      });
-    }
-  }
-
-  async update(email: string, updateResumeDto: UpdateResumeDto) {
-    try {
-      return await this.prismaService.resume.update({
+      const resume = await this.prismaService.resume.update({
         where: { ownerEmail: email },
         data: {
           numberOfDownloads: updateResumeDto.numberOfDownloads,
@@ -44,7 +26,93 @@ export class ResumeService {
             ? new Date().toISOString()
             : undefined,
         },
+        select: {
+          ownerEmail: true,
+          numberOfDownloads: true,
+          isVisible: true,
+          visibleSince: true,
+          aboutMe: true,
+          ciapCourses: {
+            select: {
+              course: {
+                select: {
+                  id: true,
+                  name: true,
+                  date: true,
+                },
+              },
+              isVisible: true,
+            },
+          },
+          knownLanguages: {
+            select: {
+              languageName: true,
+              masteryLevel: true,
+              isVisible: true,
+            },
+          },
+          technicalSkills: {
+            select: {
+              skillName: true,
+              skillCategoryName: true,
+              isVisible: true,
+            },
+          },
+          higherEducationStudies: {
+            select: {
+              title: true,
+              institution: true,
+              endDate: true,
+              isVisible: true,
+            },
+          },
+          industriesOfInterest: {
+            select: {
+              industryName: true,
+              isVisible: true,
+            },
+          },
+          portfolio: {
+            select: {
+              title: true,
+              isVisible: true,
+              sourceLink: true,
+            },
+          },
+          positionsOfInterest: {
+            select: {
+              positionName: true,
+              isVisible: true,
+            },
+          },
+          softSkills: {
+            select: {
+              skillName: true,
+              isVisible: true,
+            },
+          },
+        },
       });
+      return {
+        ownerEmail: resume.ownerEmail,
+        numberOfDownloads: resume.numberOfDownloads,
+        isVisible: resume.isVisible,
+        visibleSince: resume.visibleSince,
+        aboutMe: resume.aboutMe,
+        ciapCourses: resume.ciapCourses.map((ciapCourse) => ({
+          id: ciapCourse.course.id,
+          name: ciapCourse.course.name,
+          date: ciapCourse.course.date,
+          isVisible: ciapCourse.isVisible,
+        })),
+        knownLanguages: resume.knownLanguages,
+        technicalSkills: resume.technicalSkills,
+        higherEducationStudies: resume.higherEducationStudies,
+        industriesOfInterest: resume.industriesOfInterest,
+        portfolio: resume.portfolio,
+        positionsOfInterest: resume.positionsOfInterest,
+        softSkills: resume.softSkills,
+      };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
