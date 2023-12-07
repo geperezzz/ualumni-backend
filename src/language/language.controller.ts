@@ -37,6 +37,7 @@ import { UpdateLanguageDto } from './dto/update-language.dto';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @ApiTags('language')
 @Controller('language')
@@ -74,6 +75,7 @@ export class LanguageController {
   }
 
   @Get()
+  @SessionNotRequired()
   @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -109,6 +111,7 @@ export class LanguageController {
   }
 
   @Get(':name')
+  @SessionNotRequired()
   @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Language was succesfully found' })
