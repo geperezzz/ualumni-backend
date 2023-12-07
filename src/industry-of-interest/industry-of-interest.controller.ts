@@ -41,6 +41,7 @@ import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @ApiTags('industry-of-interest')
 @Controller('alumni')
@@ -161,6 +162,7 @@ export class IndustryOfInterestController {
   }
 
   @Get(':alumniEmail/industry-of-interest')
+  @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -229,6 +231,7 @@ export class IndustryOfInterestController {
   }
 
   @Get(':alumniEmail/industry-of-interest/:industryName')
+  @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
