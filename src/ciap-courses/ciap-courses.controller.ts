@@ -40,6 +40,7 @@ import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @ApiTags('ciap-courses')
 @Controller('ciap-courses')
@@ -76,6 +77,7 @@ export class CiapCoursesController {
   }
 
   @Get()
+  @SessionNotRequired()
   @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -110,6 +112,7 @@ export class CiapCoursesController {
   }
 
   @Get(':id')
+  @SessionNotRequired()
   @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'CIAP course was succesfully found' })
