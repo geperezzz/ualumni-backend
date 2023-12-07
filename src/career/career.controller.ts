@@ -38,6 +38,7 @@ import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @ApiTags('career')
 @Controller('career')
@@ -72,6 +73,7 @@ export class CareerController {
   }
 
   @Get()
+  @SessionNotRequired()
   @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -106,6 +108,7 @@ export class CareerController {
   }
 
   @Get(':name')
+  @SessionNotRequired()
   @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Career was succesfully found' })
