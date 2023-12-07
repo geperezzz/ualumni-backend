@@ -10,7 +10,7 @@ import {
   UnexpectedError,
 } from 'src/common/error/service.error';
 import { PortfolioItemDto } from './dto/portfolio-item.dto';
-import { PortfolioItem } from './entities/portfolio-item.entity';
+import { PageDto } from 'src/common/dto/paginated-response.dto';
 
 @Injectable()
 export class PortfolioItemService {
@@ -19,7 +19,7 @@ export class PortfolioItemService {
   async create(
     resumeOwnerEmail: string,
     createPortfolioItemDto: CreatePortfolioItemDto,
-  ) {
+  ): Promise<PortfolioItemDto> {
     try {
       return await this.prismaService.portfolioItem.create({
         data: {
@@ -44,6 +44,43 @@ export class PortfolioItemService {
           );
         }
       }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
+  async findMany(
+    resumeOwnerEmail: string,
+    page: number,
+    perPage: number,
+  ): Promise<PageDto<PortfolioItemDto>> {
+    try {
+      const totalCount = await this.prismaService.portfolioItem.count({
+        where: { resumeOwnerEmail },
+      });
+      const pageCount = Math.ceil(totalCount / perPage);
+
+      if (totalCount == 0 || page < 1) {
+        page = 1;
+      } else if (page > pageCount) {
+        page = pageCount;
+      }
+      const data = await this.prismaService.portfolioItem.findMany({
+        where: {
+          resumeOwnerEmail,
+        },
+        take: perPage,
+        skip: (page - 1) * perPage,
+      });
+      return {
+        page,
+        perPage: data.length,
+        pageCount,
+        totalCount,
+        items: data,
+      };
+    } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });
@@ -89,7 +126,6 @@ export class PortfolioItemService {
   async findOne(
     title: string,
     resumeOwnerEmail: string,
-    sourceLink: string,
   ): Promise<PortfolioItemDto | null> {
     try {
       return await this.prismaService.portfolioItem.findUnique({
