@@ -27,6 +27,9 @@ import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 import { JobOffersFilterParamsDto } from './dto/job-offers-filter-params.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { JobOfferDto } from './dto/job-offer.dto';
+import { ResponseDto } from 'src/common/dto/response.dto';
+import { PagedResponseDto } from 'src/common/dto/paged-response.dto';
 
 @ApiTags('Job Offers')
 @Controller('job-offers')
@@ -36,7 +39,9 @@ export class JobOffersController {
 
   @Post()
   @Allowed('admin')
-  async create(@Body() createJobOfferDto: CreateJobOfferDto) {
+  async create(
+    @Body() createJobOfferDto: CreateJobOfferDto,
+  ): Promise<ResponseDto<JobOfferDto>> {
     try {
       let createdJobOffer =
         await this.jobOffersService.create(createJobOfferDto);
@@ -62,7 +67,7 @@ export class JobOffersController {
   async findPageRandomly(
     @Query() randomPaginationParamsDto: RandomPaginationParamsDto,
     @Query() filterParams: JobOffersFilterParamsDto,
-  ) {
+  ): Promise<PagedResponseDto<JobOfferDto>> {
     let jobOfferRandomPage = await this.jobOffersService.findPageRandomly(
       randomPaginationParamsDto,
       filterParams,
@@ -76,7 +81,9 @@ export class JobOffersController {
   @Get(':id')
   @SessionNotRequired()
   @Allowed('all')
-  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ResponseDto<JobOfferDto>> {
     let jobOffer = await this.jobOffersService.findOne(id);
 
     if (!jobOffer) {
@@ -97,7 +104,7 @@ export class JobOffersController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateJobOfferDto: UpdateJobOfferDto,
-  ) {
+  ): Promise<ResponseDto<JobOfferDto>> {
     try {
       let updatedJobOffer = await this.jobOffersService.update(
         id,
@@ -121,7 +128,9 @@ export class JobOffersController {
 
   @Delete(':id')
   @Allowed('admin')
-  async remove(@Param('id', ParseUUIDPipe) id: string) {
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ResponseDto<JobOfferDto>> {
     try {
       let removedJobOffer = await this.jobOffersService.remove(id);
 

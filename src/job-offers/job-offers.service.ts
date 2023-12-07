@@ -7,10 +7,11 @@ import {
   NotFoundError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
-import { JobOffer, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { RandomPage } from 'src/common/interfaces/random-page.interface';
 import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 import { JobOffersFilterParamsDto } from './dto/job-offers-filter-params.dto';
+import { JobOffer } from './job-offer.type';
 
 @Injectable()
 export class JobOffersService {
@@ -20,6 +21,14 @@ export class JobOffersService {
     try {
       return await this.prismaService.jobOffer.create({
         data: createJobOfferDto,
+        include: {
+          technicalSkills: {
+            select: {
+              technicalSkillCategoryName: true,
+              technicalSkillName: true,
+            },
+          },
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -56,17 +65,18 @@ export class JobOffersService {
     randomizationSeed ??= Math.random();
 
     try {
-      let [_, itemsWithTotalCount] = await this.prismaService.$transaction([
+      let [_, idsWithCount] = await this.prismaService.$transaction([
         this.prismaService.$queryRaw`
           SELECT 0
           FROM (
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.prismaService.$queryRaw<(JobOffer & { count: number })[]>`
+        this.prismaService.$queryRaw<{ jobOfferId: string; count: number }[]>`
           WITH filtered_job_offers AS (
-            SELECT j.*
-            FROM "JobOffer" AS j
+            SELECT j.id::text AS "jobOfferId"
+            FROM
+              "JobOffer" AS j
               LEFT JOIN "JobOfferTechnicalSkill" AS jots ON j."id" = jots."jobOfferId"
             WHERE
               j."isVisible" = TRUE
@@ -97,17 +107,21 @@ export class JobOffersService {
                   : Prisma.empty
               }
             GROUP BY j."id"
-            HAVING
-              ${
-                filterParams.skills
-                  ? Prisma.sql`${Prisma.join(
-                      filterParams.skills.map(({ categoryName, skillName }) => {
-                        return Prisma.sql`bool_or(jots."technicalSkillCategoryName" ILIKE ${categoryName} AND jots."technicalSkillName" ILIKE ${skillName})`;
-                      }),
-                      ' AND ',
-                    )}`
-                  : Prisma.empty
-              }
+            ${
+              filterParams.skills?.length
+                ? Prisma.sql`
+                    HAVING
+                      ${Prisma.join(
+                        filterParams.skills.map(
+                          ({ categoryName, skillName }) => {
+                            return Prisma.sql`bool_or(jots."technicalSkillCategoryName" ILIKE ${categoryName} AND jots."technicalSkillName" ILIKE ${skillName})`;
+                          },
+                        ),
+                        ' AND ',
+                      )}
+                  `
+                : Prisma.empty
+            }
           ), filtered_job_offers_count AS (
             SELECT COUNT(*) AS count
             FROM filtered_job_offers
@@ -120,8 +134,23 @@ export class JobOffersService {
         `,
       ]);
 
-      const numberOfItems = Number(itemsWithTotalCount.length ? itemsWithTotalCount[0].count : 0);
-      const items = itemsWithTotalCount.map(({ count, ...jobOffer }) => jobOffer);
+      const numberOfItems = Number(
+        idsWithCount.length ? idsWithCount[0].count : 0,
+      );
+      const jobOffersPromises = idsWithCount.map(({ jobOfferId }) =>
+        this.prismaService.jobOffer.findUniqueOrThrow({
+          where: { id: jobOfferId },
+          include: {
+            technicalSkills: {
+              select: {
+                technicalSkillCategoryName: true,
+                technicalSkillName: true,
+              },
+            },
+          },
+        }),
+      );
+      const items = await Promise.all(jobOffersPromises);
 
       return {
         items,
@@ -144,6 +173,14 @@ export class JobOffersService {
     try {
       return await this.prismaService.jobOffer.findUnique({
         where: { id },
+        include: {
+          technicalSkills: {
+            select: {
+              technicalSkillCategoryName: true,
+              technicalSkillName: true,
+            },
+          },
+        },
       });
     } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
@@ -160,6 +197,14 @@ export class JobOffersService {
       return await this.prismaService.jobOffer.update({
         where: { id },
         data: updateJobOfferDto,
+        include: {
+          technicalSkills: {
+            select: {
+              technicalSkillCategoryName: true,
+              technicalSkillName: true,
+            },
+          },
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -186,6 +231,14 @@ export class JobOffersService {
     try {
       return await this.prismaService.jobOffer.delete({
         where: { id },
+        include: {
+          technicalSkills: {
+            select: {
+              technicalSkillCategoryName: true,
+              technicalSkillName: true,
+            },
+          },
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
