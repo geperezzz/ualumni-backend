@@ -38,6 +38,7 @@ import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
 import { User } from '@prisma/client';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @ApiTags('portfolio-item')
 @Controller('alumni')
@@ -150,6 +151,7 @@ export class PortfolioItemController {
   }
 
   @Get(':alumniEmail/portfolio')
+  @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -214,6 +216,7 @@ export class PortfolioItemController {
   }
 
   @Get(':alumniEmail/portfolio-item/:title')
+  @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
