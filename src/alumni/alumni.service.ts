@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAlumniDto } from './dto/create-alumni.dto';
 import { UpdateAlumniDto } from './dto/update-alumni.dto';
-import { PrismaService } from 'src/ualumni-database/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   NotFoundError,
@@ -14,16 +13,17 @@ import * as bcrypt from 'bcrypt';
 import { Alumni } from './alumni.type';
 import { AlumniDto } from './dto/alumni.dto';
 import { FilterRandomPaginationParamsDto } from './dto/filter-random-pagination-params.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 @Injectable()
 export class AlumniService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private ualumniDbService: UalumniDbService) {}
 
   async create(createAlumniDto: CreateAlumniDto): Promise<Alumni> {
     let salt = await bcrypt.genSalt();
     let hashedPassword = await bcrypt.hash(createAlumniDto.password, salt);
 
     try {
-      return await this.prismaService.user.create({
+      return await this.ualumniDbService.user.create({
         data: {
           ...createAlumniDto,
           password: hashedPassword,
@@ -72,17 +72,17 @@ export class AlumniService {
     randomizationSeed ??= Math.random();
 
     try {
-      let [_, __, filteredAlumni] = await this.prismaService.$transaction([
-        this.prismaService.$queryRaw`
+      let [_, __, filteredAlumni] = await this.ualumniDbService.$transaction([
+        this.ualumniDbService.$queryRaw`
           CREATE EXTENSION IF NOT EXISTS unaccent
         `,
-        this.prismaService.$queryRaw`
+        this.ualumniDbService.$queryRaw`
           SELECT 0
           FROM (
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.prismaService.$queryRaw<{ email: string; totalCount: number }[]>`
+        this.ualumniDbService.$queryRaw<{ email: string; totalCount: number }[]>`
           WITH filtered_by_visibility AS (
             SELECT a."email", u."names", u."surnames", g."careerName", p."positionName", i."industryName", rt."skillName", rt."skillCategoryName"
             FROM "User" u INNER JOIN "Alumni" a USING("email")
@@ -218,7 +218,7 @@ export class AlumniService {
         : '0n';
       const numberOfItems = Number(stringTotalCount.replace('n', ''));
 
-      const result = await this.prismaService.alumni.findMany({
+      const result = await this.ualumniDbService.alumni.findMany({
         where: {
           email: {
             in: filteredAlumni.map((alumni) => alumni.email),
@@ -267,17 +267,17 @@ export class AlumniService {
     randomizationSeed ??= Math.random();
 
     try {
-      let [_, __, filteredAlumni] = await this.prismaService.$transaction([
-        this.prismaService.$queryRaw`
+      let [_, __, filteredAlumni] = await this.ualumniDbService.$transaction([
+        this.ualumniDbService.$queryRaw`
           CREATE EXTENSION IF NOT EXISTS unaccent
         `,
-        this.prismaService.$queryRaw`
+        this.ualumniDbService.$queryRaw`
           SELECT 0
           FROM (
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.prismaService.$queryRaw<{ email: string; totalCount: number }[]>`
+        this.ualumniDbService.$queryRaw<{ email: string; totalCount: number }[]>`
           WITH filtered_by_visibility AS (
             SELECT a."email", u."names", u."surnames", g."careerName", p."positionName", i."industryName", rt."skillName", rt."skillCategoryName"
             FROM "User" u INNER JOIN "Alumni" a USING("email")
@@ -413,7 +413,7 @@ export class AlumniService {
         : '0n';
       const numberOfItems = Number(stringTotalCount.replace('n', ''));
 
-      const items = await this.prismaService.user.findMany({
+      const items = await this.ualumniDbService.user.findMany({
         where: {
           email: {
             in: filteredAlumni.map((alumni) => alumni.email),
@@ -463,7 +463,7 @@ export class AlumniService {
 
   async findOne(email: string): Promise<Alumni | null> {
     try {
-      let result = await this.prismaService.alumni.findFirst({
+      let result = await this.ualumniDbService.alumni.findFirst({
         where: { email },
         select: {
           associatedUser: {
@@ -489,7 +489,7 @@ export class AlumniService {
     updateAlumniDto: UpdateAlumniDto,
   ): Promise<Alumni> {
     try {
-      let result = await this.prismaService.alumni.update({
+      let result = await this.ualumniDbService.alumni.update({
         where: { email },
         data: {
           associatedUser: {
@@ -531,7 +531,7 @@ export class AlumniService {
 
   async remove(email: string): Promise<Alumni> {
     try {
-      return this.prismaService.user.delete({
+      return this.ualumniDbService.user.delete({
         where: { email },
         select: {
           email: true,

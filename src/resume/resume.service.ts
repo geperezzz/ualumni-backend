@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { ResumeDto } from './dto/resume.dto';
-import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { NotFoundError, UnexpectedError } from 'src/common/error/service.error';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class ResumeService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async findOne(email: string): Promise<ResumeDto | null> {
     try {
-      return await this.prismaService.resume.findUnique({
+      return await this.ualumniDbService.resume.findUnique({
         where: { ownerEmail: email },
         include: {
           knownLanguages: true,
@@ -34,7 +34,7 @@ export class ResumeService {
 
   async update(email: string, updateResumeDto: UpdateResumeDto) {
     try {
-      return await this.prismaService.resume.update({
+      return await this.ualumniDbService.resume.update({
         where: { ownerEmail: email },
         data: {
           numberOfDownloads: updateResumeDto.numberOfDownloads,
@@ -68,7 +68,7 @@ export class ResumeService {
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
     //update resume.visibleSince older than a month
-    const resumes = await this.prismaService.resume.updateMany({
+    const resumes = await this.ualumniDbService.resume.updateMany({
       where: { visibleSince: { lte: oneMonthAgo } },
       data: { isVisible: false },
     });

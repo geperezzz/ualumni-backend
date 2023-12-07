@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTechnicalSkillDto } from './dto/create-technical-skill.dto';
 import { UpdateTechnicalSkillDto } from './dto/update-technical-skill.dto';
-import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { TechnicalSkillDto } from './dto/technical-skill.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,
@@ -11,17 +10,18 @@ import {
   UnexpectedError,
 } from 'src/common/error/service.error';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class TechnicalSkillService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
     categoryName: string,
     createTechnicalSkillDto: CreateTechnicalSkillDto,
   ): Promise<TechnicalSkillDto> {
     try {
-      return await this.prismaService.technicalSkill.create({
+      return await this.ualumniDbService.technicalSkill.create({
         data: {
           name: createTechnicalSkillDto.name,
           categoryName: categoryName,
@@ -54,7 +54,7 @@ export class TechnicalSkillService {
     perPage: number,
   ): Promise<PageDto<TechnicalSkillDto>> {
     try {
-      const totalCount = await this.prismaService.technicalSkill.count({
+      const totalCount = await this.ualumniDbService.technicalSkill.count({
         where: { categoryName },
       });
       const pageCount = Math.ceil(totalCount / perPage);
@@ -65,7 +65,7 @@ export class TechnicalSkillService {
         page = pageCount;
       }
 
-      const data = await this.prismaService.technicalSkill.findMany({
+      const data = await this.ualumniDbService.technicalSkill.findMany({
         where: { categoryName },
         take: perPage,
         skip: (page - 1) * perPage,
@@ -90,7 +90,7 @@ export class TechnicalSkillService {
     categoryName: string,
   ): Promise<TechnicalSkillDto | null> {
     try {
-      return await this.prismaService.technicalSkill.findUnique({
+      return await this.ualumniDbService.technicalSkill.findUnique({
         where: {
           name_categoryName: { name, categoryName },
         },
@@ -108,7 +108,7 @@ export class TechnicalSkillService {
     updateTechnicalSkillDto: UpdateTechnicalSkillDto,
   ): Promise<TechnicalSkillDto> {
     try {
-      return await this.prismaService.technicalSkill.update({
+      return await this.ualumniDbService.technicalSkill.update({
         where: {
           name_categoryName: { name, categoryName },
         },
@@ -135,7 +135,7 @@ export class TechnicalSkillService {
 
   async remove(name: string, categoryName: string): Promise<TechnicalSkillDto> {
     try {
-      return await this.prismaService.technicalSkill.delete({
+      return await this.ualumniDbService.technicalSkill.delete({
         where: {
           name_categoryName: { name, categoryName },
         },

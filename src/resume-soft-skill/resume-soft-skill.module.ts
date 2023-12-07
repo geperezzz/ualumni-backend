@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ResumeSoftSkillService } from './resume-soft-skill.service';
 import { ResumeSoftSkillController } from './resume-soft-skill.controller';
-import { PrismaModule } from 'src/ualumni-database/ualumni-database.module';
+import { UalumniDbModule } from 'src/ualumni-db/ualumni-db.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [UalumniDbModule],
   controllers: [ResumeSoftSkillController],
   providers: [ResumeSoftSkillService],
 })

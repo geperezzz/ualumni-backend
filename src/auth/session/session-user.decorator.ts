@@ -3,7 +3,7 @@ import {
   UnauthorizedException,
   createParamDecorator,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { User } from 'prisma/ualumni/client';
 import { Request } from 'express';
 
 export const SessionUser = createParamDecorator(

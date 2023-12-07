@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePortfolioItemDto } from './dto/create-portfolio-item.dto';
 import { UpdatePortfolioItemDto } from './dto/update-portfolio-item.dto';
-import { PrismaService } from 'src/ualumni-database/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,
@@ -10,18 +9,18 @@ import {
   UnexpectedError,
 } from 'src/common/error/service.error';
 import { PortfolioItemDto } from './dto/portfolio-item.dto';
-import { PortfolioItem } from './entities/portfolio-item.entity';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class PortfolioItemService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
     resumeOwnerEmail: string,
     createPortfolioItemDto: CreatePortfolioItemDto,
   ) {
     try {
-      return await this.prismaService.portfolioItem.create({
+      return await this.ualumniDbService.portfolioItem.create({
         data: {
           resumeOwnerEmail: resumeOwnerEmail,
           title: createPortfolioItemDto.title,
@@ -56,7 +55,7 @@ export class PortfolioItemService {
     updatePortfolioItemDto: UpdatePortfolioItemDto,
   ): Promise<PortfolioItemDto> {
     try {
-      return await this.prismaService.portfolioItem.update({
+      return await this.ualumniDbService.portfolioItem.update({
         where: {
           resumeOwnerEmail_title: {
             title,
@@ -92,7 +91,7 @@ export class PortfolioItemService {
     sourceLink: string,
   ): Promise<PortfolioItemDto | null> {
     try {
-      return await this.prismaService.portfolioItem.findUnique({
+      return await this.ualumniDbService.portfolioItem.findUnique({
         where: {
           resumeOwnerEmail_title: {
             title,
@@ -112,7 +111,7 @@ export class PortfolioItemService {
     resumeOwnerEmail: string,
   ): Promise<PortfolioItemDto> {
     try {
-      return await this.prismaService.portfolioItem.delete({
+      return await this.ualumniDbService.portfolioItem.delete({
         where: {
           resumeOwnerEmail_title: {
             title,

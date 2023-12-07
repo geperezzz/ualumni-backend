@@ -28,7 +28,7 @@ import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { User } from '@prisma/client';
+import { User } from 'prisma/ualumni/client';
 import { FilterRandomPaginationParamsDto } from './dto/filter-random-pagination-params.dto';
 import { ApiTags } from '@nestjs/swagger';
 

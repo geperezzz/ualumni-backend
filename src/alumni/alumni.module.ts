@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AlumniService } from './alumni.service';
 import { AlumniController } from './alumni.controller';
-import { PrismaModule } from 'src/ualumni-database/ualumni-database.module';
+import { UalumniDbModule } from 'src/ualumni-db/ualumni-db.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [UalumniDbModule],
   controllers: [AlumniController],
   providers: [AlumniService],
   exports: [AlumniService],
