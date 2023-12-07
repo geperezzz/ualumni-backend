@@ -16,6 +16,7 @@ import {
   InternalServerErrorException,
   Put,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { ContractTypeService } from './contract-type.service';
 import { ContractTypeDto } from './dto/contract-type.dto';
@@ -33,13 +34,19 @@ import { ResponseDto } from 'src/common/dto/response.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 import { AlreadyExistsError } from 'src/common/error/service.error';
 import { NotFoundError } from 'rxjs';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { SessionAuthGuard } from 'src/auth/session/session.guard';
+import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 
 @ApiTags('contract-type')
 @Controller('contract-type')
+@UseGuards(SessionAuthGuard, PermissionsGuard)
 export class ContractTypeController {
   constructor(private readonly contractTypeService: ContractTypeService) {}
 
   @Post()
+  @Allowed('admin')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ description: 'Contract type was succesfully created' })
   @ApiBadRequestResponse({
@@ -68,6 +75,7 @@ export class ContractTypeController {
   }
 
   @Get()
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'The list of contract types was succesfully obtained',
@@ -79,15 +87,14 @@ export class ContractTypeController {
     description: 'An unexpected situation ocurred',
   })
   async findMany(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
+    @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<ContractTypeDto>> {
-    if (perPage < 1)
+    if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse = await this.contractTypeService.findMany(
-        page,
-        perPage,
+        paginationParamsDto.pageNumber,
+        paginationParamsDto.itemsPerPage,
       );
       return {
         statusCode: HttpStatus.OK,
@@ -102,6 +109,7 @@ export class ContractTypeController {
   }
 
   @Get(':name')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Contract type was succesfully found' })
   @ApiNotFoundResponse({
@@ -125,6 +133,7 @@ export class ContractTypeController {
   }
 
   @Put(':name')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Contract type was succesfully updated' })
   @ApiNotFoundResponse({
@@ -162,6 +171,7 @@ export class ContractTypeController {
   }
 
   @Delete(':name')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Contract type was succesfully deleted' })
   @ApiNotFoundResponse({
