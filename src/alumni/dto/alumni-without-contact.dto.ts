@@ -5,11 +5,9 @@ export class AlumniCareerDto {
   graduationDate: Date;
 }
 
-export class AlumniDto {
+export class AlumniWithoutContactDto {
   @Expose() email: string;
   @Expose() names: string;
   @Expose() surnames: string;
-  @Expose() address: string | null;
-  @Expose() telephoneNumber: string | null;
   @Expose() careers: AlumniCareerDto[];
 }

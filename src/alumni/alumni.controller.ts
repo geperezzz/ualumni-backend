@@ -32,6 +32,9 @@ import { User } from '@prisma/client';
 import { AlumniFilterParamsDto } from './dto/alumni-filter-params.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
+import { AlumniWithResumeWithoutContactDto } from './dto/alumni-with-resume-without-contact.dto';
+import { AlumniWithoutContactDto } from './dto/alumni-without-contact.dto';
+import { AlumniWithResumeDto } from './dto/alumni-with-resume.dto';
 
 @ApiTags('Alumni')
 @Controller('alumni')
@@ -68,7 +71,7 @@ export class AlumniController {
   async findPageRandomly(
     @Query() alumniFilterParamsDto: AlumniFilterParamsDto,
     @Query() randomPaginationParamsDto: RandomPaginationParamsDto,
-  ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
+  ): Promise<RandomlyPagedResponseDto<AlumniWithoutContactDto>> {
     let alumniRandomPage = await this.alumniService.findPageRandomly(
       randomPaginationParamsDto,
       alumniFilterParamsDto,
@@ -76,7 +79,7 @@ export class AlumniController {
     let alumniDtoRandomPage = {
       ...alumniRandomPage,
       items: alumniRandomPage.items.map((alumni) =>
-        plainToInstance(AlumniDto, alumni, {
+        plainToInstance(AlumniWithoutContactDto, alumni, {
           excludeExtraneousValues: true,
         }),
       ),
@@ -94,7 +97,7 @@ export class AlumniController {
   async findPageWithResumeRandomly(
     @Query() alumniFilterParamsDto: AlumniFilterParamsDto,
     @Query() randomPaginationParamsDto: RandomPaginationParamsDto,
-  ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
+  ): Promise<RandomlyPagedResponseDto<AlumniWithResumeWithoutContactDto>> {
     let alumniRandomPage = await this.alumniService.findPageWithResumeRandomly(
       randomPaginationParamsDto,
       alumniFilterParamsDto,
@@ -102,14 +105,62 @@ export class AlumniController {
     let alumniDtoRandomPage = {
       ...alumniRandomPage,
       items: alumniRandomPage.items.map((alumni) => {
-        const { password, ...alumniWithoutPassword } = alumni;
-        return alumniWithoutPassword;
+        return plainToInstance(AlumniWithResumeWithoutContactDto, alumni, {
+          excludeExtraneousValues: true,
+        });
       }),
     };
 
     return {
       statusCode: HttpStatus.OK,
       data: alumniDtoRandomPage,
+    };
+  }
+
+  @Get('me/resume')
+  @Allowed('alumni')
+  async findMeWithResume(
+    @SessionUser() user: User,
+  ): Promise<ResponseDto<AlumniWithResumeDto>> {
+    let alumni = await this.alumniService.findOneWithResume(user.email);
+
+    if (!alumni) {
+      throw new NotFoundException(
+        `There is no alumni with the given \`email\` (${user.email})`,
+        {},
+      );
+    }
+    let alumniDto = plainToInstance(AlumniWithResumeDto, alumni, {
+      excludeExtraneousValues: true,
+    });
+
+    return {
+      statusCode: HttpStatus.OK,
+      data: alumniDto,
+    };
+  }
+
+  @Get(':email/resume')
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
+  async findOneWithResume(
+    @Param('email') email: string,
+  ): Promise<ResponseDto<AlumniWithResumeDto>> {
+    let alumni = await this.alumniService.findOneWithResume(email);
+
+    if (!alumni) {
+      throw new NotFoundException(
+        `There is no alumni with the given \`email\` (${email})`,
+        {},
+      );
+    }
+    let alumniDto = plainToInstance(AlumniWithResumeDto, alumni, {
+      excludeExtraneousValues: true,
+    });
+
+    return {
+      statusCode: HttpStatus.OK,
+      data: alumniDto,
     };
   }
 
