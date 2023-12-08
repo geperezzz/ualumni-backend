@@ -1,48 +1,122 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAlumniDto } from './dto/create-alumni.dto';
 import { UpdateAlumniDto } from './dto/update-alumni.dto';
-import { PrismaService } from 'src/ualumni-database/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   NotFoundError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
-import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 import { RandomPage } from 'src/common/interfaces/random-page.interface';
 import * as bcrypt from 'bcrypt';
 import { Alumni } from './alumni.type';
 import { AlumniDto } from './dto/alumni.dto';
 import { FilterRandomPaginationParamsDto } from './dto/filter-random-pagination-params.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
+import { UcabDbService } from 'src/ucab-db/ucab-db.service';
+
 @Injectable()
 export class AlumniService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private ualumniDbService: UalumniDbService,
+    private ucabDbService: UcabDbService,
+  ) {}
+
+  private async findUcabDbAlumni(email: string) {
+    try {
+      return await this.ucabDbService.student.findUniqueOrThrow({
+        where: {
+          email: email,
+          enrolledCareers: {
+            some: {
+              status: 'FINISHED',
+            },
+          },
+        },
+        include: {
+          enrolledCareers: {
+            where: {
+              status: 'FINISHED',
+            },
+          },
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === '2025') {
+          throw new NotFoundError(
+            `The given email (${email}) doesn't belong to an UCAB alumni`,
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
 
   async create(createAlumniDto: CreateAlumniDto): Promise<Alumni> {
-    let salt = await bcrypt.genSalt();
-    let hashedPassword = await bcrypt.hash(createAlumniDto.password, salt);
+    const ucabDbAlumni = await this.findUcabDbAlumni(createAlumniDto.email);
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(createAlumniDto.password, salt);
 
     try {
-      return await this.prismaService.user.create({
-        data: {
-          ...createAlumniDto,
-          password: hashedPassword,
-          role: 'ALUMNI',
-          associatedAlumni: {
-            create: {
+      const createdAlumni = await this.ualumniDbService.$transaction(
+        async (tx) => {
+          await tx.alumni.create({
+            data: {
+              address: ucabDbAlumni.address,
+              telephoneNumber: ucabDbAlumni.telephoneNumber,
+              associatedUser: {
+                create: {
+                  email: createAlumniDto.email,
+                  names: ucabDbAlumni.names,
+                  surnames: ucabDbAlumni.surnames,
+                  password: hashedPassword,
+                  role: 'ALUMNI',
+                },
+              },
               resume: {
                 create: {},
               },
             },
-          },
+          });
+
+          await Promise.all(
+            ucabDbAlumni.enrolledCareers.map((career) =>
+              tx.graduation.create({
+                data: {
+                  alumniEmail: createAlumniDto.email,
+                  careerName: career.careerName,
+                  graduationDate: career.graduationDate!,
+                },
+              }),
+            ),
+          );
+
+          return await tx.alumni.findUniqueOrThrow({
+            where: { email: createAlumniDto.email },
+            include: {
+              associatedUser: {
+                select: {
+                  names: true,
+                  surnames: true,
+                  password: true,
+                },
+              },
+              graduations: {
+                select: {
+                  careerName: true,
+                  graduationDate: true,
+                },
+              },
+            },
+          });
         },
-        select: {
-          email: true,
-          names: true,
-          surnames: true,
-          password: true,
-        },
-      });
+      );
+
+      const { associatedUser: userProps, ...rest } = createdAlumni;
+      return { ...userProps, ...rest };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -68,21 +142,23 @@ export class AlumniService {
     skillsNames,
     industriesOfInterest,
     skillCategories,
-  }: FilterRandomPaginationParamsDto): Promise<RandomPage<AlumniDto>> {
+  }: FilterRandomPaginationParamsDto): Promise<RandomPage<Alumni>> {
     randomizationSeed ??= Math.random();
 
     try {
-      let [_, __, filteredAlumni] = await this.prismaService.$transaction([
-        this.prismaService.$queryRaw`
+      let [_, __, filteredAlumni] = await this.ualumniDbService.$transaction([
+        this.ualumniDbService.$queryRaw`
           CREATE EXTENSION IF NOT EXISTS unaccent
         `,
-        this.prismaService.$queryRaw`
+        this.ualumniDbService.$queryRaw`
           SELECT 0
           FROM (
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.prismaService.$queryRaw<{ email: string; totalCount: number }[]>`
+        this.ualumniDbService.$queryRaw<
+          { email: string; totalCount: number }[]
+        >`
           WITH filtered_by_visibility AS (
             SELECT a."email", u."names", u."surnames", g."careerName", p."positionName", i."industryName", rt."skillName", rt."skillCategoryName"
             FROM "User" u INNER JOIN "Alumni" a USING("email")
@@ -218,13 +294,13 @@ export class AlumniService {
         : '0n';
       const numberOfItems = Number(stringTotalCount.replace('n', ''));
 
-      const result = await this.prismaService.alumni.findMany({
+      const result = await this.ualumniDbService.alumni.findMany({
         where: {
           email: {
             in: filteredAlumni.map((alumni) => alumni.email),
           },
         },
-        select: {
+        include: {
           associatedUser: {
             select: {
               email: true,
@@ -233,11 +309,20 @@ export class AlumniService {
               surnames: true,
             },
           },
+          graduations: {
+            select: {
+              careerName: true,
+              graduationDate: true
+            }
+          }
         },
       });
 
       return {
-        items: result.map((alumni) => alumni.associatedUser),
+        items: result.map(({ associatedUser, ...alumniProps }) => ({
+          ...associatedUser,
+          ...alumniProps,
+        })),
         meta: {
           pageNumber,
           itemsPerPage,
@@ -263,21 +348,23 @@ export class AlumniService {
     skillsNames,
     industriesOfInterest,
     skillCategories,
-  }: FilterRandomPaginationParamsDto): Promise<RandomPage<Alumni>> {
+  }: FilterRandomPaginationParamsDto): Promise<RandomPage<any>> {
     randomizationSeed ??= Math.random();
 
     try {
-      let [_, __, filteredAlumni] = await this.prismaService.$transaction([
-        this.prismaService.$queryRaw`
+      let [_, __, filteredAlumni] = await this.ualumniDbService.$transaction([
+        this.ualumniDbService.$queryRaw`
           CREATE EXTENSION IF NOT EXISTS unaccent
         `,
-        this.prismaService.$queryRaw`
+        this.ualumniDbService.$queryRaw`
           SELECT 0
           FROM (
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.prismaService.$queryRaw<{ email: string; totalCount: number }[]>`
+        this.ualumniDbService.$queryRaw<
+          { email: string; totalCount: number }[]
+        >`
           WITH filtered_by_visibility AS (
             SELECT a."email", u."names", u."surnames", g."careerName", p."positionName", i."industryName", rt."skillName", rt."skillCategoryName"
             FROM "User" u INNER JOIN "Alumni" a USING("email")
@@ -413,32 +500,86 @@ export class AlumniService {
         : '0n';
       const numberOfItems = Number(stringTotalCount.replace('n', ''));
 
-      const items = await this.prismaService.user.findMany({
+      const items = await this.ualumniDbService.alumni.findMany({
         where: {
           email: {
             in: filteredAlumni.map((alumni) => alumni.email),
           },
         },
-        select: {
-          email: true,
-          password: true,
-          names: true,
-          surnames: true,
-          associatedAlumni: {
+        include: {
+          associatedUser: {
+            select: {
+              password: true,
+              names: true,
+              surnames: true,
+            },
+          },
+          resume: {
             include: {
-              resume: {
-                include: {
-                  ciapCourses: true,
-                  knownLanguages: true,
-                  technicalSkills: true,
-                  higherEducationStudies: true,
-                  industriesOfInterest: true,
-                  portfolio: true,
-                  positionsOfInterest: true,
-                  softSkills: true,
+              ciapCourses: {
+                select: {
+                  course: {
+                    select: {
+                      name: true,
+                      date: true,
+                    },
+                  },
+                  isVisible: true,
                 },
               },
-              graduations: true,
+              knownLanguages: {
+                select: {
+                  languageName: true,
+                  masteryLevel: true,
+                  isVisible: true,
+                },
+              },
+              technicalSkills: {
+                select: {
+                  skillCategoryName: true,
+                  skillName: true,
+                  isVisible: true,
+                },
+              },
+              higherEducationStudies: {
+                select: {
+                  title: true,
+                  institution: true,
+                  endDate: true,
+                  isVisible: true,
+                },
+              },
+              industriesOfInterest: {
+                select: {
+                  industryName: true,
+                  isVisible: true,
+                },
+              },
+              portfolio: {
+                select: {
+                  title: true,
+                  sourceLink: true,
+                  isVisible: true,
+                },
+              },
+              positionsOfInterest: {
+                select: {
+                  positionName: true,
+                  isVisible: true,
+                },
+              },
+              softSkills: {
+                select: {
+                  skillName: true,
+                  isVisible: true,
+                },
+              },
+            },
+          },
+          graduations: {
+            select: {
+              careerName: true,
+              graduationDate: true,
             },
           },
         },
@@ -463,20 +604,31 @@ export class AlumniService {
 
   async findOne(email: string): Promise<Alumni | null> {
     try {
-      let result = await this.prismaService.alumni.findFirst({
+      let alumni = await this.ualumniDbService.alumni.findFirst({
         where: { email },
-        select: {
+        include: {
           associatedUser: {
             select: {
-              email: true,
               password: true,
               names: true,
               surnames: true,
             },
           },
+          graduations: {
+            select: {
+              careerName: true,
+              graduationDate: true
+            }
+          }
         },
       });
-      return result?.associatedUser ?? null;
+
+      if (!alumni) {
+        return null;
+      }
+      
+      const { associatedUser: userProps, ...rest } = alumni;
+      return { ...userProps, ...rest };
     } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
@@ -489,25 +641,32 @@ export class AlumniService {
     updateAlumniDto: UpdateAlumniDto,
   ): Promise<Alumni> {
     try {
-      let result = await this.prismaService.alumni.update({
+      let updatedAlumni = await this.ualumniDbService.alumni.update({
         where: { email },
         data: {
           associatedUser: {
             update: updateAlumniDto,
           },
         },
-        select: {
+        include: {
           associatedUser: {
             select: {
-              email: true,
               password: true,
               names: true,
               surnames: true,
             },
           },
+          graduations: {
+            select: {
+              careerName: true,
+              graduationDate: true
+            }
+          }
         },
       });
-      return result.associatedUser;
+      
+      const { associatedUser: userProps, ...rest } = updatedAlumni;
+      return { ...userProps, ...rest };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
@@ -531,15 +690,27 @@ export class AlumniService {
 
   async remove(email: string): Promise<Alumni> {
     try {
-      return this.prismaService.user.delete({
+      const removedAlumni = await this.ualumniDbService.alumni.delete({
         where: { email },
-        select: {
-          email: true,
-          password: true,
-          names: true,
-          surnames: true,
-        },
+        include: {
+          associatedUser: {
+            select: {
+              password: true,
+              names: true,
+              surnames: true,
+            },
+          },
+          graduations: {
+            select: {
+              careerName: true,
+              graduationDate: true
+            }
+          }
+        }
       });
+
+      const { associatedUser: userProps, ...rest } = removedAlumni;
+      return { ...userProps, ...rest };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {

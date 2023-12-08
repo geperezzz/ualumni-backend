@@ -31,7 +31,7 @@ import { CreateLanguageDto } from './dto/create-language.dto';
 import {
   AlreadyExistsError,
   NotFoundError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { UpdateLanguageDto } from './dto/update-language.dto';
 
 @ApiTags('language')

@@ -8,7 +8,7 @@ import {
   ForeignKeyError,
   NotFoundError,
   UnexpectedError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 

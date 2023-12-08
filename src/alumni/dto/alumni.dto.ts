@@ -1,7 +1,12 @@
 import { Expose } from 'class-transformer';
+import { Alumni, Graduation } from '../alumni.type';
 
-export class AlumniDto {
-  @Expose() email: string;
-  @Expose() names: string;
-  @Expose() surnames: string;
+@Expose()
+export class AlumniDto implements Omit<Alumni, 'password'> {
+  email: string;
+  names: string;
+  surnames: string;
+  graduations: Graduation[];
+  address: string | null;
+  telephoneNumber: string | null;
 }

@@ -1245,18 +1245,24 @@ export namespace Prisma {
     email: string | null
     names: string | null
     surnames: string | null
+    address: string | null
+    telephoneNumber: string | null
   }
 
   export type StudentMaxAggregateOutputType = {
     email: string | null
     names: string | null
     surnames: string | null
+    address: string | null
+    telephoneNumber: string | null
   }
 
   export type StudentCountAggregateOutputType = {
     email: number
     names: number
     surnames: number
+    address: number
+    telephoneNumber: number
     _all: number
   }
 
@@ -1265,18 +1271,24 @@ export namespace Prisma {
     email?: true
     names?: true
     surnames?: true
+    address?: true
+    telephoneNumber?: true
   }
 
   export type StudentMaxAggregateInputType = {
     email?: true
     names?: true
     surnames?: true
+    address?: true
+    telephoneNumber?: true
   }
 
   export type StudentCountAggregateInputType = {
     email?: true
     names?: true
     surnames?: true
+    address?: true
+    telephoneNumber?: true
     _all?: true
   }
 
@@ -1356,6 +1368,8 @@ export namespace Prisma {
     email: string
     names: string
     surnames: string
+    address: string
+    telephoneNumber: string
     _count: StudentCountAggregateOutputType | null
     _min: StudentMinAggregateOutputType | null
     _max: StudentMaxAggregateOutputType | null
@@ -1379,6 +1393,8 @@ export namespace Prisma {
     email?: boolean
     names?: boolean
     surnames?: boolean
+    address?: boolean
+    telephoneNumber?: boolean
     enrolledCareers?: boolean | Student$enrolledCareersArgs<ExtArgs>
     coursesTaken?: boolean | Student$coursesTakenArgs<ExtArgs>
     _count?: boolean | StudentCountOutputTypeDefaultArgs<ExtArgs>
@@ -1388,6 +1404,8 @@ export namespace Prisma {
     email?: boolean
     names?: boolean
     surnames?: boolean
+    address?: boolean
+    telephoneNumber?: boolean
   }
 
   export type StudentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1407,6 +1425,8 @@ export namespace Prisma {
       email: string
       names: string
       surnames: string
+      address: string
+      telephoneNumber: string
     }, ExtArgs["result"]["student"]>
     composites: {}
   }
@@ -1807,6 +1827,8 @@ export namespace Prisma {
     readonly email: FieldRef<"Student", 'String'>
     readonly names: FieldRef<"Student", 'String'>
     readonly surnames: FieldRef<"Student", 'String'>
+    readonly address: FieldRef<"Student", 'String'>
+    readonly telephoneNumber: FieldRef<"Student", 'String'>
   }
     
 
@@ -4921,7 +4943,9 @@ export namespace Prisma {
   export const StudentScalarFieldEnum: {
     email: 'email',
     names: 'names',
-    surnames: 'surnames'
+    surnames: 'surnames',
+    address: 'address',
+    telephoneNumber: 'telephoneNumber'
   };
 
   export type StudentScalarFieldEnum = (typeof StudentScalarFieldEnum)[keyof typeof StudentScalarFieldEnum]
@@ -5048,6 +5072,8 @@ export namespace Prisma {
     email?: StringFilter<"Student"> | string
     names?: StringFilter<"Student"> | string
     surnames?: StringFilter<"Student"> | string
+    address?: StringFilter<"Student"> | string
+    telephoneNumber?: StringFilter<"Student"> | string
     enrolledCareers?: StudentCareerListRelationFilter
     coursesTaken?: CiapCourseListRelationFilter
   }
@@ -5056,6 +5082,8 @@ export namespace Prisma {
     email?: SortOrder
     names?: SortOrder
     surnames?: SortOrder
+    address?: SortOrder
+    telephoneNumber?: SortOrder
     enrolledCareers?: StudentCareerOrderByRelationAggregateInput
     coursesTaken?: CiapCourseOrderByRelationAggregateInput
   }
@@ -5067,6 +5095,8 @@ export namespace Prisma {
     NOT?: StudentWhereInput | StudentWhereInput[]
     names?: StringFilter<"Student"> | string
     surnames?: StringFilter<"Student"> | string
+    address?: StringFilter<"Student"> | string
+    telephoneNumber?: StringFilter<"Student"> | string
     enrolledCareers?: StudentCareerListRelationFilter
     coursesTaken?: CiapCourseListRelationFilter
   }, "email">
@@ -5075,6 +5105,8 @@ export namespace Prisma {
     email?: SortOrder
     names?: SortOrder
     surnames?: SortOrder
+    address?: SortOrder
+    telephoneNumber?: SortOrder
     _count?: StudentCountOrderByAggregateInput
     _max?: StudentMaxOrderByAggregateInput
     _min?: StudentMinOrderByAggregateInput
@@ -5087,6 +5119,8 @@ export namespace Prisma {
     email?: StringWithAggregatesFilter<"Student"> | string
     names?: StringWithAggregatesFilter<"Student"> | string
     surnames?: StringWithAggregatesFilter<"Student"> | string
+    address?: StringWithAggregatesFilter<"Student"> | string
+    telephoneNumber?: StringWithAggregatesFilter<"Student"> | string
   }
 
   export type CareerWhereInput = {
@@ -5227,6 +5261,8 @@ export namespace Prisma {
     email: string
     names: string
     surnames: string
+    address: string
+    telephoneNumber: string
     enrolledCareers?: StudentCareerCreateNestedManyWithoutStudentInput
     coursesTaken?: CiapCourseCreateNestedManyWithoutEnrolledStudentsInput
   }
@@ -5235,6 +5271,8 @@ export namespace Prisma {
     email: string
     names: string
     surnames: string
+    address: string
+    telephoneNumber: string
     enrolledCareers?: StudentCareerUncheckedCreateNestedManyWithoutStudentInput
     coursesTaken?: CiapCourseUncheckedCreateNestedManyWithoutEnrolledStudentsInput
   }
@@ -5243,6 +5281,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     names?: StringFieldUpdateOperationsInput | string
     surnames?: StringFieldUpdateOperationsInput | string
+    address?: StringFieldUpdateOperationsInput | string
+    telephoneNumber?: StringFieldUpdateOperationsInput | string
     enrolledCareers?: StudentCareerUpdateManyWithoutStudentNestedInput
     coursesTaken?: CiapCourseUpdateManyWithoutEnrolledStudentsNestedInput
   }
@@ -5251,6 +5291,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     names?: StringFieldUpdateOperationsInput | string
     surnames?: StringFieldUpdateOperationsInput | string
+    address?: StringFieldUpdateOperationsInput | string
+    telephoneNumber?: StringFieldUpdateOperationsInput | string
     enrolledCareers?: StudentCareerUncheckedUpdateManyWithoutStudentNestedInput
     coursesTaken?: CiapCourseUncheckedUpdateManyWithoutEnrolledStudentsNestedInput
   }
@@ -5259,18 +5301,24 @@ export namespace Prisma {
     email: string
     names: string
     surnames: string
+    address: string
+    telephoneNumber: string
   }
 
   export type StudentUpdateManyMutationInput = {
     email?: StringFieldUpdateOperationsInput | string
     names?: StringFieldUpdateOperationsInput | string
     surnames?: StringFieldUpdateOperationsInput | string
+    address?: StringFieldUpdateOperationsInput | string
+    telephoneNumber?: StringFieldUpdateOperationsInput | string
   }
 
   export type StudentUncheckedUpdateManyInput = {
     email?: StringFieldUpdateOperationsInput | string
     names?: StringFieldUpdateOperationsInput | string
     surnames?: StringFieldUpdateOperationsInput | string
+    address?: StringFieldUpdateOperationsInput | string
+    telephoneNumber?: StringFieldUpdateOperationsInput | string
   }
 
   export type CareerCreateInput = {
@@ -5437,18 +5485,24 @@ export namespace Prisma {
     email?: SortOrder
     names?: SortOrder
     surnames?: SortOrder
+    address?: SortOrder
+    telephoneNumber?: SortOrder
   }
 
   export type StudentMaxOrderByAggregateInput = {
     email?: SortOrder
     names?: SortOrder
     surnames?: SortOrder
+    address?: SortOrder
+    telephoneNumber?: SortOrder
   }
 
   export type StudentMinOrderByAggregateInput = {
     email?: SortOrder
     names?: SortOrder
     surnames?: SortOrder
+    address?: SortOrder
+    telephoneNumber?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -6125,6 +6179,8 @@ export namespace Prisma {
     email: string
     names: string
     surnames: string
+    address: string
+    telephoneNumber: string
     enrolledCareers?: StudentCareerCreateNestedManyWithoutStudentInput
   }
 
@@ -6132,6 +6188,8 @@ export namespace Prisma {
     email: string
     names: string
     surnames: string
+    address: string
+    telephoneNumber: string
     enrolledCareers?: StudentCareerUncheckedCreateNestedManyWithoutStudentInput
   }
 
@@ -6163,12 +6221,16 @@ export namespace Prisma {
     email?: StringFilter<"Student"> | string
     names?: StringFilter<"Student"> | string
     surnames?: StringFilter<"Student"> | string
+    address?: StringFilter<"Student"> | string
+    telephoneNumber?: StringFilter<"Student"> | string
   }
 
   export type StudentCreateWithoutEnrolledCareersInput = {
     email: string
     names: string
     surnames: string
+    address: string
+    telephoneNumber: string
     coursesTaken?: CiapCourseCreateNestedManyWithoutEnrolledStudentsInput
   }
 
@@ -6176,6 +6238,8 @@ export namespace Prisma {
     email: string
     names: string
     surnames: string
+    address: string
+    telephoneNumber: string
     coursesTaken?: CiapCourseUncheckedCreateNestedManyWithoutEnrolledStudentsInput
   }
 
@@ -6212,6 +6276,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     names?: StringFieldUpdateOperationsInput | string
     surnames?: StringFieldUpdateOperationsInput | string
+    address?: StringFieldUpdateOperationsInput | string
+    telephoneNumber?: StringFieldUpdateOperationsInput | string
     coursesTaken?: CiapCourseUpdateManyWithoutEnrolledStudentsNestedInput
   }
 
@@ -6219,6 +6285,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     names?: StringFieldUpdateOperationsInput | string
     surnames?: StringFieldUpdateOperationsInput | string
+    address?: StringFieldUpdateOperationsInput | string
+    telephoneNumber?: StringFieldUpdateOperationsInput | string
     coursesTaken?: CiapCourseUncheckedUpdateManyWithoutEnrolledStudentsNestedInput
   }
 
@@ -6311,6 +6379,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     names?: StringFieldUpdateOperationsInput | string
     surnames?: StringFieldUpdateOperationsInput | string
+    address?: StringFieldUpdateOperationsInput | string
+    telephoneNumber?: StringFieldUpdateOperationsInput | string
     enrolledCareers?: StudentCareerUpdateManyWithoutStudentNestedInput
   }
 
@@ -6318,6 +6388,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     names?: StringFieldUpdateOperationsInput | string
     surnames?: StringFieldUpdateOperationsInput | string
+    address?: StringFieldUpdateOperationsInput | string
+    telephoneNumber?: StringFieldUpdateOperationsInput | string
     enrolledCareers?: StudentCareerUncheckedUpdateManyWithoutStudentNestedInput
   }
 
@@ -6325,6 +6397,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     names?: StringFieldUpdateOperationsInput | string
     surnames?: StringFieldUpdateOperationsInput | string
+    address?: StringFieldUpdateOperationsInput | string
+    telephoneNumber?: StringFieldUpdateOperationsInput | string
   }
 
 

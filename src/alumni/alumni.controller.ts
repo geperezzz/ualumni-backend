@@ -28,9 +28,10 @@ import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { User } from '@prisma/client';
+import { User } from 'prisma/ualumni/client';
 import { FilterRandomPaginationParamsDto } from './dto/filter-random-pagination-params.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { Alumni } from './alumni.type';
 
 @ApiTags('Alumni')
 @Controller('alumni')
@@ -42,16 +43,13 @@ export class AlumniController {
   @Allowed('admin')
   async create(
     @Body() createAlumniDto: CreateAlumniDto,
-  ): Promise<ResponseDto<AlumniDto>> {
+  ): Promise<ResponseDto<Alumni>> {
     try {
       let createdAlumni = await this.alumniService.create(createAlumniDto);
-      let createdAlumniDto = plainToInstance(AlumniDto, createdAlumni, {
-        excludeExtraneousValues: true,
-      });
 
       return {
         statusCode: HttpStatus.CREATED,
-        data: createdAlumniDto,
+        data: createdAlumni,
       };
     } catch (error) {
       if (error instanceof AlreadyExistsError) {
@@ -66,10 +64,19 @@ export class AlumniController {
   @Allowed('admin', 'visitor')
   async findPageRandomly(
     @Query() filterRandomPaginationParamsDto: FilterRandomPaginationParamsDto,
-  ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
+    @SessionUser() user: User
+  ): Promise<RandomlyPagedResponseDto<Alumni | AlumniDto>> {
     let alumniRandomPage = await this.alumniService.findPageRandomly(
       filterRandomPaginationParamsDto,
     );
+
+    if (user) {
+      return {
+        statusCode: HttpStatus.OK,
+        data: alumniRandomPage,
+      };
+    }
+
     let alumniDtoRandomPage = {
       ...alumniRandomPage,
       items: alumniRandomPage.items.map((alumni) =>
@@ -90,21 +97,31 @@ export class AlumniController {
   @Allowed('admin', 'visitor')
   async findPageWithResumeRandomly(
     @Query() filterRandomPaginationParamsDto: FilterRandomPaginationParamsDto,
-  ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
-    let alumniRandomPage = await this.alumniService.findPageWithResumeRandomly(
+    @SessionUser() user: User
+  ): Promise<RandomlyPagedResponseDto<Alumni | AlumniDto>> {
+    let alumniWithResumeRandomPage = await this.alumniService.findPageWithResumeRandomly(
       filterRandomPaginationParamsDto,
     );
-    let alumniDtoRandomPage = {
-      ...alumniRandomPage,
-      items: alumniRandomPage.items.map((alumni) => {
-        const { password, ...alumniWithoutPassword } = alumni;
-        return alumniWithoutPassword;
-      }),
+    
+    if (user) {
+      return {
+        statusCode: HttpStatus.OK,
+        data: alumniWithResumeRandomPage,
+      };  
+    }
+
+    let alumniWithResumeDtoRandomPage = {
+      ...alumniWithResumeRandomPage,
+      items: alumniWithResumeRandomPage.items.map((alumni) =>
+        plainToInstance(AlumniDto, alumni, {
+          excludeExtraneousValues: true,
+        }),
+      ),
     };
 
     return {
       statusCode: HttpStatus.OK,
-      data: alumniDtoRandomPage,
+      data: alumniWithResumeDtoRandomPage,
     };
   }
 
@@ -134,7 +151,8 @@ export class AlumniController {
   @Allowed('admin', 'visitor')
   async findOne(
     @Param('email') email: string,
-  ): Promise<ResponseDto<AlumniDto>> {
+    @SessionUser() user: User
+  ): Promise<ResponseDto<Alumni | AlumniDto>> {
     let alumni = await this.alumniService.findOne(email);
 
     if (!alumni) {
@@ -143,6 +161,14 @@ export class AlumniController {
         {},
       );
     }
+
+    if (user) {
+      return {
+        statusCode: HttpStatus.OK,
+        data: alumni,
+      };
+    }
+
     let alumniDto = plainToInstance(AlumniDto, alumni, {
       excludeExtraneousValues: true,
     });
@@ -188,19 +214,16 @@ export class AlumniController {
   async update(
     @Param('email') email: string,
     @Body() updateAlumniDto: UpdateAlumniDto,
-  ): Promise<ResponseDto<AlumniDto>> {
+  ): Promise<ResponseDto<Alumni>> {
     try {
       let updatedAlumni = await this.alumniService.update(
         email,
         updateAlumniDto,
       );
-      let updatedAlumniDto = plainToInstance(AlumniDto, updatedAlumni, {
-        excludeExtraneousValues: true,
-      });
 
       return {
         statusCode: HttpStatus.CREATED,
-        data: updatedAlumniDto,
+        data: updatedAlumni,
       };
     } catch (error) {
       if (error instanceof NotFoundError) {
@@ -236,16 +259,13 @@ export class AlumniController {
 
   @Delete(':email')
   @Allowed('admin')
-  async remove(@Param('email') email: string): Promise<ResponseDto<AlumniDto>> {
+  async remove(@Param('email') email: string): Promise<ResponseDto<Alumni>> {
     try {
       let removedAlumni = await this.alumniService.remove(email);
-      let removedAlumniDto = plainToInstance(AlumniDto, removedAlumni, {
-        excludeExtraneousValues: true,
-      });
 
       return {
         statusCode: HttpStatus.CREATED,
-        data: removedAlumniDto,
+        data: removedAlumni,
       };
     } catch (error) {
       if (error instanceof NotFoundError) {

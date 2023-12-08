@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { ResumeDto } from './dto/resume.dto';
 import { PrismaService } from 'src/ualumni-database/prisma.service';
-import { NotFoundError, UnexpectedError } from 'src/common/error/service.error';
+import {
+  NotFoundError,
+  UnexpectedError,
+} from 'src/common/errors/service.error';
 import { Prisma } from '@prisma/client';
 import { Cron, CronExpression } from '@nestjs/schedule';
 

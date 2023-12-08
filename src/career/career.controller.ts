@@ -32,7 +32,7 @@ import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 import {
   AlreadyExistsError,
   NotFoundError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 
 @ApiTags('career')
 @Controller('career')

@@ -23,7 +23,7 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { ForeignKeyError } from 'src/common/error/service.error';
+import { ForeignKeyError } from 'src/common/errors/service.error';
 
 @ApiTags('resume-ciap-courses')
 @Controller('user/:email/resume/ciap-courses')

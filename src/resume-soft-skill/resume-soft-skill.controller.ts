@@ -30,8 +30,8 @@ import {
 import {
   AlreadyExistsError,
   ForeignKeyError,
-} from 'src/common/error/service.error';
-import { NotFoundError } from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
+import { NotFoundError } from 'src/common/errors/service.error';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { ResumeSoftSkillDto } from './dto/resume-soft-skill.dto';
 

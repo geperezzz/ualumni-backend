@@ -7,7 +7,7 @@ import {
   ForeignKeyError,
   NotFoundError,
   UnexpectedError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { Prisma } from '@prisma/client';
 import { ResumeSoftSkillDto } from './dto/resume-soft-skill.dto';
 import { PageDto } from 'src/common/dto/paginated-response.dto';

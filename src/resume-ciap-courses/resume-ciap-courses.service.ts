@@ -6,7 +6,7 @@ import { Prisma } from '@prisma/client';
 import {
   ForeignKeyError,
   UnexpectedError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 
 @Injectable()
 export class ResumeCiapCoursesService {

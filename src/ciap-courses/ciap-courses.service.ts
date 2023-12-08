@@ -8,7 +8,7 @@ import {
   AlreadyExistsError,
   NotFoundError,
   UnexpectedError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
 
 @Injectable()

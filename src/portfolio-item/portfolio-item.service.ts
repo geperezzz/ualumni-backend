@@ -8,7 +8,7 @@ import {
   ForeignKeyError,
   NotFoundError,
   UnexpectedError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { PortfolioItemDto } from './dto/portfolio-item.dto';
 import { PortfolioItem } from './entities/portfolio-item.entity';
 

@@ -1,17 +1,13 @@
 import {
   ExecutionContext,
-  UnauthorizedException,
   createParamDecorator,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { User } from 'prisma/ualumni/client';
 import { Request } from 'express';
 
 export const SessionUser = createParamDecorator(
-  (data: unknown, context: ExecutionContext) => {
+  (_data: unknown, context: ExecutionContext): User | undefined => {
     const request = context.switchToHttp().getRequest<Request>();
-    if (!request.user) {
-      throw new UnauthorizedException();
-    }
-    return request.user as User;
+    return request.user as User | undefined;
   },
 );

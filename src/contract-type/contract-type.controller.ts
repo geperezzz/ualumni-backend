@@ -31,7 +31,7 @@ import {
 } from '@nestjs/swagger';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
-import { AlreadyExistsError } from 'src/common/error/service.error';
+import { AlreadyExistsError } from 'src/common/errors/service.error';
 import { NotFoundError } from 'rxjs';
 
 @ApiTags('contract-type')

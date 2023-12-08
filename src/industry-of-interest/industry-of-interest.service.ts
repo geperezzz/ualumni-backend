@@ -6,7 +6,7 @@ import {
   ForeignKeyError,
   NotFoundError,
   UnexpectedError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { IndustryOfInterestDto } from './dto/industry-of-interest.dto';
 import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { Prisma } from '@prisma/client';

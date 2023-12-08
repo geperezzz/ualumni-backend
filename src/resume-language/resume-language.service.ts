@@ -8,7 +8,7 @@ import {
   ForeignKeyError,
   NotFoundError,
   UnexpectedError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { ResumeLanguageDto } from './dto/resume-language.dto';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
 

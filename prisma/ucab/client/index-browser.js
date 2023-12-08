@@ -110,7 +110,9 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 exports.Prisma.StudentScalarFieldEnum = {
   email: 'email',
   names: 'names',
-  surnames: 'surnames'
+  surnames: 'surnames',
+  address: 'address',
+  telephoneNumber: 'telephoneNumber'
 };
 
 exports.Prisma.CareerScalarFieldEnum = {

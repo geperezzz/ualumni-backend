@@ -9,7 +9,7 @@ import {
   AlreadyExistsError,
   NotFoundError,
   UnexpectedError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 
 @Injectable()
 export class CareerService {
