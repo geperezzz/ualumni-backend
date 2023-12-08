@@ -15,6 +15,7 @@ import {
   NotFoundException,
   InternalServerErrorException,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { HigherEducationStudyService } from './higher-education-study.service';
 import { CreateHigherEducationStudyDto } from './dto/create-higher-education-study.dto';
@@ -34,15 +35,25 @@ import {
 } from 'src/common/error/service.error';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { HigherEducationStudyDto } from './dto/higher-education-study.dto';
+import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
+import { SessionAuthGuard } from 'src/auth/session/session.guard';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionUser } from 'src/auth/session/session-user.decorator';
+import { User } from '@prisma/client';
+import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @ApiTags('higher-education-study')
-@Controller('user/:email/resume/higher-education-study')
+@Controller('alumni')
+@UseGuards(SessionAuthGuard, PermissionsGuard)
 export class HigherEducationStudyController {
   constructor(
     private readonly higherEducationStudyService: HigherEducationStudyService,
   ) {}
 
-  @Post()
+  @Post('me/higher-education-studies')
+  @Allowed('alumni')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
     description: 'The higher education study was succesfully created',
@@ -50,13 +61,13 @@ export class HigherEducationStudyController {
   @ApiBadRequestResponse({
     description: 'Already exists a higher education study with the given title',
   })
-  async create(
-    @Param('email') resumeOwnerEmail: string,
+  async createMine(
+    @SessionUser() user: User,
     @Body() createHigherEducationStudyDto: CreateHigherEducationStudyDto,
-  ) {
+  ): Promise<ResponseDto<HigherEducationStudyDto>> {
     try {
       const data = await this.higherEducationStudyService.create(
-        resumeOwnerEmail,
+        user.email,
         createHigherEducationStudyDto,
       );
       return {
@@ -75,7 +86,42 @@ export class HigherEducationStudyController {
     }
   }
 
-  @Get()
+  @Post(':alumniEmail/higher-education-studies')
+  @Allowed('admin')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({
+    description: 'The higher education study was succesfully created',
+  })
+  @ApiBadRequestResponse({
+    description: 'Already exists a higher education study with the given title',
+  })
+  async create(
+    @Param('alumniEmail') alumniEmail: string,
+    @Body() createHigherEducationStudyDto: CreateHigherEducationStudyDto,
+  ): Promise<ResponseDto<HigherEducationStudyDto>> {
+    try {
+      const data = await this.higherEducationStudyService.create(
+        alumniEmail,
+        createHigherEducationStudyDto,
+      );
+      return {
+        statusCode: HttpStatus.CREATED,
+        data,
+      };
+    } catch (error) {
+      if (error instanceof AlreadyExistsError)
+        throw new BadRequestException(error.message, { cause: error });
+      if (error instanceof ForeignKeyError)
+        throw new BadRequestException(error.message, { cause: error });
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
+
+  @Get('me/higher-education-studies')
+  @Allowed('alumni')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description:
@@ -87,19 +133,18 @@ export class HigherEducationStudyController {
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
   })
-  async findMany(
-    @Param('email') resumeOwnerEmail: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
-  ): Promise<any> {
-    if (perPage < 1)
+  async findMyPage(
+    @SessionUser() user: User,
+    @Query() paginationParamsDto: PaginationParamsDto,
+  ): Promise<PaginatedResponseDto<HigherEducationStudyDto>> {
+    if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse =
         await this.higherEducationStudyService.findMany(
-          resumeOwnerEmail,
-          page,
-          perPage,
+          user.email,
+          paginationParamsDto.pageNumber,
+          paginationParamsDto.itemsPerPage,
         );
       return {
         statusCode: HttpStatus.OK,
@@ -111,7 +156,78 @@ export class HigherEducationStudyController {
     }
   }
 
-  @Get(':title')
+  @Get(':alumniEmail/higher-education-studies')
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description:
+      'The list of higher education studies was succesfully obtained',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid number of items per page requested',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async findPage(
+    @Param('alumniEmail') resumeOwnerEmail: string,
+    @Query() paginationParamsDto: PaginationParamsDto,
+  ): Promise<PaginatedResponseDto<HigherEducationStudyDto>> {
+    if (paginationParamsDto.itemsPerPage < 1)
+      throw new BadRequestException('Invalid number of items per page');
+    try {
+      const paginationResponse =
+        await this.higherEducationStudyService.findMany(
+          resumeOwnerEmail,
+          paginationParamsDto.pageNumber,
+          paginationParamsDto.itemsPerPage,
+        );
+      return {
+        statusCode: HttpStatus.OK,
+        data: paginationResponse,
+      };
+    } catch (error) {
+      const message = error.response ? error.response : 'Bad Request';
+      throw new HttpException(message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('me/higher-education-studies/:title')
+  @Allowed('alumni')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'Higher education study was succesfully found',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'The higher education study for the requested alumni was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async findMine(
+    @SessionUser() user: User,
+    @Param('title') title: string,
+  ): Promise<ResponseDto<HigherEducationStudyDto>> {
+    const higherEducationStudy = await this.higherEducationStudyService.findOne(
+      title,
+      user.email,
+    );
+
+    if (!higherEducationStudy)
+      throw new NotFoundException(
+        `There is no higher education study with the given \`title\` (${title})`,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      data: higherEducationStudy,
+    };
+  }
+
+  @Get(':alumniEmail/higher-education-studies/:title')
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'Higher education study was succesfully found',
@@ -124,9 +240,9 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async findOne(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniEmail') resumeOwnerEmail: string,
     @Param('title') title: string,
-  ) {
+  ): Promise<ResponseDto<HigherEducationStudyDto>> {
     const higherEducationStudy = await this.higherEducationStudyService.findOne(
       title,
       resumeOwnerEmail,
@@ -142,7 +258,51 @@ export class HigherEducationStudyController {
     };
   }
 
-  @Patch(':title')
+  @Patch('me/higher-education-studies/:title')
+  @Allowed('alumni')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'Higher education study was succesfully updated',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'The higher education study with the requested name was not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Already exist a higher education study with the given title',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async updateMine(
+    @SessionUser() user: User,
+    @Param('title') title: string,
+    @Body() updateHigherEducationStudyDto: UpdateHigherEducationStudyDto,
+  ): Promise<ResponseDto<HigherEducationStudyDto>> {
+    try {
+      const updatedHigherEducationStudy =
+        await this.higherEducationStudyService.update(
+          title,
+          user.email,
+          updateHigherEducationStudyDto,
+        );
+      return { statusCode: HttpStatus.OK, data: updatedHigherEducationStudy };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      if (error instanceof AlreadyExistsError) {
+        throw new BadRequestException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
+
+  @Patch(':alumniEmail/higher-education-studies/:title')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'Higher education study was succesfully updated',
@@ -158,10 +318,10 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async update(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniEmail') resumeOwnerEmail: string,
     @Param('title') title: string,
     @Body() updateHigherEducationStudyDto: UpdateHigherEducationStudyDto,
-  ) {
+  ): Promise<ResponseDto<HigherEducationStudyDto>> {
     try {
       const updatedHigherEducationStudy =
         await this.higherEducationStudyService.update(
@@ -184,7 +344,43 @@ export class HigherEducationStudyController {
     }
   }
 
-  @Delete(':title')
+  @Delete('me/higher-education-studies/:title')
+  @Allowed('alumni')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'Higher education study was succesfully deleted',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'The higher education study with the requested title was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async removeMine(
+    @SessionUser() user: User,
+    @Param('title') title: string,
+  ): Promise<ResponseDto<HigherEducationStudyDto>> {
+    try {
+      const deletedHigherEducationStudy =
+        await this.higherEducationStudyService.remove(title, user.email);
+      return {
+        statusCode: HttpStatus.OK,
+        data: deletedHigherEducationStudy,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
+
+  @Delete(':alumniEmail/higher-education-studies/:title')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'Higher education study was succesfully deleted',
@@ -197,7 +393,7 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async remove(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniEmail') resumeOwnerEmail: string,
     @Param('title') title: string,
   ): Promise<ResponseDto<HigherEducationStudyDto>> {
     try {

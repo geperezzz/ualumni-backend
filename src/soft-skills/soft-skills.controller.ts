@@ -27,7 +27,9 @@ import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('soft-skills')
 @Controller('soft-skills')
 @UseGuards(SessionAuthGuard, PermissionsGuard)
 export class SoftSkillsController {

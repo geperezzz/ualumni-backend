@@ -7,6 +7,7 @@ import {
   ForeignKeyError,
   UnexpectedError,
 } from 'src/common/error/service.error';
+import { PageDto } from 'src/common/dto/paginated-response.dto';
 
 @Injectable()
 export class ResumeCiapCoursesService {
@@ -38,13 +39,36 @@ export class ResumeCiapCoursesService {
     }
   }
 
-  async findAll(ownerEmail: string): Promise<ResumeCiapCourseDto[]> {
+  async findMany(
+    ownerEmail: string,
+    pageNumber: number,
+    itemsPerPage: number,
+  ): Promise<PageDto<ResumeCiapCourseDto>> {
     try {
-      return await this.prismaService.resumeCiapCourse.findMany({
+      const totalCount = await this.prismaService.resumeCiapCourse.count({
+        where: { resumeOwnerEmail: ownerEmail },
+      });
+      const pageCount = Math.ceil(totalCount / itemsPerPage);
+
+      if (totalCount == 0 || pageNumber < 1) {
+        pageNumber = 1;
+      } else if (pageNumber > pageCount) {
+        pageNumber = pageCount;
+      }
+      const data = await this.prismaService.resumeCiapCourse.findMany({
         where: {
           resumeOwnerEmail: ownerEmail,
         },
+        take: itemsPerPage,
+        skip: (pageNumber - 1) * itemsPerPage,
       });
+      return {
+        page: pageNumber,
+        perPage: data.length,
+        pageCount,
+        totalCount,
+        items: data,
+      };
     } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,

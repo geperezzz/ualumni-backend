@@ -171,47 +171,6 @@ export class SkillCategoryService {
     }
   }
 
-  async updateRelatedCareers(
-    name: string,
-    updateRelatedCareersDto: UpdateRelatedCareersDto,
-  ): Promise<SkillCategoryDto> {
-    try {
-      return await this.prismaService.skillCategory.update({
-        where: { name },
-        data: {
-          relatedCareers: {
-            disconnect: updateRelatedCareersDto.removeRelatedCareersNames?.map(
-              (name) => ({ name }),
-            ),
-            connect: updateRelatedCareersDto.addRelatedCareersNames?.map(
-              (name) => ({ name }),
-            ),
-          },
-        },
-        include: { relatedCareers: true },
-      });
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        console.log(error.code);
-        if (error.code === 'P2016') {
-          throw new NotFoundError(
-            `There is no skill category with the given name (${name})`,
-            { cause: error },
-          );
-        }
-        if (error.code === 'P2025') {
-          throw new ForeignKeyError(
-            `There is no career with the given name/s (${updateRelatedCareersDto.addRelatedCareersNames})`,
-            { cause: error },
-          );
-        }
-      }
-      throw new UnexpectedError('An unexpected situation ocurred', {
-        cause: error,
-      });
-    }
-  }
-
   async remove(name: string): Promise<SkillCategoryDto> {
     try {
       return await this.prismaService.skillCategory.delete({

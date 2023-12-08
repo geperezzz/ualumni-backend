@@ -15,6 +15,7 @@ import {
   NotFoundException,
   InternalServerErrorException,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ResumeTechnicalSkillService } from './resume-technical-skill.service';
 import { CreateResumeTechnicalSkillDto } from './dto/create-resume-technical-skill.dto';
@@ -35,15 +36,24 @@ import {
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { ResumeTechnicalSkillDto } from './dto/resume-technical-skill.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
+import { SessionAuthGuard } from 'src/auth/session/session.guard';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { SessionUser } from 'src/auth/session/session-user.decorator';
+import { User } from '@prisma/client';
+import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @ApiTags('resume-technical-skill')
-@Controller('user/:email/resume/skillCategory/:skillCategory/technical-skill')
+@Controller('alumni')
+@UseGuards(SessionAuthGuard, PermissionsGuard)
 export class ResumeTechnicalSkillController {
   constructor(
     private readonly resumeTechnicalSkillService: ResumeTechnicalSkillService,
   ) {}
 
-  @Post()
+  @Post('me/resume/skill-category/technical-skill')
+  @Allowed('alumni')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
     description: 'The technical skill was succesfully added',
@@ -51,15 +61,13 @@ export class ResumeTechnicalSkillController {
   @ApiBadRequestResponse({
     description: 'Already exists a technical skill with the given name',
   })
-  async create(
-    @Param('email') resumeOwnerEmail: string,
-    @Param('skillCategory') skillCategory: string,
+  async addMine(
+    @SessionUser() user: User,
     @Body() CreateResumeTechnicalSkillDto: CreateResumeTechnicalSkillDto,
   ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
     try {
       const data = await this.resumeTechnicalSkillService.create(
-        resumeOwnerEmail,
-        skillCategory,
+        user.email,
         CreateResumeTechnicalSkillDto,
       );
       return {
@@ -78,7 +86,42 @@ export class ResumeTechnicalSkillController {
     }
   }
 
-  @Get()
+  @Post(':email/resume/skill-category/technical-skill')
+  @Allowed('admin')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({
+    description: 'The technical skill was succesfully added',
+  })
+  @ApiBadRequestResponse({
+    description: 'Already exists a technical skill with the given name',
+  })
+  async add(
+    @Param('email') resumeOwnerEmail: string,
+    @Body() CreateResumeTechnicalSkillDto: CreateResumeTechnicalSkillDto,
+  ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
+    try {
+      const data = await this.resumeTechnicalSkillService.create(
+        resumeOwnerEmail,
+        CreateResumeTechnicalSkillDto,
+      );
+      return {
+        statusCode: HttpStatus.CREATED,
+        data,
+      };
+    } catch (error) {
+      if (error instanceof AlreadyExistsError)
+        throw new BadRequestException(error.message, { cause: error });
+      if (error instanceof ForeignKeyError)
+        throw new BadRequestException(error.message, { cause: error });
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
+
+  @Get('me/resume/skill-category/technical-skill')
+  @Allowed('alumni')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'The list of technical skills was succesfully obtained',
@@ -89,19 +132,18 @@ export class ResumeTechnicalSkillController {
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
   })
-  async findMany(
-    @Param('email') resumeOwnerEmail: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
+  async findPageMine(
+    @SessionUser() user: User,
+    @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<ResumeTechnicalSkillDto>> {
-    if (perPage < 1)
+    if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse =
         await this.resumeTechnicalSkillService.findMany(
-          resumeOwnerEmail,
-          page,
-          perPage,
+          user.email,
+          paginationParamsDto.pageNumber,
+          paginationParamsDto.itemsPerPage,
         );
       return {
         statusCode: HttpStatus.OK,
@@ -113,7 +155,78 @@ export class ResumeTechnicalSkillController {
     }
   }
 
-  @Get(':skillName')
+  @Get(':email/resume/skill-category/technical-skill')
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'The list of technical skills was succesfully obtained',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid number of items per page requested',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async findPage(
+    @Param('email') resumeOwnerEmail: string,
+    @Query() paginationParamsDto: PaginationParamsDto,
+  ): Promise<PaginatedResponseDto<ResumeTechnicalSkillDto>> {
+    if (paginationParamsDto.itemsPerPage < 1)
+      throw new BadRequestException('Invalid number of items per page');
+    try {
+      const paginationResponse =
+        await this.resumeTechnicalSkillService.findMany(
+          resumeOwnerEmail,
+          paginationParamsDto.pageNumber,
+          paginationParamsDto.itemsPerPage,
+        );
+      return {
+        statusCode: HttpStatus.OK,
+        data: paginationResponse,
+      };
+    } catch (error) {
+      const message = error.response ? error.response : 'Bad Request';
+      throw new HttpException(message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('me/resume/skill-category/:skillCategory/technical-skill/:skillName')
+  @Allowed('alumni')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'A technical skill was succesfully found',
+  })
+  @ApiNotFoundResponse({
+    description: 'The technical skill for the requested alumni was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async findMine(
+    @SessionUser() user: User,
+    @Param('skillCategory') skillCategory: string,
+    @Param('skillName') skillName: string,
+  ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
+    const resumeTechnicalSkill = await this.resumeTechnicalSkillService.findOne(
+      user.email,
+      skillCategory,
+      skillName,
+    );
+
+    if (!resumeTechnicalSkill)
+      throw new NotFoundException(
+        `There is no technical skill with the given \`skillName\` (${skillName})`,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      data: resumeTechnicalSkill,
+    };
+  }
+
+  @Get(':email/resume/skill-category/:skillCategory/technical-skill/:skillName')
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'A technical skill was succesfully found',
@@ -145,7 +258,53 @@ export class ResumeTechnicalSkillController {
     };
   }
 
-  @Patch(':skillName')
+  @Patch('me/resume/skill-category/:skillCategory/technical-skill/:skillName')
+  @Allowed('alumni')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: ' A technical skill was succesfully updated',
+  })
+  @ApiNotFoundResponse({
+    description: 'The technical skill with the requested name was not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Already exist a technical skill with the given skillName',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async updateMine(
+    @SessionUser() user: User,
+    @Param('skillCategory') skillCategory: string,
+    @Param('skillName') skillName: string,
+    @Body() updateResumeTechnicalSkillDto: UpdateResumeTechnicalSkillDto,
+  ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
+    try {
+      const updateLanguageName = await this.resumeTechnicalSkillService.update(
+        user.email,
+        skillCategory,
+        skillName,
+        updateResumeTechnicalSkillDto,
+      );
+      return { statusCode: HttpStatus.OK, data: updateLanguageName };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      if (error instanceof AlreadyExistsError) {
+        throw new BadRequestException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
+
+  @Patch(
+    ':email/resume/skill-category/:skillCategory/technical-skill/:skillName',
+  )
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: ' A technical skill was succesfully updated',
@@ -164,7 +323,7 @@ export class ResumeTechnicalSkillController {
     @Param('skillCategory') skillCategory: string,
     @Param('skillName') skillName: string,
     @Body() updateResumeTechnicalSkillDto: UpdateResumeTechnicalSkillDto,
-  ) {
+  ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
     try {
       const updateLanguageName = await this.resumeTechnicalSkillService.update(
         resumeOwnerEmail,
@@ -187,7 +346,50 @@ export class ResumeTechnicalSkillController {
     }
   }
 
-  @Delete(':skillName')
+  @Delete('me/resume/skill-category/:skillCategory/technical-skill/:skillName')
+  @Allowed('alumni')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'A technical skill was succesfully deleted',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'The technical skill with the requested skillName was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async removeMine(
+    @SessionUser() user: User,
+    @Param('skillCategory') skillCategory: string,
+    @Param('skillName') skillName: string,
+  ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
+    try {
+      const deletedResumeTechnicalSkill =
+        await this.resumeTechnicalSkillService.remove(
+          user.email,
+          skillCategory,
+          skillName,
+        );
+      return {
+        statusCode: HttpStatus.OK,
+        data: deletedResumeTechnicalSkill,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
+
+  @Delete(
+    ':email/resume/skill-category/:skillCategory/technical-skill/:skillName',
+  )
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'A technical skill was succesfully deleted',

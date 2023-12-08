@@ -29,8 +29,12 @@ import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
 import { User } from '@prisma/client';
-import { FilterRandomPaginationParamsDto } from './dto/filter-random-pagination-params.dto';
+import { AlumniFilterParamsDto } from './dto/alumni-filter-params.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
+import { AlumniWithResumeWithoutContactDto } from './dto/alumni-with-resume-without-contact.dto';
+import { AlumniWithoutContactDto } from './dto/alumni-without-contact.dto';
+import { AlumniWithResumeDto } from './dto/alumni-with-resume.dto';
 
 @ApiTags('Alumni')
 @Controller('alumni')
@@ -65,15 +69,17 @@ export class AlumniController {
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   async findPageRandomly(
-    @Query() filterRandomPaginationParamsDto: FilterRandomPaginationParamsDto,
-  ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
+    @Query() alumniFilterParamsDto: AlumniFilterParamsDto,
+    @Query() randomPaginationParamsDto: RandomPaginationParamsDto,
+  ): Promise<RandomlyPagedResponseDto<AlumniWithoutContactDto>> {
     let alumniRandomPage = await this.alumniService.findPageRandomly(
-      filterRandomPaginationParamsDto,
+      randomPaginationParamsDto,
+      alumniFilterParamsDto,
     );
     let alumniDtoRandomPage = {
       ...alumniRandomPage,
       items: alumniRandomPage.items.map((alumni) =>
-        plainToInstance(AlumniDto, alumni, {
+        plainToInstance(AlumniWithoutContactDto, alumni, {
           excludeExtraneousValues: true,
         }),
       ),
@@ -89,22 +95,72 @@ export class AlumniController {
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   async findPageWithResumeRandomly(
-    @Query() filterRandomPaginationParamsDto: FilterRandomPaginationParamsDto,
-  ): Promise<RandomlyPagedResponseDto<AlumniDto>> {
+    @Query() alumniFilterParamsDto: AlumniFilterParamsDto,
+    @Query() randomPaginationParamsDto: RandomPaginationParamsDto,
+  ): Promise<RandomlyPagedResponseDto<AlumniWithResumeWithoutContactDto>> {
     let alumniRandomPage = await this.alumniService.findPageWithResumeRandomly(
-      filterRandomPaginationParamsDto,
+      randomPaginationParamsDto,
+      alumniFilterParamsDto,
     );
     let alumniDtoRandomPage = {
       ...alumniRandomPage,
       items: alumniRandomPage.items.map((alumni) => {
-        const { password, ...alumniWithoutPassword } = alumni;
-        return alumniWithoutPassword;
+        return plainToInstance(AlumniWithResumeWithoutContactDto, alumni, {
+          excludeExtraneousValues: true,
+        });
       }),
     };
 
     return {
       statusCode: HttpStatus.OK,
       data: alumniDtoRandomPage,
+    };
+  }
+
+  @Get('me/resume')
+  @Allowed('alumni')
+  async findMeWithResume(
+    @SessionUser() user: User,
+  ): Promise<ResponseDto<AlumniWithResumeDto>> {
+    let alumni = await this.alumniService.findOneWithResume(user.email);
+
+    if (!alumni) {
+      throw new NotFoundException(
+        `There is no alumni with the given \`email\` (${user.email})`,
+        {},
+      );
+    }
+    let alumniDto = plainToInstance(AlumniWithResumeDto, alumni, {
+      excludeExtraneousValues: true,
+    });
+
+    return {
+      statusCode: HttpStatus.OK,
+      data: alumniDto,
+    };
+  }
+
+  @Get(':email/resume')
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
+  async findOneWithResume(
+    @Param('email') email: string,
+  ): Promise<ResponseDto<AlumniWithResumeDto>> {
+    let alumni = await this.alumniService.findOneWithResume(email);
+
+    if (!alumni) {
+      throw new NotFoundException(
+        `There is no alumni with the given \`email\` (${email})`,
+        {},
+      );
+    }
+    let alumniDto = plainToInstance(AlumniWithResumeDto, alumni, {
+      excludeExtraneousValues: true,
+    });
+
+    return {
+      statusCode: HttpStatus.OK,
+      data: alumniDto,
     };
   }
 

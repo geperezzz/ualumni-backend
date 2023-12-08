@@ -14,6 +14,7 @@ import {
   NotFoundException,
   Put,
   InternalServerErrorException,
+  UseGuards,
 } from '@nestjs/common';
 import { CareerService } from './career.service';
 import { CreateCareerDto } from './dto/create-career.dto';
@@ -33,13 +34,20 @@ import {
   AlreadyExistsError,
   NotFoundError,
 } from 'src/common/error/service.error';
+import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
+import { SessionAuthGuard } from 'src/auth/session/session.guard';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @ApiTags('career')
 @Controller('career')
+@UseGuards(SessionAuthGuard, PermissionsGuard)
 export class CareerController {
   constructor(private readonly careerService: CareerService) {}
 
   @Post()
+  @Allowed('admin')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ description: 'The career was succesfully created' })
   @ApiBadRequestResponse({
@@ -65,6 +73,8 @@ export class CareerController {
   }
 
   @Get()
+  @SessionNotRequired()
+  @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'The list of careers was succesfully obtained',
@@ -75,16 +85,15 @@ export class CareerController {
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
   })
-  async findMany(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
+  async findPage(
+    @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<CareerDto>> {
-    if (perPage < 1)
+    if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse = await this.careerService.findMany(
-        page,
-        perPage,
+        paginationParamsDto.pageNumber,
+        paginationParamsDto.itemsPerPage,
       );
       return {
         statusCode: HttpStatus.OK,
@@ -99,6 +108,8 @@ export class CareerController {
   }
 
   @Get(':name')
+  @SessionNotRequired()
+  @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Career was succesfully found' })
   @ApiNotFoundResponse({
@@ -120,6 +131,7 @@ export class CareerController {
   }
 
   @Put(':name')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Career was succesfully updated' })
   @ApiNotFoundResponse({
@@ -156,6 +168,7 @@ export class CareerController {
   }
 
   @Delete(':name')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Career was succesfully delete' })
   @ApiNotFoundResponse({

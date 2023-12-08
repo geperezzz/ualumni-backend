@@ -27,7 +27,9 @@ import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
 import { User } from '@prisma/client';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('job-applications')
 @Controller('alumni')
 @UseGuards(SessionAuthGuard, PermissionsGuard)
 export class JobApplicationsController {

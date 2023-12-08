@@ -14,6 +14,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { LanguageService } from './language.service';
 import { LanguageDto } from './dto/language.dto';
@@ -33,13 +34,19 @@ import {
   NotFoundError,
 } from 'src/common/error/service.error';
 import { UpdateLanguageDto } from './dto/update-language.dto';
+import { SessionAuthGuard } from 'src/auth/session/session.guard';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @ApiTags('language')
 @Controller('language')
+@UseGuards(SessionAuthGuard, PermissionsGuard)
 export class LanguageController {
   constructor(private readonly languageService: LanguageService) {}
 
   @Post()
+  @Allowed('admin')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ description: 'Language was succesfully created' })
   @ApiBadRequestResponse({
@@ -68,6 +75,8 @@ export class LanguageController {
   }
 
   @Get()
+  @SessionNotRequired()
+  @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'The list of languages was succesfully obtained',
@@ -102,6 +111,8 @@ export class LanguageController {
   }
 
   @Get(':name')
+  @SessionNotRequired()
+  @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Language was succesfully found' })
   @ApiNotFoundResponse({
@@ -125,6 +136,7 @@ export class LanguageController {
   }
 
   @Put(':name')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Language was succesfully updated' })
   @ApiNotFoundResponse({
@@ -162,6 +174,7 @@ export class LanguageController {
   }
 
   @Delete(':name')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Language was succesfully deleted' })
   @ApiNotFoundResponse({
