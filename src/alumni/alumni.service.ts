@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAlumniDto } from './dto/create-alumni.dto';
 import { UpdateAlumniDto } from './dto/update-alumni.dto';
-import { Prisma } from 'prisma/ualumni/client';
+import { Prisma as PrismaUalumni } from 'prisma/ualumni/client';
+import { Prisma as PrismaUcab } from 'prisma/ucab/client';
 import {
   AlreadyExistsError,
   NotFoundError,
@@ -10,7 +11,6 @@ import {
 import { RandomPage } from 'src/common/interfaces/random-page.interface';
 import * as bcrypt from 'bcrypt';
 import { Alumni } from './alumni.type';
-import { AlumniDto } from './dto/alumni.dto';
 import { FilterRandomPaginationParamsDto } from './dto/filter-random-pagination-params.dto';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 import { UcabDbService } from 'src/ucab-db/ucab-db.service';
@@ -42,8 +42,8 @@ export class AlumniService {
         },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === '2025') {
+      if (error instanceof PrismaUcab.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
           throw new NotFoundError(
             `The given email (${email}) doesn't belong to an UCAB alumni`,
           );
@@ -118,7 +118,7 @@ export class AlumniService {
       const { associatedUser: userProps, ...rest } = createdAlumni;
       return { ...userProps, ...rest };
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error instanceof PrismaUalumni.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
             `There already exists an alumni with the given \`email\` (${createAlumniDto.email})`,
@@ -170,18 +170,18 @@ export class AlumniService {
             WHERE r."isVisible" = TRUE
               ${
                 positionsOfInterest
-                  ? Prisma.sql`AND p."isVisible" = TRUE`
-                  : Prisma.empty
+                  ? PrismaUalumni.sql`AND p."isVisible" = TRUE`
+                  : PrismaUalumni.empty
               }
               ${
                 industriesOfInterest
-                  ? Prisma.sql`AND i."isVisible" = TRUE`
-                  : Prisma.empty
+                  ? PrismaUalumni.sql`AND i."isVisible" = TRUE`
+                  : PrismaUalumni.empty
               }
               ${
                 skillsNames
-                  ? Prisma.sql`AND rt."isVisible" = TRUE`
-                  : Prisma.empty
+                  ? PrismaUalumni.sql`AND rt."isVisible" = TRUE`
+                  : PrismaUalumni.empty
               }
           ), filtered_by_name AS (
             SELECT "email", "careerName", "positionName", "industryName", "skillName", "skillCategoryName"
@@ -194,86 +194,86 @@ export class AlumniService {
             FROM filtered_by_name
 	          ${
               careersNames
-                ? Prisma.sql`
-                    WHERE "careerName" IN (${Prisma.join(careersNames)})`
-                : Prisma.empty
+                ? PrismaUalumni.sql`
+                    WHERE "careerName" IN (${PrismaUalumni.join(careersNames)})`
+                : PrismaUalumni.empty
             }
             GROUP BY "email", "positionName", "industryName", "skillName", "skillCategoryName"
             ${
               careersNames
-                ? Prisma.sql`
+                ? PrismaUalumni.sql`
                     HAVING COUNT(*) = ${careersNames.length}`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
           ), filtered_by_position AS (
             SELECT "email", "industryName", "skillName", "skillCategoryName"
             FROM filtered_by_career
             ${
               positionsOfInterest
-                ? Prisma.sql`
-                    WHERE "positionName" IN (${Prisma.join(
+                ? PrismaUalumni.sql`
+                    WHERE "positionName" IN (${PrismaUalumni.join(
                       positionsOfInterest,
                     )})`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
             GROUP BY "email", "industryName", "skillName", "skillCategoryName"
             ${
               positionsOfInterest
-                ? Prisma.sql`
+                ? PrismaUalumni.sql`
                     HAVING COUNT(*) = ${positionsOfInterest.length}`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
           ), filtered_by_industry AS (
             SELECT "email", "skillName", "skillCategoryName"
             FROM filtered_by_position
             ${
               industriesOfInterest
-                ? Prisma.sql`
-                    WHERE "industryName" IN (${Prisma.join(
+                ? PrismaUalumni.sql`
+                    WHERE "industryName" IN (${PrismaUalumni.join(
                       industriesOfInterest,
                     )})`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
             GROUP BY "email", "skillName", "skillCategoryName"
             ${
               industriesOfInterest
-                ? Prisma.sql`
+                ? PrismaUalumni.sql`
                     HAVING COUNT(*) = ${industriesOfInterest.length}`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
           ), filtered_by_skills AS (
             SELECT "email", "skillCategoryName"
             FROM filtered_by_industry
             ${
               skillsNames
-                ? Prisma.sql`
-                    WHERE "skillName" IN (${Prisma.join(skillsNames)})`
-                : Prisma.empty
+                ? PrismaUalumni.sql`
+                    WHERE "skillName" IN (${PrismaUalumni.join(skillsNames)})`
+                : PrismaUalumni.empty
             }
             GROUP BY "email", "skillCategoryName"
             ${
               skillsNames
-                ? Prisma.sql`
+                ? PrismaUalumni.sql`
                     HAVING COUNT(*) = ${skillsNames.length}`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
           ), filtered_by_skill_categories AS (
             SELECT "email", COUNT("email") AS "filteredAlumniCount"
             FROM filtered_by_skills
             ${
               skillCategories
-                ? Prisma.sql`
-                    WHERE "skillCategoryName" IN (${Prisma.join(
+                ? PrismaUalumni.sql`
+                    WHERE "skillCategoryName" IN (${PrismaUalumni.join(
                       skillCategories,
                     )}) `
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
             GROUP BY "email"
             ${
               skillCategories
-                ? Prisma.sql`
+                ? PrismaUalumni.sql`
                     HAVING COUNT(*) = ${skillCategories.length}`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
           ), filtered_total_count AS (
             SELECT MAX("filteredAlumniCount") AS "totalCount"
@@ -376,18 +376,18 @@ export class AlumniService {
             WHERE r."isVisible" = TRUE
               ${
                 positionsOfInterest
-                  ? Prisma.sql`AND p."isVisible" = TRUE`
-                  : Prisma.empty
+                  ? PrismaUalumni.sql`AND p."isVisible" = TRUE`
+                  : PrismaUalumni.empty
               }
               ${
                 industriesOfInterest
-                  ? Prisma.sql`AND i."isVisible" = TRUE`
-                  : Prisma.empty
+                  ? PrismaUalumni.sql`AND i."isVisible" = TRUE`
+                  : PrismaUalumni.empty
               }
               ${
                 skillsNames
-                  ? Prisma.sql`AND rt."isVisible" = TRUE`
-                  : Prisma.empty
+                  ? PrismaUalumni.sql`AND rt."isVisible" = TRUE`
+                  : PrismaUalumni.empty
               }
           ), filtered_by_name AS (
             SELECT "email", "careerName", "positionName", "industryName", "skillName", "skillCategoryName"
@@ -400,86 +400,86 @@ export class AlumniService {
             FROM filtered_by_name
 	          ${
               careersNames
-                ? Prisma.sql`
-                    WHERE "careerName" IN (${Prisma.join(careersNames)})`
-                : Prisma.empty
+                ? PrismaUalumni.sql`
+                    WHERE "careerName" IN (${PrismaUalumni.join(careersNames)})`
+                : PrismaUalumni.empty
             }
             GROUP BY "email", "positionName", "industryName", "skillName", "skillCategoryName"
             ${
               careersNames
-                ? Prisma.sql`
+                ? PrismaUalumni.sql`
                     HAVING COUNT(*) = ${careersNames.length}`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
           ), filtered_by_position AS (
             SELECT "email", "industryName", "skillName", "skillCategoryName"
             FROM filtered_by_career
             ${
               positionsOfInterest
-                ? Prisma.sql`
-                    WHERE "positionName" IN (${Prisma.join(
+                ? PrismaUalumni.sql`
+                    WHERE "positionName" IN (${PrismaUalumni.join(
                       positionsOfInterest,
                     )})`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
             GROUP BY "email", "industryName", "skillName", "skillCategoryName"
             ${
               positionsOfInterest
-                ? Prisma.sql`
+                ? PrismaUalumni.sql`
                     HAVING COUNT(*) = ${positionsOfInterest.length}`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
           ), filtered_by_industry AS (
             SELECT "email", "skillName", "skillCategoryName"
             FROM filtered_by_position
             ${
               industriesOfInterest
-                ? Prisma.sql`
-                    WHERE "industryName" IN (${Prisma.join(
+                ? PrismaUalumni.sql`
+                    WHERE "industryName" IN (${PrismaUalumni.join(
                       industriesOfInterest,
                     )})`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
             GROUP BY "email", "skillName", "skillCategoryName"
             ${
               industriesOfInterest
-                ? Prisma.sql`
+                ? PrismaUalumni.sql`
                     HAVING COUNT(*) = ${industriesOfInterest.length}`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
           ), filtered_by_skills AS (
             SELECT "email", "skillCategoryName"
             FROM filtered_by_industry
             ${
               skillsNames
-                ? Prisma.sql`
-                    WHERE "skillName" IN (${Prisma.join(skillsNames)})`
-                : Prisma.empty
+                ? PrismaUalumni.sql`
+                    WHERE "skillName" IN (${PrismaUalumni.join(skillsNames)})`
+                : PrismaUalumni.empty
             }
             GROUP BY "email", "skillCategoryName"
             ${
               skillsNames
-                ? Prisma.sql`
+                ? PrismaUalumni.sql`
                     HAVING COUNT(*) = ${skillsNames.length}`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
           ), filtered_by_skill_categories AS (
             SELECT "email", COUNT("email") AS "filteredAlumniCount"
             FROM filtered_by_skills
             ${
               skillCategories
-                ? Prisma.sql`
-                    WHERE "skillCategoryName" IN (${Prisma.join(
+                ? PrismaUalumni.sql`
+                    WHERE "skillCategoryName" IN (${PrismaUalumni.join(
                       skillCategories,
                     )}) `
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
             GROUP BY "email"
             ${
               skillCategories
-                ? Prisma.sql`
+                ? PrismaUalumni.sql`
                     HAVING COUNT(*) = ${skillCategories.length}`
-                : Prisma.empty
+                : PrismaUalumni.empty
             }
           ), filtered_total_count AS (
             SELECT MAX("filteredAlumniCount") AS "totalCount"
@@ -668,7 +668,7 @@ export class AlumniService {
       const { associatedUser: userProps, ...rest } = updatedAlumni;
       return { ...userProps, ...rest };
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error instanceof PrismaUalumni.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
             `There is no alumni with the given \`email\` (${email})`,
@@ -690,29 +690,34 @@ export class AlumniService {
 
   async remove(email: string): Promise<Alumni> {
     try {
-      const removedAlumni = await this.ualumniDbService.alumni.delete({
-        where: { email },
-        include: {
-          associatedUser: {
-            select: {
-              password: true,
-              names: true,
-              surnames: true,
+      const [removedAlumni, _] = await this.ualumniDbService.$transaction([
+        this.ualumniDbService.alumni.delete({
+          where: { email },
+          include: {
+            associatedUser: {
+              select: {
+                password: true,
+                names: true,
+                surnames: true,
+              },
             },
-          },
-          graduations: {
-            select: {
-              careerName: true,
-              graduationDate: true
+            graduations: {
+              select: {
+                careerName: true,
+                graduationDate: true
+              }
             }
           }
-        }
-      });
+        }),
+        this.ualumniDbService.user.delete({
+          where: { email }
+        })
+      ])
 
       const { associatedUser: userProps, ...rest } = removedAlumni;
       return { ...userProps, ...rest };
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error instanceof PrismaUalumni.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
             `There is no alumni with the given \`email\` (${email})`,
