@@ -1,25 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { ContractTypeDto } from './dto/contract-type.dto';
-import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { CreateContractTypeDto } from './dto/create-contract-type.dto';
 import {
   AlreadyExistsError,
   NotFoundError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
 import { UpdateContractTypeDto } from './dto/update-contract-type.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class ContractTypeService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
     createContractTypeDto: CreateContractTypeDto,
   ): Promise<ContractTypeDto> {
     try {
-      return await this.prismaService.contractType.create({
+      return await this.ualumniDbService.contractType.create({
         data: {
           name: createContractTypeDto.name,
         },
@@ -44,7 +44,7 @@ export class ContractTypeService {
     perPage: number,
   ): Promise<PageDto<ContractTypeDto>> {
     try {
-      const totalCount = await this.prismaService.contractType.count();
+      const totalCount = await this.ualumniDbService.contractType.count();
       const pageCount = Math.ceil(totalCount / perPage);
 
       if (totalCount == 0 || page < 1) {
@@ -53,7 +53,7 @@ export class ContractTypeService {
         page = pageCount;
       }
 
-      const data = await this.prismaService.contractType.findMany({
+      const data = await this.ualumniDbService.contractType.findMany({
         take: perPage,
         skip: (page - 1) * perPage,
       });
@@ -74,7 +74,7 @@ export class ContractTypeService {
 
   async findOne(name: string): Promise<ContractTypeDto | null> {
     try {
-      return await this.prismaService.contractType.findUnique({
+      return await this.ualumniDbService.contractType.findUnique({
         where: { name },
       });
     } catch (error) {
@@ -89,7 +89,7 @@ export class ContractTypeService {
     updateContractTypeDto: UpdateContractTypeDto,
   ): Promise<ContractTypeDto> {
     try {
-      return await this.prismaService.contractType.update({
+      return await this.ualumniDbService.contractType.update({
         where: {
           name,
         },
@@ -119,7 +119,7 @@ export class ContractTypeService {
 
   async remove(name: string): Promise<ContractTypeDto> {
     try {
-      return await this.prismaService.contractType.delete({
+      return await this.ualumniDbService.contractType.delete({
         where: {
           name,
         },

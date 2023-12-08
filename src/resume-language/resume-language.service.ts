@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateResumeLanguageDto } from './dto/create-resume-language.dto';
 import { UpdateResumeLanguageDto } from './dto/update-resume-language.dto';
-import { PrismaService } from 'src/ualumni-database/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,
@@ -11,17 +10,18 @@ import {
 } from 'src/common/errors/service.error';
 import { ResumeLanguageDto } from './dto/resume-language.dto';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class ResumeLanguageService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
     resumeOwnerEmail: string,
     createResumeLanguageDto: CreateResumeLanguageDto,
   ) {
     try {
-      return await this.prismaService.resumeLanguage.create({
+      return await this.ualumniDbService.resumeLanguage.create({
         data: {
           resumeOwnerEmail: resumeOwnerEmail,
           languageName: createResumeLanguageDto.languageName,
@@ -56,7 +56,7 @@ export class ResumeLanguageService {
     perPage: number,
   ): Promise<PageDto<ResumeLanguageDto>> {
     try {
-      const totalCount = await this.prismaService.resumeLanguage.count({
+      const totalCount = await this.ualumniDbService.resumeLanguage.count({
         where: { resumeOwnerEmail },
       });
       const pageCount = Math.ceil(totalCount / perPage);
@@ -67,7 +67,7 @@ export class ResumeLanguageService {
         page = pageCount;
       }
 
-      const data = await this.prismaService.resumeLanguage.findMany({
+      const data = await this.ualumniDbService.resumeLanguage.findMany({
         where: { resumeOwnerEmail },
         take: perPage,
         skip: (page - 1) * perPage,
@@ -92,7 +92,7 @@ export class ResumeLanguageService {
     resumeOwnerEmail: string,
   ): Promise<ResumeLanguageDto | null> {
     try {
-      return await this.prismaService.resumeLanguage.findUnique({
+      return await this.ualumniDbService.resumeLanguage.findUnique({
         where: {
           resumeOwnerEmail_languageName: {
             languageName,
@@ -113,7 +113,7 @@ export class ResumeLanguageService {
     updateResumeLanguageDto: UpdateResumeLanguageDto,
   ): Promise<ResumeLanguageDto> {
     try {
-      return await this.prismaService.resumeLanguage.update({
+      return await this.ualumniDbService.resumeLanguage.update({
         where: {
           resumeOwnerEmail_languageName: {
             languageName,
@@ -148,7 +148,7 @@ export class ResumeLanguageService {
     resumeOwnerEmail: string,
   ): Promise<ResumeLanguageDto> {
     try {
-      return await this.prismaService.resumeLanguage.delete({
+      return await this.ualumniDbService.resumeLanguage.delete({
         where: {
           resumeOwnerEmail_languageName: {
             languageName,

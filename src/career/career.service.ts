@@ -2,22 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { CreateCareerDto } from './dto/create-career.dto';
 import { UpdateCareerDto } from './dto/update-career.dto';
 import { CareerDto } from './dto/career.dto';
-import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   NotFoundError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class CareerService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly ualumniBdService: UalumniDbService) {}
 
   async create(createCareerDto: CreateCareerDto): Promise<CareerDto> {
     try {
-      return await this.prismaService.career.create({
+      return await this.ualumniBdService.career.create({
         data: {
           name: createCareerDto.name,
         },
@@ -39,7 +39,7 @@ export class CareerService {
 
   async findMany(page: number, perPage: number): Promise<PageDto<CareerDto>> {
     try {
-      const totalCount = await this.prismaService.career.count();
+      const totalCount = await this.ualumniBdService.career.count();
       const pageCount = Math.ceil(totalCount / perPage);
 
       if (page < 1) {
@@ -48,7 +48,7 @@ export class CareerService {
         page = pageCount;
       }
 
-      const data = await this.prismaService.career.findMany({
+      const data = await this.ualumniBdService.career.findMany({
         take: perPage,
         skip: (page - 1) * perPage,
       });
@@ -69,7 +69,7 @@ export class CareerService {
 
   async findOne(name: string): Promise<CareerDto | null> {
     try {
-      return await this.prismaService.career.findUnique({
+      return await this.ualumniBdService.career.findUnique({
         where: {
           name,
         },
@@ -86,7 +86,7 @@ export class CareerService {
     updateCareerDto: UpdateCareerDto,
   ): Promise<CareerDto> {
     try {
-      return await this.prismaService.career.update({
+      return await this.ualumniBdService.career.update({
         where: {
           name,
         },
@@ -117,7 +117,7 @@ export class CareerService {
 
   async remove(name: string): Promise<CareerDto> {
     try {
-      return await this.prismaService.career.delete({
+      return await this.ualumniBdService.career.delete({
         where: {
           name,
         },

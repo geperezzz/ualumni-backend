@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateHigherEducationStudyDto } from './dto/create-higher-education-study.dto';
 import { UpdateHigherEducationStudyDto } from './dto/update-higher-education-study.dto';
-import { PrismaService } from 'src/ualumni-database/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,
@@ -11,17 +10,18 @@ import {
 } from 'src/common/errors/service.error';
 import { HigherEducationStudyDto } from './dto/higher-education-study.dto';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class HigherEducationStudyService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
     resumeOwnerEmail: string,
     createHigherEducationStudyDto: CreateHigherEducationStudyDto,
   ) {
     try {
-      return await this.prismaService.higherEducationStudy.create({
+      return await this.ualumniDbService.higherEducationStudy.create({
         data: {
           resumeOwnerEmail: resumeOwnerEmail,
           title: createHigherEducationStudyDto.title,
@@ -59,7 +59,7 @@ export class HigherEducationStudyService {
     perPage: number,
   ): Promise<PageDto<HigherEducationStudyDto>> {
     try {
-      const totalCount = await this.prismaService.higherEducationStudy.count({
+      const totalCount = await this.ualumniDbService.higherEducationStudy.count({
         where: { resumeOwnerEmail },
       });
       const pageCount = Math.ceil(totalCount / perPage);
@@ -70,7 +70,7 @@ export class HigherEducationStudyService {
         page = pageCount;
       }
 
-      const data = await this.prismaService.higherEducationStudy.findMany({
+      const data = await this.ualumniDbService.higherEducationStudy.findMany({
         where: { resumeOwnerEmail },
         take: perPage,
         skip: (page - 1) * perPage,
@@ -95,7 +95,7 @@ export class HigherEducationStudyService {
     resumeOwnerEmail: string,
   ): Promise<HigherEducationStudyDto | null> {
     try {
-      return await this.prismaService.higherEducationStudy.findUnique({
+      return await this.ualumniDbService.higherEducationStudy.findUnique({
         where: {
           resumeOwnerEmail_title: {
             title,
@@ -116,7 +116,7 @@ export class HigherEducationStudyService {
     updateHigherEducationStudyDto: UpdateHigherEducationStudyDto,
   ): Promise<HigherEducationStudyDto> {
     try {
-      return await this.prismaService.higherEducationStudy.update({
+      return await this.ualumniDbService.higherEducationStudy.update({
         where: {
           resumeOwnerEmail_title: {
             title,
@@ -151,7 +151,7 @@ export class HigherEducationStudyService {
     resumeOwnerEmail: string,
   ): Promise<HigherEducationStudyDto> {
     try {
-      return await this.prismaService.higherEducationStudy.delete({
+      return await this.ualumniDbService.higherEducationStudy.delete({
         where: {
           resumeOwnerEmail_title: {
             title,

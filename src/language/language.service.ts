@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { LanguageDto } from './dto/language.dto';
-import { PrismaService } from 'src/ualumni-database/prisma.service';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   NotFoundError,
@@ -10,14 +9,15 @@ import {
 } from 'src/common/errors/service.error';
 import { CreateLanguageDto } from './dto/create-language.dto';
 import { UpdateLanguageDto } from './dto/update-language.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class LanguageService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(createLanguageDto: CreateLanguageDto): Promise<LanguageDto> {
     try {
-      return await this.prismaService.language.create({
+      return await this.ualumniDbService.language.create({
         data: {
           name: createLanguageDto.name,
         },
@@ -39,7 +39,7 @@ export class LanguageService {
 
   async findMany(page: number, perPage: number): Promise<PageDto<LanguageDto>> {
     try {
-      const totalCount = await this.prismaService.language.count();
+      const totalCount = await this.ualumniDbService.language.count();
       const pageCount = Math.ceil(totalCount / perPage);
 
       if (page < 1) {
@@ -48,7 +48,7 @@ export class LanguageService {
         page = pageCount;
       }
 
-      const data = await this.prismaService.language.findMany({
+      const data = await this.ualumniDbService.language.findMany({
         take: perPage,
         skip: (page - 1) * perPage,
       });
@@ -69,7 +69,7 @@ export class LanguageService {
 
   async findOne(name: string): Promise<LanguageDto | null> {
     try {
-      return await this.prismaService.language.findUnique({
+      return await this.ualumniDbService.language.findUnique({
         where: {
           name,
         },
@@ -86,7 +86,7 @@ export class LanguageService {
     updateLanguageDto: UpdateLanguageDto,
   ): Promise<LanguageDto> {
     try {
-      return await this.prismaService.language.update({
+      return await this.ualumniDbService.language.update({
         where: {
           name,
         },
@@ -116,7 +116,7 @@ export class LanguageService {
 
   async remove(name: string): Promise<LanguageDto> {
     try {
-      return await this.prismaService.language.delete({
+      return await this.ualumniDbService.language.delete({
         where: {
           name,
         },

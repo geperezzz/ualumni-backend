@@ -3,12 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   HttpStatus,
   HttpCode,
-  HttpException,
   Query,
   DefaultValuePipe,
   ParseIntPipe,
@@ -31,8 +29,7 @@ import {
 } from '@nestjs/swagger';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
-import { AlreadyExistsError } from 'src/common/errors/service.error';
-import { NotFoundError } from 'rxjs';
+import { AlreadyExistsError, NotFoundError } from 'src/common/errors/service.error';
 
 @ApiTags('contract-type')
 @Controller('contract-type')

@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { CreateGraduationDto } from './dto/create-graduation.dto';
 import { UpdateGraduationDto } from './dto/update-graduation.dto';
-import { Graduation, Prisma } from '@prisma/client';
+import { Graduation, Prisma } from 'prisma/ualumni/client';
 import { Page } from 'src/common/interfaces/page.interface';
-import { PrismaService } from 'src/ualumni-database/prisma.service';
 import {
   AlreadyExistsError,
   NotFoundError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class GraduationsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private ualumniDbService: UalumniDbService) {}
 
   async create(
     alumniEmail: string,
     createGraduationDto: CreateGraduationDto,
   ): Promise<Graduation> {
     try {
-      return await this.prismaService.graduation.create({
+      return await this.ualumniDbService.graduation.create({
         data: {
           alumniEmail,
           ...createGraduationDto,
@@ -59,13 +59,13 @@ export class GraduationsService {
     { pageNumber, itemsPerPage }: PaginationParamsDto,
   ): Promise<Page<Graduation>> {
     try {
-      let [items, numberOfItems] = await this.prismaService.$transaction([
-        this.prismaService.graduation.findMany({
+      let [items, numberOfItems] = await this.ualumniDbService.$transaction([
+        this.ualumniDbService.graduation.findMany({
           where: { alumniEmail },
           take: itemsPerPage,
           skip: itemsPerPage * (pageNumber - 1),
         }),
-        this.prismaService.graduation.count(),
+        this.ualumniDbService.graduation.count(),
       ]);
 
       return {
@@ -89,7 +89,7 @@ export class GraduationsService {
     careerName: string,
   ): Promise<Graduation | null> {
     try {
-      return await this.prismaService.graduation.findUnique({
+      return await this.ualumniDbService.graduation.findUnique({
         where: {
           careerName_alumniEmail: {
             careerName,
@@ -110,7 +110,7 @@ export class GraduationsService {
     updateGraduationDto: UpdateGraduationDto,
   ): Promise<Graduation> {
     try {
-      return await this.prismaService.graduation.update({
+      return await this.ualumniDbService.graduation.update({
         where: {
           careerName_alumniEmail: {
             careerName,
@@ -142,7 +142,7 @@ export class GraduationsService {
 
   async remove(alumniEmail: string, careerName: string): Promise<Graduation> {
     try {
-      return await this.prismaService.graduation.delete({
+      return await this.ualumniDbService.graduation.delete({
         where: {
           careerName_alumniEmail: {
             careerName,

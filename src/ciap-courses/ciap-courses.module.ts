@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { CiapCoursesService } from './ciap-courses.service';
 import { CiapCoursesController } from './ciap-courses.controller';
-import { PrismaModule } from 'src/ualumni-database/ualumni-database.module';
+import { UalumniDbModule } from 'src/ualumni-db/ualumni-db.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [UalumniDbModule],
   controllers: [CiapCoursesController],
   providers: [CiapCoursesService],
 })

@@ -1,22 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { CreateResumeCiapCourseDto } from './dto/create-resume-ciap-course.dto';
 import { ResumeCiapCourseDto } from './dto/resume-ciap-course.dto';
-import { PrismaService } from 'src/ualumni-database/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   ForeignKeyError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class ResumeCiapCoursesService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly ualumniDbService: UalumniDbService) {}
   async create(
     ownerEmail: string,
     createResumeCiapCourseDto: CreateResumeCiapCourseDto,
   ): Promise<ResumeCiapCourseDto> {
     try {
-      return await this.prismaService.resumeCiapCourse.create({
+      return await this.ualumniDbService.resumeCiapCourse.create({
         data: {
           isVisible: true,
           courseId: createResumeCiapCourseDto.id,
@@ -40,7 +40,7 @@ export class ResumeCiapCoursesService {
 
   async findAll(ownerEmail: string): Promise<ResumeCiapCourseDto[]> {
     try {
-      return await this.prismaService.resumeCiapCourse.findMany({
+      return await this.ualumniDbService.resumeCiapCourse.findMany({
         where: {
           resumeOwnerEmail: ownerEmail,
         },
@@ -57,7 +57,7 @@ export class ResumeCiapCoursesService {
     id: string,
   ): Promise<ResumeCiapCourseDto | null> {
     try {
-      return await this.prismaService.resumeCiapCourse.findUnique({
+      return await this.ualumniDbService.resumeCiapCourse.findUnique({
         where: {
           resumeOwnerEmail_courseId: {
             resumeOwnerEmail: ownerEmail,
@@ -74,7 +74,7 @@ export class ResumeCiapCoursesService {
 
   async remove(ownerEmail: string, id: string): Promise<ResumeCiapCourseDto> {
     try {
-      return await this.prismaService.resumeCiapCourse.delete({
+      return await this.ualumniDbService.resumeCiapCourse.delete({
         where: {
           resumeOwnerEmail_courseId: {
             resumeOwnerEmail: ownerEmail,

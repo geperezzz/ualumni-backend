@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateResumeTechnicalSkillDto } from './dto/create-resume-technical-skill.dto';
 import { UpdateResumeTechnicalSkillDto } from './dto/update-resume-technical-skill.dto';
-import { PrismaService } from 'src/ualumni-database/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,
@@ -11,10 +10,11 @@ import {
 } from 'src/common/errors/service.error';
 import { ResumeTechnicalSkillDto } from './dto/resume-technical-skill.dto';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class ResumeTechnicalSkillService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
     resumeOwnerEmail: string,
@@ -22,7 +22,7 @@ export class ResumeTechnicalSkillService {
     createResumeTechnicalSkillDto: CreateResumeTechnicalSkillDto,
   ) {
     try {
-      return await this.prismaService.resumeTechnicalSkill.create({
+      return await this.ualumniDbService.resumeTechnicalSkill.create({
         data: {
           resumeOwnerEmail: resumeOwnerEmail,
           skillCategoryName: skillCategory,
@@ -57,7 +57,7 @@ export class ResumeTechnicalSkillService {
     perPage: number,
   ): Promise<PageDto<ResumeTechnicalSkillDto>> {
     try {
-      const totalCount = await this.prismaService.resumeTechnicalSkill.count({
+      const totalCount = await this.ualumniDbService.resumeTechnicalSkill.count({
         where: { resumeOwnerEmail },
       });
       const pageCount = Math.ceil(totalCount / perPage);
@@ -68,7 +68,7 @@ export class ResumeTechnicalSkillService {
         page = pageCount;
       }
 
-      const data = await this.prismaService.resumeTechnicalSkill.findMany({
+      const data = await this.ualumniDbService.resumeTechnicalSkill.findMany({
         where: { resumeOwnerEmail },
         take: perPage,
         skip: (page - 1) * perPage,
@@ -94,7 +94,7 @@ export class ResumeTechnicalSkillService {
     skillName: string,
   ): Promise<ResumeTechnicalSkillDto | null> {
     try {
-      return await this.prismaService.resumeTechnicalSkill.findUnique({
+      return await this.ualumniDbService.resumeTechnicalSkill.findUnique({
         where: {
           resumeOwnerEmail_skillName_skillCategoryName: {
             skillName,
@@ -117,7 +117,7 @@ export class ResumeTechnicalSkillService {
     updateResumeTechnicalSkillDto: UpdateResumeTechnicalSkillDto,
   ): Promise<ResumeTechnicalSkillDto> {
     try {
-      return await this.prismaService.resumeTechnicalSkill.update({
+      return await this.ualumniDbService.resumeTechnicalSkill.update({
         where: {
           resumeOwnerEmail_skillName_skillCategoryName: {
             skillName,
@@ -154,7 +154,7 @@ export class ResumeTechnicalSkillService {
     skillName: string,
   ): Promise<ResumeTechnicalSkillDto> {
     try {
-      return await this.prismaService.resumeTechnicalSkill.delete({
+      return await this.ualumniDbService.resumeTechnicalSkill.delete({
         where: {
           resumeOwnerEmail_skillName_skillCategoryName: {
             resumeOwnerEmail,
