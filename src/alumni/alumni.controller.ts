@@ -11,6 +11,7 @@ import {
   NotFoundException,
   Query,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { AlumniService } from './alumni.service';
 import { CreateAlumniDto } from './dto/create-alumni.dto';
@@ -32,6 +33,7 @@ import { User } from 'prisma/ualumni/client';
 import { FilterRandomPaginationParamsDto } from './dto/filter-random-pagination-params.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Alumni } from './alumni.type';
+import { Request } from 'express';
 
 @ApiTags('Alumni')
 @Controller('alumni')
@@ -195,7 +197,7 @@ export class AlumniController {
       });
 
       return {
-        statusCode: HttpStatus.CREATED,
+        statusCode: HttpStatus.OK,
         data: updatedAlumniDto,
       };
     } catch (error) {
@@ -222,7 +224,7 @@ export class AlumniController {
       );
 
       return {
-        statusCode: HttpStatus.CREATED,
+        statusCode: HttpStatus.OK,
         data: updatedAlumni,
       };
     } catch (error) {
@@ -238,17 +240,21 @@ export class AlumniController {
 
   @Delete('me')
   @Allowed('alumni')
-  async removeMe(@SessionUser() user: User): Promise<ResponseDto<AlumniDto>> {
+  async removeMe(@SessionUser() user: User, @Req() request: Request): Promise<ResponseDto<AlumniDto>> {
     try {
       let removedAlumni = await this.alumniService.remove(user.email);
       let removedAlumniDto = plainToInstance(AlumniDto, removedAlumni, {
         excludeExtraneousValues: true,
       });
 
-      return {
-        statusCode: HttpStatus.CREATED,
-        data: removedAlumniDto,
-      };
+      return new Promise(resolve =>
+        request.logout(() =>
+          resolve({
+            statusCode: HttpStatus.OK,
+            data: removedAlumniDto,
+          })
+        )
+      );
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
@@ -264,7 +270,7 @@ export class AlumniController {
       let removedAlumni = await this.alumniService.remove(email);
 
       return {
-        statusCode: HttpStatus.CREATED,
+        statusCode: HttpStatus.OK,
         data: removedAlumni,
       };
     } catch (error) {
