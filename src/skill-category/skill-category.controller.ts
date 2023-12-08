@@ -15,6 +15,7 @@ import {
   ParseIntPipe,
   NotFoundException,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { SkillCategoryService } from './skill-category.service';
 import { CreateSkillCategoryDto } from './dto/create-skill-category.dto';
@@ -36,13 +37,20 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { SessionAuthGuard } from 'src/auth/session/session.guard';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
+import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 
 @ApiTags('skill-category')
 @Controller('skill-category')
+@UseGuards(SessionAuthGuard, PermissionsGuard)
 export class SkillCategoryController {
   constructor(private readonly skillCategoryService: SkillCategoryService) {}
 
   @Post()
+  @Allowed('admin')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
     description: 'The skill category was succesfully created',
@@ -82,6 +90,9 @@ export class SkillCategoryController {
   }
 
   @Get()
+  @SessionNotRequired()
+  @Allowed('all')
+  @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'The list of skill categories was succesfully obtained',
   })
@@ -91,16 +102,15 @@ export class SkillCategoryController {
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
   })
-  async findMany(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('perPage', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
+  async findPage(
+    @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<SkillCategoryDto>> {
-    if (perPage < 1)
+    if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
     try {
       const skillCategories = await this.skillCategoryService.findMany(
-        page,
-        perPage,
+        paginationParamsDto.pageNumber,
+        paginationParamsDto.itemsPerPage,
       );
       return {
         statusCode: HttpStatus.OK,
@@ -115,6 +125,8 @@ export class SkillCategoryController {
   }
 
   @Get('career/:careerName')
+  @SessionNotRequired()
+  @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'The list of skill categories was succesfully obtained',
@@ -127,17 +139,16 @@ export class SkillCategoryController {
   })
   async findManyByCareerName(
     @Param('careerName') careerName: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('perPage', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
+    @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<SkillCategoryDto>> {
-    if (perPage < 1)
+    if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
     try {
       const skillCategories =
         await this.skillCategoryService.findManyByCareerName(
           careerName,
-          page,
-          perPage,
+          paginationParamsDto.pageNumber,
+          paginationParamsDto.itemsPerPage,
         );
       return {
         statusCode: HttpStatus.OK,
@@ -152,6 +163,8 @@ export class SkillCategoryController {
   }
 
   @Get(':name')
+  @SessionNotRequired()
+  @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Skill category was succesfully found' })
   @ApiNotFoundResponse({
@@ -175,6 +188,7 @@ export class SkillCategoryController {
   }
 
   @Put(':name')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Skill category was succesfully updated' })
   @ApiNotFoundResponse({
@@ -213,47 +227,9 @@ export class SkillCategoryController {
     }
   }
 
-  @Patch(':name/careers')
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ description: 'Related careers was succesfully updated' })
-  @ApiNotFoundResponse({
-    description: 'The career/s with the requested name/s was not found',
-  })
-  @ApiBadRequestResponse({
-    description: 'There is no career/s with the given name/s',
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'An unexpected situation ocurred',
-  })
-  async updateRelatedCareers(
-    @Param('name') name: string,
-    @Body() updateRelatedCareersDto: UpdateRelatedCareersDto,
-  ): Promise<ResponseDto<SkillCategoryDto>> {
-    try {
-      const updatedSkillCategory =
-        await this.skillCategoryService.updateRelatedCareers(
-          name,
-          updateRelatedCareersDto,
-        );
-      return {
-        statusCode: HttpStatus.OK,
-        data: updatedSkillCategory,
-      };
-    } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw new NotFoundException(error.message, { cause: error });
-      }
-      if (error instanceof ForeignKeyError) {
-        throw new BadRequestException(error.message, { cause: error });
-      }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
-    }
-  }
-
   @Delete(':name')
+  @Allowed('admin')
+  @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Skill category was succesfully delete' })
   @ApiNotFoundResponse({
     description: 'The skill category with the requested name was not found',
