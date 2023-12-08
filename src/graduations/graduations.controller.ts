@@ -29,7 +29,9 @@ import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('graduations')
 @Controller('alumni')
 @UseGuards(SessionAuthGuard, PermissionsGuard)
 export class GraduationsController {
