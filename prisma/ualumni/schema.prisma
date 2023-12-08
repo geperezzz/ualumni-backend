@@ -29,7 +29,7 @@ model JobOffer {
 }
 
 model JobOfferTechnicalSkill {
-  jobOffer                   JobOffer       @relation(fields: [jobOfferId], references: [id])
+  jobOffer                   JobOffer       @relation(fields: [jobOfferId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   jobOfferId                 String         @db.Uuid
   technicalSkill             TechnicalSkill @relation(fields: [technicalSkillName, technicalSkillCategoryName], references: [name, categoryName])
   technicalSkillName         String
@@ -84,7 +84,7 @@ model Session {
 model Graduation {
   career         Career   @relation(fields: [careerName], references: [name])
   careerName     String
-  alumni         Alumni   @relation(fields: [alumniEmail], references: [email])
+  alumni         Alumni   @relation(fields: [alumniEmail], references: [email], onUpdate: Cascade, onDelete: Cascade)
   alumniEmail    String
   graduationDate DateTime @db.Date
 
@@ -92,9 +92,9 @@ model Graduation {
 }
 
 model JobApplication {
-  jobOffer              JobOffer @relation(fields: [jobOfferId], references: [id])
+  jobOffer              JobOffer @relation(fields: [jobOfferId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   jobOfferId            String   @db.Uuid
-  alumniWhoApplied      Alumni   @relation(fields: [alumniWhoAppliedEmail], references: [email])
+  alumniWhoApplied      Alumni   @relation(fields: [alumniWhoAppliedEmail], references: [email], onUpdate: Cascade, onDelete: Cascade)
   alumniWhoAppliedEmail String
   applicationTimestamp  DateTime
 
@@ -128,7 +128,7 @@ model CiapCourse {
 }
 
 model ResumeCiapCourse {
-  resume           Resume     @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
+  resume           Resume     @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
   resumeOwnerEmail String
   course           CiapCourse @relation(fields: [courseId], references: [id])
   courseId         String     @db.Uuid
@@ -143,7 +143,7 @@ model SoftSkill {
 }
 
 model ResumeSoftSkill {
-  resume           Resume    @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
+  resume           Resume    @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
   resumeOwnerEmail String
   skill            SoftSkill @relation(fields: [skillName], references: [name])
   skillName        String
@@ -160,7 +160,7 @@ model SkillCategory {
 
 model TechnicalSkill {
   name                 String
-  category             SkillCategory            @relation(fields: [categoryName], references: [name])
+  category             SkillCategory            @relation(fields: [categoryName], references: [name], onUpdate: Cascade, onDelete: Cascade)
   categoryName         String
   resumesListingThis   ResumeTechnicalSkill[]
   jobOffersListingThis JobOfferTechnicalSkill[]
@@ -169,7 +169,7 @@ model TechnicalSkill {
 }
 
 model ResumeTechnicalSkill {
-  resume            Resume         @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
+  resume            Resume         @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
   resumeOwnerEmail  String
   skill             TechnicalSkill @relation(fields: [skillName, skillCategoryName], references: [name, categoryName])
   skillName         String
@@ -185,7 +185,7 @@ model Language {
 }
 
 model ResumeLanguage {
-  resume           Resume   @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
+  resume           Resume   @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
   resumeOwnerEmail String
   language         Language @relation(fields: [languageName], references: [name])
   languageName     String
@@ -196,7 +196,7 @@ model ResumeLanguage {
 }
 
 model PortfolioItem {
-  resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
+  resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
   resumeOwnerEmail String
   title            String
   sourceLink       String
@@ -206,7 +206,7 @@ model PortfolioItem {
 }
 
 model HigherEducationStudy {
-  resume           Resume   @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
+  resume           Resume   @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
   resumeOwnerEmail String
   title            String
   institution      String
@@ -217,7 +217,7 @@ model HigherEducationStudy {
 }
 
 model PositionOfInterest {
-  resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
+  resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
   resumeOwnerEmail String
   positionName     String
   isVisible        Boolean
@@ -226,7 +226,7 @@ model PositionOfInterest {
 }
 
 model IndustryOfInterest {
-  resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
+  resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
   resumeOwnerEmail String
   industryName     String
   isVisible        Boolean
