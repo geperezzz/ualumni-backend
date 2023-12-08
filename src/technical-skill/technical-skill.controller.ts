@@ -14,6 +14,7 @@ import {
   NotFoundException,
   ParseIntPipe,
   DefaultValuePipe,
+  UseGuards,
 } from '@nestjs/common';
 import { TechnicalSkillService } from './technical-skill.service';
 import { CreateTechnicalSkillDto } from './dto/create-technical-skill.dto';
@@ -34,13 +35,20 @@ import {
   NotFoundError,
 } from 'src/common/error/service.error';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
+import { SessionAuthGuard } from 'src/auth/session/session.guard';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
+import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 
 @ApiTags('technical-skill')
 @Controller('skillCategory/:skillCategory/technical-skill')
+@UseGuards(SessionAuthGuard, PermissionsGuard)
 export class TechnicalSkillController {
   constructor(private readonly technicalSkillService: TechnicalSkillService) {}
 
   @Post()
+  @Allowed('admin')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
     description: 'technical skill was succesfully created',
@@ -77,6 +85,8 @@ export class TechnicalSkillController {
   }
 
   @Get()
+  @SessionNotRequired()
+  @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'The list of technical skills was succesfully obtained',
@@ -89,16 +99,15 @@ export class TechnicalSkillController {
   })
   async findMany(
     @Param('skillCategory') categoryName: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
+    @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<TechnicalSkillDto>> {
-    if (perPage < 1)
+    if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse = await this.technicalSkillService.findMany(
         categoryName,
-        page,
-        perPage,
+        paginationParamsDto.pageNumber,
+        paginationParamsDto.itemsPerPage,
       );
       return {
         statusCode: HttpStatus.OK,
@@ -113,6 +122,8 @@ export class TechnicalSkillController {
   }
 
   @Get('/:name')
+  @SessionNotRequired()
+  @Allowed('all')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'Technical skill was succesfully found',
@@ -143,6 +154,7 @@ export class TechnicalSkillController {
   }
 
   @Patch('/:name')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'Technical skill was succesfully updated',
@@ -183,6 +195,7 @@ export class TechnicalSkillController {
   }
 
   @Delete(':name')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'Technical skill was succesfully deleted',
