@@ -6,10 +6,29 @@ import { NotFoundError, UnexpectedError } from 'src/common/error/service.error';
 import { Prisma } from '@prisma/client';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Resume } from './resume.type';
+import * as path from 'path';
+import * as pug from 'pug';
+import puppeteer from 'puppeteer';
 
 @Injectable()
 export class ResumeService {
   constructor(private readonly prismaService: PrismaService) {}
+  private buildResumeAsHtml = pug.compileFile(
+    path.resolve(__dirname, 'templates/resume.pug'),
+  );
+
+  async exportAsPdf() {
+    const browser = await puppeteer.launch({ headless: 'new' });
+
+    const resumePage = await browser.newPage();
+    await resumePage.setContent(this.buildResumeAsHtml(), {
+      waitUntil: 'networkidle0',
+    });
+    const pdf = await resumePage.pdf();
+
+    await browser.close();
+    return pdf;
+  }
 
   async update(
     email: string,

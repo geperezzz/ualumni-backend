@@ -10,6 +10,8 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Header,
+  StreamableFile,
 } from '@nestjs/common';
 import { ResumeService } from './resume.service';
 import { UpdateResumeDto } from './dto/update-resume.dto';
@@ -28,12 +30,32 @@ import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
 import { User } from '@prisma/client';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @ApiTags('resume')
 @Controller('alumni')
 @UseGuards(SessionAuthGuard, PermissionsGuard)
 export class ResumeController {
   constructor(private readonly resumeService: ResumeService) {}
+
+  @Allowed('alumni')
+  @Get('me/resume/pdf')
+  @Header('Content-Type', 'application/pdf')
+  @Header('Content-Disposition', 'inline; filename=resume.pdf')
+  async exportAsPdfMine(): Promise<StreamableFile> {
+    const pdf = await this.resumeService.exportAsPdf();
+    return new StreamableFile(pdf);
+  }
+
+  @Get(':email/resume/pdf')
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
+  @Header('Content-Type', 'application/pdf')
+  @Header('Content-Disposition', 'inline; filename=resume.pdf')
+  async exportAsPdf(): Promise<StreamableFile> {
+    const pdf = await this.resumeService.exportAsPdf();
+    return new StreamableFile(pdf);
+  }
 
   @Patch('me/resume')
   @Allowed('alumni')
