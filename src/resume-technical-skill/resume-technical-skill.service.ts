@@ -18,14 +18,13 @@ export class ResumeTechnicalSkillService {
 
   async create(
     resumeOwnerEmail: string,
-    skillCategory: string,
     createResumeTechnicalSkillDto: CreateResumeTechnicalSkillDto,
-  ) {
+  ): Promise<ResumeTechnicalSkillDto> {
     try {
       return await this.prismaService.resumeTechnicalSkill.create({
         data: {
           resumeOwnerEmail: resumeOwnerEmail,
-          skillCategoryName: skillCategory,
+          skillCategoryName: createResumeTechnicalSkillDto.skillCategoryName,
           skillName: createResumeTechnicalSkillDto.skillName,
           isVisible: createResumeTechnicalSkillDto.isVisible,
         },
