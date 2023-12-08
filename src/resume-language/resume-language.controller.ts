@@ -40,6 +40,8 @@ import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
 import { User } from '@prisma/client';
+import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @ApiTags('resume-language')
 @Controller('alumni')
@@ -59,7 +61,7 @@ export class ResumeLanguageController {
   async addMine(
     @SessionUser() user: User,
     @Body() CreateResumeLanguageDto: CreateResumeLanguageDto,
-  ) {
+  ): Promise<ResponseDto<ResumeLanguageDto>> {
     try {
       const data = await this.resumeLanguageService.create(
         user.email,
@@ -93,7 +95,7 @@ export class ResumeLanguageController {
   async add(
     @Param('email') resumeOwnerEmail: string,
     @Body() CreateResumeLanguageDto: CreateResumeLanguageDto,
-  ) {
+  ): Promise<ResponseDto<ResumeLanguageDto>> {
     try {
       const data = await this.resumeLanguageService.create(
         resumeOwnerEmail,
@@ -115,7 +117,8 @@ export class ResumeLanguageController {
     }
   }
 
-  @Get()
+  @Get('me/resume/language')
+  @Allowed('alumni')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'The list of languages was succesfully obtained',
@@ -126,18 +129,17 @@ export class ResumeLanguageController {
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
   })
-  async findMany(
-    @Param('email') resumeOwnerEmail: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
+  async findPageMine(
+    @SessionUser() user: User,
+    @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<any> {
-    if (perPage < 1)
+    if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse = await this.resumeLanguageService.findMany(
-        resumeOwnerEmail,
-        page,
-        perPage,
+        user.email,
+        paginationParamsDto.pageNumber,
+        paginationParamsDto.itemsPerPage,
       );
       return {
         statusCode: HttpStatus.OK,
@@ -149,7 +151,75 @@ export class ResumeLanguageController {
     }
   }
 
-  @Get(':languageName')
+  @Get(':email/resume/language')
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'The list of languages was succesfully obtained',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid number of items per page requested',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async findPage(
+    @Param('email') resumeOwnerEmail: string,
+    @Query() paginationParamsDto: PaginationParamsDto,
+  ): Promise<any> {
+    if (paginationParamsDto.itemsPerPage < 1)
+      throw new BadRequestException('Invalid number of items per page');
+    try {
+      const paginationResponse = await this.resumeLanguageService.findMany(
+        resumeOwnerEmail,
+        paginationParamsDto.pageNumber,
+        paginationParamsDto.itemsPerPage,
+      );
+      return {
+        statusCode: HttpStatus.OK,
+        data: paginationResponse,
+      };
+    } catch (error) {
+      const message = error.response ? error.response : 'Bad Request';
+      throw new HttpException(message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('me/resume/language/:languageName')
+  @Allowed('alumni')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'A Language was succesfully found',
+  })
+  @ApiNotFoundResponse({
+    description: 'The language for the requested alumni was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async findMine(
+    @SessionUser() user: User,
+    @Param('languageName') languageName: string,
+  ) {
+    const resumeLanguage = await this.resumeLanguageService.findOne(
+      languageName,
+      user.email,
+    );
+
+    if (!resumeLanguage)
+      throw new NotFoundException(
+        `There is no language with the given \`languageName\` (${languageName})`,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      data: resumeLanguage,
+    };
+  }
+
+  @Get(':email/resume/language/:languageName')
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'A Language was succesfully found',
@@ -179,7 +249,49 @@ export class ResumeLanguageController {
     };
   }
 
-  @Patch(':languageName')
+  @Patch('me/resume/language/:languageName')
+  @Allowed('alumni')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'Language was succesfully updated',
+  })
+  @ApiNotFoundResponse({
+    description: 'The language with the requested name was not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Already exist a language with the given languageName',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async updateMine(
+    @SessionUser() user: User,
+    @Param('languageName') languageName: string,
+    @Body() updateLanguageNameDto: UpdateResumeLanguageDto,
+  ) {
+    try {
+      const updateLanguageName = await this.resumeLanguageService.update(
+        languageName,
+        user.email,
+        updateLanguageNameDto,
+      );
+      return { statusCode: HttpStatus.OK, data: updateLanguageName };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      if (error instanceof AlreadyExistsError) {
+        throw new BadRequestException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
+
+  @Patch(':email/resume/language/:languageName')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'Language was succesfully updated',
@@ -219,7 +331,45 @@ export class ResumeLanguageController {
     }
   }
 
-  @Delete(':languageName')
+  @Delete('me/resume/language/:languageName')
+  @Allowed('alumni')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'Higher education study was succesfully deleted',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'The higher education study with the requested languageName was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async removeMine(
+    @SessionUser() user: User,
+    @Param('languageName') languageName: string,
+  ): Promise<ResponseDto<ResumeLanguageDto>> {
+    try {
+      const deletedResumeLanguage = await this.resumeLanguageService.remove(
+        languageName,
+        user.email,
+      );
+      return {
+        statusCode: HttpStatus.OK,
+        data: deletedResumeLanguage,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
+
+  @Delete(':email/resume/language/:languageName')
+  @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'Higher education study was succesfully deleted',
