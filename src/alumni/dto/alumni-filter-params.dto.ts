@@ -29,6 +29,7 @@ export class AlumniFilterParamsDto {
   @IsOptional()
   @Transform(({ value }) => {
     if (typeof value === 'string') return [value];
+    return value;
   })
   @Expose({ name: 'careers' })
   careersNames?: string[];
@@ -55,6 +56,7 @@ export class AlumniFilterParamsDto {
   @IsOptional()
   @Transform(({ value }) => {
     if (typeof value === 'string') return [value];
+    return value;
   })
   @Expose({ name: 'positions' })
   positionsOfInterest?: string[];
@@ -64,6 +66,7 @@ export class AlumniFilterParamsDto {
   @IsOptional()
   @Transform(({ value }) => {
     if (typeof value === 'string') return [value];
+    return value;
   })
   @Expose({ name: 'industries' })
   industriesOfInterest?: string[];
@@ -73,6 +76,7 @@ export class AlumniFilterParamsDto {
   @IsOptional()
   @Transform(({ value }) => {
     if (typeof value === 'string') return [value];
+    return value;
   })
   @Expose({ name: 'categories' })
   skillCategories?: string[];

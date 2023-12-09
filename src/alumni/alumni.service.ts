@@ -300,7 +300,6 @@ export class AlumniService {
     }: AlumniFilterParamsDto,
   ): Promise<RandomPage<AlumniWithResume>> {
     randomizationSeed ??= Math.random();
-
     try {
       let [_, __, filteredAlumni] = await this.prismaService.$transaction([
         this.prismaService.$queryRaw`
@@ -421,6 +420,7 @@ export class AlumniService {
                       skills.map(({ categoryName, skillName }) => {
                         return Prisma.sql`bool_or("skillCategoryName" ILIKE ${categoryName} AND "skillName" ILIKE ${skillName})`;
                       }),
+                      ' AND ',
                     )}`
                 : Prisma.empty
             }
