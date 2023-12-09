@@ -38,13 +38,23 @@ import { SessionNotRequired } from 'src/auth/session/session-not-required.decora
 export class ResumeController {
   constructor(private readonly resumeService: ResumeService) {}
 
-  @Allowed('alumni')
   @Get('me/resume/pdf')
+  @Allowed('alumni')
   @Header('Content-Type', 'application/pdf')
   @Header('Content-Disposition', 'inline; filename=resume.pdf')
-  async exportAsPdfMine(): Promise<StreamableFile> {
-    const pdf = await this.resumeService.exportAsPdf();
-    return new StreamableFile(pdf);
+  async exportAsPdfMine(@SessionUser() user: User): Promise<StreamableFile> {
+    try {
+      const pdf = await this.resumeService.exportAsPdf(user.email);
+      return new StreamableFile(pdf);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
   }
 
   @Get(':email/resume/pdf')
@@ -52,9 +62,19 @@ export class ResumeController {
   @Allowed('admin', 'visitor')
   @Header('Content-Type', 'application/pdf')
   @Header('Content-Disposition', 'inline; filename=resume.pdf')
-  async exportAsPdf(): Promise<StreamableFile> {
-    const pdf = await this.resumeService.exportAsPdf();
-    return new StreamableFile(pdf);
+  async exportAsPdf(@Param('email') email: string): Promise<StreamableFile> {
+    try {
+      const pdf = await this.resumeService.exportAsPdf(email);
+      return new StreamableFile(pdf);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
   }
 
   @Patch('me/resume')

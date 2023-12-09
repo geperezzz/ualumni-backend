@@ -9,19 +9,34 @@ import { Resume } from './resume.type';
 import * as path from 'path';
 import * as pug from 'pug';
 import puppeteer from 'puppeteer';
+import { AlumniService } from 'src/alumni/alumni.service';
+import { AlumniWithResume } from 'src/alumni/alumni-with-resume.type';
 
 @Injectable()
 export class ResumeService {
-  constructor(private readonly prismaService: PrismaService) {}
-  private buildResumeAsHtml = pug.compileFile(
-    path.resolve(__dirname, 'templates/resume.pug'),
-  );
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly alumniService: AlumniService,
+  ) {}
+  private buildResumeAsHtml = (alumni: AlumniWithResume) => {
+    const compiledFunction = pug.compileFile(
+      path.resolve(__dirname, 'templates/resume.pug'),
+    );
+    return compiledFunction({ alumni });
+  };
 
-  async exportAsPdf() {
+  async exportAsPdf(email: string) {
+    const alumni = await this.alumniService.findOneWithResume(email);
+    if (!alumni) {
+      console.log(alumni);
+      throw new NotFoundError(
+        `There is no alumni with the given \`email\` (${email})`,
+      );
+    }
     const browser = await puppeteer.launch({ headless: 'new' });
 
     const resumePage = await browser.newPage();
-    await resumePage.setContent(this.buildResumeAsHtml(), {
+    await resumePage.setContent(this.buildResumeAsHtml(alumni), {
       waitUntil: 'networkidle0',
     });
     const pdf = await resumePage.pdf();
