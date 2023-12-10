@@ -1,5 +1,4 @@
 import { Expose } from 'class-transformer';
-import { Resume } from '../resume.type';
 import { CiapCourse } from 'src/ciap-courses/entities/ciap-course.entity';
 import {
   HigherEducationStudy,

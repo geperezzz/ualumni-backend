@@ -1,10 +1,6 @@
-import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class UpdateResumeDto {
-  @IsInt()
-  @IsOptional()
-  numberOfDownloads?: number;
-
   @IsBoolean()
   @IsOptional()
   isVisible?: boolean;

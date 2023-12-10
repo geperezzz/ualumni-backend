@@ -19,7 +19,6 @@ export class ResumeService {
       const resume = await this.prismaService.resume.update({
         where: { ownerEmail: email },
         data: {
-          numberOfDownloads: updateResumeDto.numberOfDownloads,
           isVisible: updateResumeDto.isVisible,
           aboutMe: updateResumeDto.aboutMe,
           visibleSince: updateResumeDto.isVisible
