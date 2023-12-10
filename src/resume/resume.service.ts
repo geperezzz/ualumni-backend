@@ -25,8 +25,9 @@ export class ResumeService {
     return compiledFunction({ alumni });
   };
 
-  async exportAsPdf(email: string) {
-    const alumni = await this.alumniService.findOneWithResume(email);
+  async exportAsPdf(email: string): Promise<Buffer> {
+    const alumni =
+      await this.alumniService.findOneWithResumeOnlyVisibles(email);
     if (!alumni) {
       console.log(alumni);
       throw new NotFoundError(
