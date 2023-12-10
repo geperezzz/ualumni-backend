@@ -28,6 +28,8 @@ model CiapCourse {
   name             String
   completionDate   DateTime  @db.Date
   enrolledStudents Student[]
+
+  @@unique([name, completionDate])
 }
 
 enum StudentCareerStatus {

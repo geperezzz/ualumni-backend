@@ -5,6 +5,7 @@ import { Prisma as PrismaUalumni } from 'prisma/ualumni/client';
 import { Prisma as PrismaUcab } from 'prisma/ucab/client';
 import {
   AlreadyExistsError,
+  ForeignKeyError,
   NotFoundError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
@@ -14,6 +15,7 @@ import { Alumni } from './alumni.type';
 import { FilterRandomPaginationParamsDto } from './dto/filter-random-pagination-params.dto';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 import { UcabDbService } from 'src/ucab-db/ucab-db.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class AlumniService {
@@ -55,6 +57,54 @@ export class AlumniService {
     }
   }
 
+  @Cron(CronExpression.EVERY_12_HOURS)
+  async synchronize() {
+    try {
+      //get ualumni alumni
+      const allUalumni = await this.ualumniDbService.alumni.findMany({
+        include: {
+          graduations: true,
+        },
+      });
+      
+      //Compare with ucab alumni
+      for (let ualumniDbAlumni of allUalumni) {
+        const ucabDbAlumni = await this.findUcabDbAlumni(ualumniDbAlumni.email);
+        for (let ucabDbCareer of ucabDbAlumni.enrolledCareers) {
+          // Create graduation if not exists
+          const ualumniDbCareer = ualumniDbAlumni.graduations.find(
+            (ualumniDbCareer) =>
+              ualumniDbCareer.careerName === ucabDbCareer.careerName,
+          );
+
+          if (!ualumniDbCareer) {
+            await this.ualumniDbService.graduation.create({
+              data: {
+                alumniEmail: ualumniDbAlumni.email,
+                careerName: ucabDbCareer.careerName,
+                graduationDate: ucabDbCareer.graduationDate
+                  ? ucabDbCareer.graduationDate
+                  : new Date().toISOString(),
+              },
+            });
+          }
+        }
+      }
+    } catch (error) {
+      if (error instanceof PrismaUalumni.PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          throw new ForeignKeyError(
+            `Cannot update. There is no career in UalumniDB with the given \`careerName\``,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
   async create(createAlumniDto: CreateAlumniDto): Promise<Alumni> {
     const ucabDbAlumni = await this.findUcabDbAlumni(createAlumniDto.email);
     const salt = await bcrypt.genSalt();
@@ -63,7 +113,7 @@ export class AlumniService {
     try {
       const createdAlumni = await this.ualumniDbService.$transaction(
         async (tx) => {
-          await tx.alumni.create({
+            await tx.alumni.create({
             data: {
               address: ucabDbAlumni.address,
               telephoneNumber: ucabDbAlumni.telephoneNumber,
@@ -81,7 +131,7 @@ export class AlumniService {
               },
             },
           });
-
+          
           await Promise.all(
             ucabDbAlumni.enrolledCareers.map((career) =>
               tx.graduation.create({
@@ -93,7 +143,7 @@ export class AlumniService {
               }),
             ),
           );
-
+          
           return await tx.alumni.findUniqueOrThrow({
             where: { email: createAlumniDto.email },
             include: {
@@ -626,7 +676,7 @@ export class AlumniService {
       if (!alumni) {
         return null;
       }
-      
+
       const { associatedUser: userProps, ...rest } = alumni;
       return { ...userProps, ...rest };
     } catch (error) {
@@ -664,7 +714,7 @@ export class AlumniService {
           }
         },
       });
-      
+
       const { associatedUser: userProps, ...rest } = updatedAlumni;
       return { ...userProps, ...rest };
     } catch (error) {
