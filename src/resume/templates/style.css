@@ -179,6 +179,7 @@ p {
   display: flex;
   flex-direction: column;
   margin: 20px 0;
+  padding-left: 8px;
   border-left: 8px solid #007935;
 }
 
