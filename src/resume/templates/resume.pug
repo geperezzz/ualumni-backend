@@ -21,7 +21,7 @@ body
           li
             span.icon
               i.fa.fa-phone(aria-hidden='true')
-            span.text +58 123556
+            span.text #{alumni.telephoneNumber}
           li
             span.icon
               i.fa.fa-envelope-o(aria-hidden='true')
@@ -29,49 +29,52 @@ body
           li
             span.icon
               i.fa.fa-map-marker(aria-hidden='true')
-            span.text Puerto Ordaz, Venezuela
-      .contactInfo.portfolio
-        h3.title Portafolio
-        ul
-          li
-            span.icon
-              i.fa.fa-briefcase(aria-hidden='true')
-            span.text
-              b Proyectos cheveres
-            span.text
-              h5
-                i www.juancito.com
-      .contactInfo.language
-        h3.title Idiomas
-        ul
-          li
-            span.icon
-              i.fa.fa-comments(aria-hidden='true')
-            span.text Espa&ntilde;ol - Native
-          li
-            span.text Ingles - C2
-      .contactInfo.softskills
-        h3.title Habilidades blandas
-        ul
-          li
-            span.icon
-              i.fa.fa-lightbulb-o(aria-hidden='true')
-            span.text Pana
-            span.percent
-          li
-            span.text Amable
-            span.percent
-          li
-            span.text Paciente
-            span.percent
+            span.text #{alumni.address}
+      if alumni.resume.portfolio.length > 0
+        .contactInfo.portfolio
+          h3.title Portafolio
+          ul
+            each project, index in alumni.resume.portfolio
+              li
+                if index == 0
+                  span.icon
+                    i.fa.fa-briefcase(aria-hidden='true')
+                span.text
+                  b #{project.title}
+                span.text
+                  h5
+                    i #{project.sourceLink}
+      if alumni.resume.knownLanguages.length > 0
+        .contactInfo.language
+          h3.title Idiomas
+          ul
+            each language, index in alumni.resume.knownLanguages
+              li
+                if index == 0
+                  span.icon
+                    i.fa.fa-comments(aria-hidden='true')
+                span.text #{language.languageName} - #{language.masteryLevel}
+      if alumni.resume.softSkills.length > 0   
+        .contactInfo.softskills
+          h3.title Habilidades blandas
+          ul
+            each softskill, index in alumni.resume.softSkills
+              li
+                if index == 0
+                  span.icon
+                    i.fa.fa-lightbulb-o(aria-hidden='true')
+                span.text #{softskill.skillName}
+                span.percent
     .right_Side
       .name
         h1
-          | Juanito Maximiliano Colmenares
-          br
-          span
-            | Ingeniero Informatico
-      .about
+          | #{alumni.names} #{alumni.surnames}
+          if alumni.careers.length > 0
+            each career, index in alumni.careers
+              br
+              span 
+                |#{career.careerName}
+      //-.about
         h2.title2 Experiencia Laboral
         .box
           .year_company
@@ -106,36 +109,28 @@ body
             p
               | Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
               | eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      if alumni.resume.higherEducationStudies.length > 0
+        .about
+          h2.title2 Estudios realizados
+          each study, index in alumni.resume.higherEducationStudies
+            .box
+              .year_company
+                h5
+                  i #{study.endDate.getFullYear()}
+                .text
+                  h4 #{study.title}
+                  p #{study.institution}
+      if alumni.resume.technicalSkills.length > 0
       .about
-        h2.title2 Estudios realizados
-        .box
-          .year_company
-            h5
-              i 20xx
-          .text
-            h4 Ingenieria Informatica
-            p Universidad Catolica Andres Bello
-        .box
-          .year_company
-            h5
-              i 20xx
-          .text
-            h4 Bachilller
-            p Colegio generico #2
-      .about
-        h2.title2 Habilidades Tecnicas
+        h2.title2 Habilidades Técnicas
         .tecnicas
           ul
-            li Figma
-            li Css
-            li Photoshop
-            li Javascript
-            li Java
-            li Php
-      .about
-        h2.title2 Certificados CIAP
-        .certificados
-          ul
-            li Product Owner
-            li Innovaci&oacute;n, Agilidad y Design Thinking
-            li Mantenimiento y soporte a equipos de c&oacute;mputo
+            each skill, index in alumni.resume.technicalSkills
+              li #{skill.skillName}
+      if alumni.resume.ciapCourses.length > 0
+        .about
+          h2.title2 Certificados CIAP
+          .certificados
+            ul
+              each course, index in alumni.resume.ciapCourses
+                li #{course.name}
