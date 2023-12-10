@@ -100,7 +100,11 @@ export class PortfolioItemService {
             resumeOwnerEmail,
           },
         },
-        data: {},
+        data: {
+          title: updatePortfolioItemDto.title,
+          sourceLink: updatePortfolioItemDto.sourceLink,
+          isVisible: updatePortfolioItemDto.isVisible,
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {

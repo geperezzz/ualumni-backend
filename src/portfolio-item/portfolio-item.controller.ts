@@ -257,7 +257,7 @@ export class PortfolioItemController {
     description: 'The Portfolio item with the requested name was not found',
   })
   @ApiBadRequestResponse({
-    description: 'Already exist a Portfolio itemstudy with the given title',
+    description: 'Already exist a Portfolio item with the given title',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',

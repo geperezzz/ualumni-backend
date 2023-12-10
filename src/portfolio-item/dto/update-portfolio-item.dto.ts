@@ -1,16 +1,15 @@
 import { IsString, IsEmail, IsBoolean, IsOptional } from 'class-validator';
 
 export class UpdatePortfolioItemDto {
-  @IsEmail()
+  @IsString()
   @IsOptional()
-  resumeOwnerEmail?: string;
+  title?: string;
 
   @IsString()
-  title: string;
-
-  @IsString()
-  sourceLink: string;
+  @IsOptional()
+  sourceLink?: string;
 
   @IsBoolean()
-  isVisible: boolean;
+  @IsOptional()
+  isVisible?: boolean;
 }
