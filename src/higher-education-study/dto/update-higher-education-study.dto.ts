@@ -7,10 +7,6 @@ import {
 } from 'class-validator';
 
 export class UpdateHigherEducationStudyDto {
-  @IsEmail()
-  @IsOptional()
-  resumeOwnerEmail?: string;
-
   @IsString()
   @IsOptional()
   title?: string;
@@ -25,5 +21,5 @@ export class UpdateHigherEducationStudyDto {
 
   @IsBoolean()
   @IsOptional()
-  isVisible?: Boolean;
+  isVisible?: boolean;
 }

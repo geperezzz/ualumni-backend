@@ -123,7 +123,12 @@ export class HigherEducationStudyService {
             resumeOwnerEmail,
           },
         },
-        data: {},
+        data: {
+          title: updateHigherEducationStudyDto.title,
+          institution: updateHigherEducationStudyDto.institution,
+          endDate: updateHigherEducationStudyDto.endDate,
+          isVisible: updateHigherEducationStudyDto.isVisible,
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
