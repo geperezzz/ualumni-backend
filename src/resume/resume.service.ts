@@ -25,7 +25,6 @@ export class ResumeService {
     const alumni =
       await this.alumniService.findOneWithResumeOnlyVisibles(email);
     if (!alumni) {
-      console.log(alumni);
       throw new NotFoundError(
         `There is no alumni with the given \`email\` (${email})`,
       );
