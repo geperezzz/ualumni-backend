@@ -24,7 +24,7 @@ export class CareerService {
     try {
       const data = await this.ualumniDbService.career.findUnique({
         where: {
-          name: name
+          name: name,
         },
       });
       return data ? data : undefined;
@@ -34,7 +34,7 @@ export class CareerService {
       });
     }
   }
-  
+
   //Create career if not exists in ualumni db
   @Cron(CronExpression.EVERY_10_SECONDS)
   async synchronize() {
@@ -43,7 +43,7 @@ export class CareerService {
 
       for (let ucabDbCareer of ucabDbCareers) {
         const ualumniDbCiapCourse = await this.findUalumniDbCareer(
-          ucabDbCareer.name
+          ucabDbCareer.name,
         );
         if (!ualumniDbCiapCourse) {
           await this.ualumniDbService.career.create({

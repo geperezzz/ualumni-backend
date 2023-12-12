@@ -24,6 +24,7 @@ import { PortfolioItemModule } from './portfolio-item/portfolio-item.module';
 import { ResumeLanguageModule } from './resume-language/resume-language.module';
 import { ResumeTechnicalSkillModule } from './resume-technical-skill/resume-technical-skill.module';
 import { UcabDbModule } from './ucab-db/ucab-db.module';
+import { WorkExperiencesModule } from './work-experiences/work-experiences.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { UcabDbModule } from './ucab-db/ucab-db.module';
     ResumeLanguageModule,
     ResumeTechnicalSkillModule,
     UcabDbModule,
+    WorkExperiencesModule,
   ],
 })
 export class AppModule {}

@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { ResumeDto } from './dto/resume.dto';
-import { NotFoundError, UnexpectedError } from 'src/common/errors/service.error';
+import {
+  NotFoundError,
+  UnexpectedError,
+} from 'src/common/errors/service.error';
 import { Prisma } from 'prisma/ualumni/client';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';

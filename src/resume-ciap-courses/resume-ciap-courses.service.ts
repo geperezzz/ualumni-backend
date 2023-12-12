@@ -56,7 +56,6 @@ export class ResumeCiapCoursesService {
           ualumniDbCiapCourse.date,
         );
 
-
         //check if alumni in ualumniDb is already enrolled
         if (ucabDbCiapCourse) {
           for (let ucabDbAlumni of ucabDbCiapCourse.enrolledStudents) {

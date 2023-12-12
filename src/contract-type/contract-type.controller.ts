@@ -29,7 +29,10 @@ import {
 } from '@nestjs/swagger';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
-import { AlreadyExistsError, NotFoundError } from 'src/common/errors/service.error';
+import {
+  AlreadyExistsError,
+  NotFoundError,
+} from 'src/common/errors/service.error';
 
 @ApiTags('contract-type')
 @Controller('contract-type')

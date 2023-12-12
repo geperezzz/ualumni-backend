@@ -5,7 +5,11 @@ import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 import { Prisma, WorkExperience } from 'prisma/ualumni/client';
 import { Page } from 'src/common/interfaces/page.interface';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
-import { AlreadyExistsError, NotFoundError, UnexpectedError } from 'src/common/errors/service.error';
+import {
+  AlreadyExistsError,
+  NotFoundError,
+  UnexpectedError,
+} from 'src/common/errors/service.error';
 
 @Injectable()
 export class WorkExperiencesService {
@@ -25,29 +29,42 @@ export class WorkExperiencesService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2003') {
-          throw new NotFoundError(`There is no alumni with email \`${resumeOwnerEmail}\``, { cause: error });
+          throw new NotFoundError(
+            `There is no alumni with email \`${resumeOwnerEmail}\``,
+            { cause: error },
+          );
         }
       }
-      throw new UnexpectedError('An unexpected situation ocurred', { cause: error });
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
-  async findOne(resumeOwnerEmail: string, workExperienceNumber: number): Promise<WorkExperience | null> {
+  async findOne(
+    resumeOwnerEmail: string,
+    workExperienceNumber: number,
+  ): Promise<WorkExperience | null> {
     try {
       return await this.ualumniDbService.workExperience.findUnique({
         where: {
           resumeOwnerEmail_number: {
             resumeOwnerEmail,
-            number: workExperienceNumber
-          }
+            number: workExperienceNumber,
+          },
         },
       });
     } catch (error) {
-      throw new UnexpectedError('An unexpected situation ocurred', { cause: error });
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
-  async findVisibleOne(resumeOwnerEmail: string, workExperienceNumber: number): Promise<WorkExperience | null> {
+  async findVisibleOne(
+    resumeOwnerEmail: string,
+    workExperienceNumber: number,
+  ): Promise<WorkExperience | null> {
     try {
       return await this.ualumniDbService.workExperience.findFirst({
         where: {
@@ -57,53 +74,26 @@ export class WorkExperiencesService {
         },
       });
     } catch (error) {
-      throw new UnexpectedError('An unexpected situation ocurred', { cause: error });
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
-  async findPage(resumeOwnerEmail: string, { itemsPerPage, pageNumber }: PaginationParamsDto): Promise<Page<WorkExperience>> {
-    try {
-      const [items, numberOfItems] = await this.ualumniDbService.$transaction([
-        this.ualumniDbService.workExperience.findMany({
-          where: {
-            resumeOwnerEmail
-          },
-          take: itemsPerPage,
-          skip: itemsPerPage * (pageNumber - 1)
-        }),
-        this.ualumniDbService.workExperience.count()
-      ]);
-
-      return {
-        items,
-        meta: {
-          pageNumber,
-          itemsPerPage,
-          numberOfItems,
-          numberOfPages: Math.ceil(Math.max(numberOfItems / itemsPerPage, 1)),
-        }
-      };
-    } catch (error) {
-      throw new UnexpectedError('An unexpected situation ocurred', { cause: error });
-    }
-  }
-
-  async findVisiblePage(resumeOwnerEmail: string, { itemsPerPage, pageNumber }: PaginationParamsDto): Promise<Page<WorkExperience>> {
+  async findPage(
+    resumeOwnerEmail: string,
+    { itemsPerPage, pageNumber }: PaginationParamsDto,
+  ): Promise<Page<WorkExperience>> {
     try {
       const [items, numberOfItems] = await this.ualumniDbService.$transaction([
         this.ualumniDbService.workExperience.findMany({
           where: {
             resumeOwnerEmail,
-            isVisible: true
           },
           take: itemsPerPage,
-          skip: itemsPerPage * (pageNumber - 1)
+          skip: itemsPerPage * (pageNumber - 1),
         }),
-        this.ualumniDbService.workExperience.count({
-          where: {
-            isVisible: true
-          }
-        })
+        this.ualumniDbService.workExperience.count(),
       ]);
 
       return {
@@ -113,51 +103,107 @@ export class WorkExperiencesService {
           itemsPerPage,
           numberOfItems,
           numberOfPages: Math.ceil(Math.max(numberOfItems / itemsPerPage, 1)),
-        }
+        },
       };
     } catch (error) {
-      throw new UnexpectedError('An unexpected situation ocurred', { cause: error });
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
-  async update(resumeOwnerEmail: string, workExperienceNumber: number, updateWorkExperienceDto: UpdateWorkExperienceDto): Promise<WorkExperience> {
+  async findVisiblePage(
+    resumeOwnerEmail: string,
+    { itemsPerPage, pageNumber }: PaginationParamsDto,
+  ): Promise<Page<WorkExperience>> {
+    try {
+      const [items, numberOfItems] = await this.ualumniDbService.$transaction([
+        this.ualumniDbService.workExperience.findMany({
+          where: {
+            resumeOwnerEmail,
+            isVisible: true,
+          },
+          take: itemsPerPage,
+          skip: itemsPerPage * (pageNumber - 1),
+        }),
+        this.ualumniDbService.workExperience.count({
+          where: {
+            isVisible: true,
+          },
+        }),
+      ]);
+
+      return {
+        items,
+        meta: {
+          pageNumber,
+          itemsPerPage,
+          numberOfItems,
+          numberOfPages: Math.ceil(Math.max(numberOfItems / itemsPerPage, 1)),
+        },
+      };
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
+  async update(
+    resumeOwnerEmail: string,
+    workExperienceNumber: number,
+    updateWorkExperienceDto: UpdateWorkExperienceDto,
+  ): Promise<WorkExperience> {
     try {
       return await this.ualumniDbService.workExperience.update({
         where: {
           resumeOwnerEmail_number: {
             resumeOwnerEmail,
-            number: workExperienceNumber
-          }
+            number: workExperienceNumber,
+          },
         },
-        data: updateWorkExperienceDto
+        data: updateWorkExperienceDto,
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
-          throw new NotFoundError(`There is no work experience #${workExperienceNumber} for alumni with email \`${resumeOwnerEmail}\``, { cause: error });
+          throw new NotFoundError(
+            `There is no work experience #${workExperienceNumber} for alumni with email \`${resumeOwnerEmail}\``,
+            { cause: error },
+          );
         }
       }
-      throw new UnexpectedError('An unexpected situation ocurred', { cause: error });
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 
-  async remove(resumeOwnerEmail: string, workExperienceNumber: number): Promise<WorkExperience> {
+  async remove(
+    resumeOwnerEmail: string,
+    workExperienceNumber: number,
+  ): Promise<WorkExperience> {
     try {
       return await this.ualumniDbService.workExperience.delete({
         where: {
           resumeOwnerEmail_number: {
             resumeOwnerEmail,
-            number: workExperienceNumber
-          }
-        }
+            number: workExperienceNumber,
+          },
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
-          throw new NotFoundError(`There is no work experience #${workExperienceNumber} for alumni with email \`${resumeOwnerEmail}\``, { cause: error });
+          throw new NotFoundError(
+            `There is no work experience #${workExperienceNumber} for alumni with email \`${resumeOwnerEmail}\``,
+            { cause: error },
+          );
         }
       }
-      throw new UnexpectedError('An unexpected situation ocurred', { cause: error });
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
     }
   }
 }

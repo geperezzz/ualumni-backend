@@ -52,7 +52,7 @@ export class WorkExperiencesController {
 
       return {
         statusCode: HttpStatus.CREATED,
-        data: createdWorkExperience
+        data: createdWorkExperience,
       };
     } catch (error) {
       if (error instanceof NotFoundError) {
@@ -68,15 +68,21 @@ export class WorkExperiencesController {
     @SessionUser() user: User,
     @Param('workExperienceNumber', ParseIntPipe) workExperienceNumber: number,
   ): Promise<ResponseDto<WorkExperienceDto>> {
-    const workExperience = await this.workExperiencesService.findOne(user.email, workExperienceNumber);
-    
+    const workExperience = await this.workExperiencesService.findOne(
+      user.email,
+      workExperienceNumber,
+    );
+
     if (!workExperience) {
-      throw new NotFoundException(`There is no work experience #${workExperienceNumber} for alumni with email \`${user.email}\``, {});
+      throw new NotFoundException(
+        `There is no work experience #${workExperienceNumber} for alumni with email \`${user.email}\``,
+        {},
+      );
     }
 
     return {
       statusCode: HttpStatus.OK,
-      data: workExperience
+      data: workExperience,
     };
   }
 
@@ -86,22 +92,31 @@ export class WorkExperiencesController {
   async findOne(
     @Param('resumeOwnerEmail') resumeOwnerEmail: string,
     @Param('workExperienceNumber', ParseIntPipe) workExperienceNumber: number,
-    @SessionUser() user?: User
+    @SessionUser() user?: User,
   ): Promise<ResponseDto<WorkExperienceDto>> {
     let workExperience: WorkExperienceDto | null;
     if (!user) {
-      workExperience = await this.workExperiencesService.findOne(resumeOwnerEmail, workExperienceNumber);
+      workExperience = await this.workExperiencesService.findOne(
+        resumeOwnerEmail,
+        workExperienceNumber,
+      );
     } else {
-      workExperience = await this.workExperiencesService.findVisibleOne(resumeOwnerEmail, workExperienceNumber);
+      workExperience = await this.workExperiencesService.findVisibleOne(
+        resumeOwnerEmail,
+        workExperienceNumber,
+      );
     }
-    
+
     if (!workExperience) {
-      throw new NotFoundException(`There is no work experience #${workExperienceNumber} for alumni with email \`${resumeOwnerEmail}\``, {});
+      throw new NotFoundException(
+        `There is no work experience #${workExperienceNumber} for alumni with email \`${resumeOwnerEmail}\``,
+        {},
+      );
     }
 
     return {
       statusCode: HttpStatus.OK,
-      data: workExperience
+      data: workExperience,
     };
   }
 
@@ -112,11 +127,14 @@ export class WorkExperiencesController {
     @SessionUser() user: User,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PagedResponseDto<WorkExperienceDto>> {
-    const workExperiencesPage = await this.workExperiencesService.findPage(user.email, paginationParamsDto);
+    const workExperiencesPage = await this.workExperiencesService.findPage(
+      user.email,
+      paginationParamsDto,
+    );
 
     return {
       statusCode: HttpStatus.OK,
-      data: workExperiencesPage
+      data: workExperiencesPage,
     };
   }
 
@@ -126,18 +144,24 @@ export class WorkExperiencesController {
   async findPage(
     @Param('resumeOwnerEmail') resumeOwnerEmail: string,
     @Query() paginationParamsDto: PaginationParamsDto,
-    @SessionUser() user?: User
+    @SessionUser() user?: User,
   ): Promise<PagedResponseDto<WorkExperienceDto>> {
     let workExperiencesPage: PageDto<WorkExperienceDto>;
     if (!user) {
-      workExperiencesPage = await this.workExperiencesService.findVisiblePage(resumeOwnerEmail, paginationParamsDto);
+      workExperiencesPage = await this.workExperiencesService.findVisiblePage(
+        resumeOwnerEmail,
+        paginationParamsDto,
+      );
     } else {
-      workExperiencesPage = await this.workExperiencesService.findPage(resumeOwnerEmail, paginationParamsDto);
+      workExperiencesPage = await this.workExperiencesService.findPage(
+        resumeOwnerEmail,
+        paginationParamsDto,
+      );
     }
 
     return {
       statusCode: HttpStatus.OK,
-      data: workExperiencesPage
+      data: workExperiencesPage,
     };
   }
 
@@ -157,7 +181,7 @@ export class WorkExperiencesController {
 
       return {
         statusCode: HttpStatus.OK,
-        data: updatedWorkExperience
+        data: updatedWorkExperience,
       };
     } catch (error) {
       if (error instanceof NotFoundError) {
@@ -183,7 +207,7 @@ export class WorkExperiencesController {
 
       return {
         statusCode: HttpStatus.OK,
-        data: updatedWorkExperience
+        data: updatedWorkExperience,
       };
     } catch (error) {
       if (error instanceof NotFoundError) {
@@ -200,11 +224,14 @@ export class WorkExperiencesController {
     @Param('workExperienceNumber', ParseIntPipe) workExperienceNumber: number,
   ): Promise<ResponseDto<WorkExperienceDto>> {
     try {
-      const removedWorkExperience = await this.workExperiencesService.remove(user.email, workExperienceNumber);
+      const removedWorkExperience = await this.workExperiencesService.remove(
+        user.email,
+        workExperienceNumber,
+      );
 
       return {
         statusCode: HttpStatus.OK,
-        data: removedWorkExperience
+        data: removedWorkExperience,
       };
     } catch (error) {
       if (error instanceof NotFoundError) {
@@ -221,11 +248,14 @@ export class WorkExperiencesController {
     @Param('workExperienceNumber', ParseIntPipe) workExperienceNumber: number,
   ): Promise<ResponseDto<WorkExperienceDto>> {
     try {
-      const removedWorkExperience = await this.workExperiencesService.remove(resumeOwnerEmail, workExperienceNumber);
+      const removedWorkExperience = await this.workExperiencesService.remove(
+        resumeOwnerEmail,
+        workExperienceNumber,
+      );
 
       return {
         statusCode: HttpStatus.OK,
-        data: removedWorkExperience
+        data: removedWorkExperience,
       };
     } catch (error) {
       if (error instanceof NotFoundError) {

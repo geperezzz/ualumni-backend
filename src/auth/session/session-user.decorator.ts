@@ -1,7 +1,4 @@
-import {
-  ExecutionContext,
-  createParamDecorator,
-} from '@nestjs/common';
+import { ExecutionContext, createParamDecorator } from '@nestjs/common';
 import { User } from 'prisma/ualumni/client';
 import { Request } from 'express';
 

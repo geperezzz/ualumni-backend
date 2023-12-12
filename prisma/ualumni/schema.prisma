@@ -108,6 +108,7 @@ model Resume {
   isVisible              Boolean                @default(false)
   visibleSince           DateTime               @default(now())
   aboutMe                String?
+  workExperiences        WorkExperience[]
   knownLanguages         ResumeLanguage[]
   portfolio              PortfolioItem[]
   higherEducationStudies HigherEducationStudy[]
@@ -116,6 +117,20 @@ model Resume {
   ciapCourses            ResumeCiapCourse[]
   positionsOfInterest    PositionOfInterest[]
   industriesOfInterest   IndustryOfInterest[]
+}
+
+model WorkExperience {
+  resume           Resume   @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
+  resumeOwnerEmail String
+  number           Int      @default(autoincrement())
+  companyName      String
+  position         String
+  description      String
+  startDate        DateTime @db.Date
+  endDate          DateTime @db.Date
+  isVisible        Boolean
+
+  @@id([resumeOwnerEmail, number])
 }
 
 model CiapCourse {

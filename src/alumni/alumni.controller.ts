@@ -66,7 +66,7 @@ export class AlumniController {
   @Allowed('admin', 'visitor')
   async findPageRandomly(
     @Query() filterRandomPaginationParamsDto: FilterRandomPaginationParamsDto,
-    @SessionUser() user: User
+    @SessionUser() user: User,
   ): Promise<RandomlyPagedResponseDto<Alumni | AlumniDto>> {
     let alumniRandomPage = await this.alumniService.findPageRandomly(
       filterRandomPaginationParamsDto,
@@ -99,17 +99,18 @@ export class AlumniController {
   @Allowed('admin', 'visitor')
   async findPageWithResumeRandomly(
     @Query() filterRandomPaginationParamsDto: FilterRandomPaginationParamsDto,
-    @SessionUser() user: User
+    @SessionUser() user: User,
   ): Promise<RandomlyPagedResponseDto<Alumni | AlumniDto>> {
-    let alumniWithResumeRandomPage = await this.alumniService.findPageWithResumeRandomly(
-      filterRandomPaginationParamsDto,
-    );
-    
+    let alumniWithResumeRandomPage =
+      await this.alumniService.findPageWithResumeRandomly(
+        filterRandomPaginationParamsDto,
+      );
+
     if (user) {
       return {
         statusCode: HttpStatus.OK,
         data: alumniWithResumeRandomPage,
-      };  
+      };
     }
 
     let alumniWithResumeDtoRandomPage = {
@@ -153,7 +154,7 @@ export class AlumniController {
   @Allowed('admin', 'visitor')
   async findOne(
     @Param('email') email: string,
-    @SessionUser() user: User
+    @SessionUser() user: User,
   ): Promise<ResponseDto<Alumni | AlumniDto>> {
     let alumni = await this.alumniService.findOne(email);
 
@@ -240,20 +241,23 @@ export class AlumniController {
 
   @Delete('me')
   @Allowed('alumni')
-  async removeMe(@SessionUser() user: User, @Req() request: Request): Promise<ResponseDto<AlumniDto>> {
+  async removeMe(
+    @SessionUser() user: User,
+    @Req() request: Request,
+  ): Promise<ResponseDto<AlumniDto>> {
     try {
       let removedAlumni = await this.alumniService.remove(user.email);
       let removedAlumniDto = plainToInstance(AlumniDto, removedAlumni, {
         excludeExtraneousValues: true,
       });
 
-      return new Promise(resolve =>
+      return new Promise((resolve) =>
         request.logout(() =>
           resolve({
             statusCode: HttpStatus.OK,
             data: removedAlumniDto,
-          })
-        )
+          }),
+        ),
       );
     } catch (error) {
       if (error instanceof NotFoundError) {

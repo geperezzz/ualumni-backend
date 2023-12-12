@@ -633,8 +633,8 @@ export class AlumniService {
                   startDate: true,
                   endDate: true,
                   isVisible: true,
-                }
-              }
+                },
+              },
             },
           },
           graduations: {

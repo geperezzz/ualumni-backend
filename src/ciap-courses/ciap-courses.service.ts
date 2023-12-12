@@ -165,7 +165,7 @@ export class CiapCoursesService {
       });
     }
   }
-  
+
   //Create ciap course if not exists in ualumni db
   @Cron(CronExpression.EVERY_10_SECONDS)
   async synchronize() {

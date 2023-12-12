@@ -14,7 +14,10 @@ import { RegisterDto } from './dto/register.dto';
 import { AlumniService } from 'src/alumni/alumni.service';
 import { plainToInstance } from 'class-transformer';
 import { AlumniDto } from 'src/alumni/dto/alumni.dto';
-import { AlreadyExistsError, NotFoundError } from 'src/common/errors/service.error';
+import {
+  AlreadyExistsError,
+  NotFoundError,
+} from 'src/common/errors/service.error';
 import { ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
@@ -75,13 +78,13 @@ export class AuthController {
   @UseGuards(SessionAuthGuard, PermissionsGuard)
   @Allowed('admin', 'alumni')
   logout(@Req() request: Request) {
-    return new Promise(resolve =>
+    return new Promise((resolve) =>
       request.logout(() =>
         resolve({
           statusCode: HttpStatus.OK,
           message: 'Successfully logged out',
-        })
-      )
+        }),
+      ),
     );
   }
 }

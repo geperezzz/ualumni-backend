@@ -1,5 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsBoolean, IsDate, IsDefined, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsDefined,
+  IsNotEmpty,
+  IsString,
+} from 'class-validator';
 
 export class CreateWorkExperienceDto {
   @IsString()
