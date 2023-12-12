@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   HttpStatus,
@@ -11,8 +10,6 @@ import {
   InternalServerErrorException,
   HttpCode,
   Query,
-  DefaultValuePipe,
-  ParseIntPipe,
   NotFoundException,
   Put,
   UseGuards,
@@ -28,7 +25,6 @@ import {
   NotFoundError,
 } from 'src/common/error/service.error';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
-import { UpdateRelatedCareersDto } from './dto/update-related-careers.dto';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -112,6 +108,42 @@ export class SkillCategoryController {
         paginationParamsDto.pageNumber,
         paginationParamsDto.itemsPerPage,
       );
+      return {
+        statusCode: HttpStatus.OK,
+        data: skillCategories,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
+
+  @Get('skills')
+  @SessionNotRequired()
+  @Allowed('all')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'The list of skill categories was succesfully obtained',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid number of items per page requested',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async findPageWithSkills(
+    @Query() paginationParamsDto: PaginationParamsDto,
+  ): Promise<PaginatedResponseDto<SkillCategoryDto>> {
+    if (paginationParamsDto.itemsPerPage < 1)
+      throw new BadRequestException('Invalid number of items per page');
+    try {
+      const skillCategories =
+        await this.skillCategoryService.findManyWithSkills(
+          paginationParamsDto.pageNumber,
+          paginationParamsDto.itemsPerPage,
+        );
       return {
         statusCode: HttpStatus.OK,
         data: skillCategories,

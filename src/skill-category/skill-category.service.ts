@@ -70,6 +70,39 @@ export class SkillCategoryService {
       const data = await this.prismaService.skillCategory.findMany({
         take: perPage,
         skip: (page - 1) * perPage,
+      });
+
+      return {
+        page,
+        perPage: data.length,
+        pageCount,
+        totalCount,
+        items: data,
+      };
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
+  async findManyWithSkills(
+    page: number,
+    perPage: number,
+  ): Promise<PageDto<SkillCategoryDto>> {
+    try {
+      const totalCount = await this.prismaService.skillCategory.count();
+      const pageCount = Math.ceil(totalCount / perPage);
+
+      if (page < 1) {
+        page = 1;
+      } else if (page > pageCount && pageCount > 0) {
+        page = pageCount;
+      }
+
+      const data = await this.prismaService.skillCategory.findMany({
+        take: perPage,
+        skip: (page - 1) * perPage,
         include: { relatedCareers: true },
       });
 
