@@ -4,6 +4,7 @@ import {
   IsDateString,
   IsEmail,
   IsBoolean,
+  IsInt,
 } from 'class-validator';
 
 export class CreateResumeLanguageDto {
@@ -12,7 +13,7 @@ export class CreateResumeLanguageDto {
   languageName: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsInt()
   masteryLevel: number;
 
   @IsNotEmpty()

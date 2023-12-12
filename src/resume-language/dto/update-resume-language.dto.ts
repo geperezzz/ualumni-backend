@@ -4,22 +4,19 @@ import {
   IsBoolean,
   IsOptional,
   IsDateString,
+  IsInt,
 } from 'class-validator';
 
 export class UpdateResumeLanguageDto {
-  @IsEmail()
-  @IsOptional()
-  resumeOwnerEmail?: string;
-
   @IsString()
   @IsOptional()
-  languageName: string;
+  languageName?: string;
 
-  @IsString()
+  @IsInt()
   @IsOptional()
-  masteryLevel: string;
+  masteryLevel?: number;
 
   @IsBoolean()
   @IsOptional()
-  isVisible: boolean;
+  isVisible?: boolean;
 }

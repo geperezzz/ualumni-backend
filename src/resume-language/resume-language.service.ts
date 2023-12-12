@@ -120,7 +120,11 @@ export class ResumeLanguageService {
             resumeOwnerEmail,
           },
         },
-        data: {},
+        data: {
+          languageName: updateResumeLanguageDto.languageName,
+          masteryLevel: updateResumeLanguageDto.masteryLevel,
+          isVisible: updateResumeLanguageDto.isVisible,
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {

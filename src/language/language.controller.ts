@@ -38,6 +38,7 @@ import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
+import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 
 @ApiTags('language')
 @Controller('language')
@@ -88,15 +89,14 @@ export class LanguageController {
     description: 'An unexpected situation ocurred',
   })
   async findMany(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('per-page', new DefaultValuePipe(10), ParseIntPipe) perPage: number,
+    @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<LanguageDto>> {
-    if (perPage < 1)
+    if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse = await this.languageService.findMany(
-        page,
-        perPage,
+        paginationParamsDto.pageNumber,
+        paginationParamsDto.itemsPerPage,
       );
       return {
         statusCode: HttpStatus.OK,

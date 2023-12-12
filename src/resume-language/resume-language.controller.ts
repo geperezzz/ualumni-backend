@@ -60,12 +60,12 @@ export class ResumeLanguageController {
   })
   async addMine(
     @SessionUser() user: User,
-    @Body() CreateResumeLanguageDto: CreateResumeLanguageDto,
+    @Body() createResumeLanguageDto: CreateResumeLanguageDto,
   ): Promise<ResponseDto<ResumeLanguageDto>> {
     try {
       const data = await this.resumeLanguageService.create(
         user.email,
-        CreateResumeLanguageDto,
+        createResumeLanguageDto,
       );
       return {
         statusCode: HttpStatus.CREATED,
