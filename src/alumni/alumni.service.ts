@@ -597,7 +597,7 @@ export class AlumniService {
 
   async findOneWithResume(email: string): Promise<AlumniWithResume | null> {
     try {
-      const resume = await this.prismaService.resume.findUniqueOrThrow({
+      const resume = await this.prismaService.resume.findUnique({
         where: { ownerEmail: email },
         select: {
           numberOfDownloads: true,
@@ -686,45 +686,39 @@ export class AlumniService {
         },
       });
 
-      return {
-        email: resume.owner.associatedUser.email,
-        names: resume.owner.associatedUser.names,
-        surnames: resume.owner.associatedUser.surnames,
-        password: resume.owner.associatedUser.password,
-        address: resume.owner.address,
-        telephoneNumber: resume.owner.telephoneNumber,
-        careers: resume.owner.graduations,
-        resume: {
-          aboutMe: resume.aboutMe,
-          numberOfDownloads: resume.numberOfDownloads,
-          isVisible: resume.isVisible,
-          visibleSince: resume.visibleSince,
-          ciapCourses: resume.ciapCourses.map((ciapCourse) => {
-            return {
-              id: ciapCourse.course.id,
-              name: ciapCourse.course.name,
-              date: ciapCourse.course.date,
-              isVisible: ciapCourse.isVisible,
-            };
-          }),
-          knownLanguages: resume.knownLanguages,
-          technicalSkills: resume.technicalSkills,
-          higherEducationStudies: resume.higherEducationStudies,
-          industriesOfInterest: resume.industriesOfInterest,
-          portfolio: resume.portfolio,
-          positionsOfInterest: resume.positionsOfInterest,
-          softSkills: resume.softSkills,
-        },
-      };
+      return resume
+        ? {
+            email: resume.owner.associatedUser.email,
+            names: resume.owner.associatedUser.names,
+            surnames: resume.owner.associatedUser.surnames,
+            password: resume.owner.associatedUser.password,
+            address: resume.owner.address,
+            telephoneNumber: resume.owner.telephoneNumber,
+            careers: resume.owner.graduations,
+            resume: {
+              aboutMe: resume.aboutMe,
+              numberOfDownloads: resume.numberOfDownloads,
+              isVisible: resume.isVisible,
+              visibleSince: resume.visibleSince,
+              ciapCourses: resume.ciapCourses.map((ciapCourse) => {
+                return {
+                  id: ciapCourse.course.id,
+                  name: ciapCourse.course.name,
+                  date: ciapCourse.course.date,
+                  isVisible: ciapCourse.isVisible,
+                };
+              }),
+              knownLanguages: resume.knownLanguages,
+              technicalSkills: resume.technicalSkills,
+              higherEducationStudies: resume.higherEducationStudies,
+              industriesOfInterest: resume.industriesOfInterest,
+              portfolio: resume.portfolio,
+              positionsOfInterest: resume.positionsOfInterest,
+              softSkills: resume.softSkills,
+            },
+          }
+        : null;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new NotFoundError(
-            `There is no alumni with the given \`email\` (${email})`,
-            { cause: error },
-          );
-        }
-      }
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });
@@ -735,7 +729,7 @@ export class AlumniService {
     email: string,
   ): Promise<AlumniWithResume | null> {
     try {
-      const resume = await this.prismaService.resume.findUniqueOrThrow({
+      const resume = await this.prismaService.resume.findUnique({
         where: { ownerEmail: email },
         select: {
           numberOfDownloads: true,
@@ -832,45 +826,39 @@ export class AlumniService {
         },
       });
 
-      return {
-        email: resume.owner.associatedUser.email,
-        names: resume.owner.associatedUser.names,
-        surnames: resume.owner.associatedUser.surnames,
-        password: resume.owner.associatedUser.password,
-        address: resume.owner.address,
-        telephoneNumber: resume.owner.telephoneNumber,
-        careers: resume.owner.graduations,
-        resume: {
-          aboutMe: resume.aboutMe,
-          numberOfDownloads: resume.numberOfDownloads,
-          isVisible: resume.isVisible,
-          visibleSince: resume.visibleSince,
-          ciapCourses: resume.ciapCourses.map((ciapCourse) => {
-            return {
-              id: ciapCourse.course.id,
-              name: ciapCourse.course.name,
-              date: ciapCourse.course.date,
-              isVisible: ciapCourse.isVisible,
-            };
-          }),
-          knownLanguages: resume.knownLanguages,
-          technicalSkills: resume.technicalSkills,
-          higherEducationStudies: resume.higherEducationStudies,
-          industriesOfInterest: resume.industriesOfInterest,
-          portfolio: resume.portfolio,
-          positionsOfInterest: resume.positionsOfInterest,
-          softSkills: resume.softSkills,
-        },
-      };
+      return resume
+        ? {
+            email: resume.owner.associatedUser.email,
+            names: resume.owner.associatedUser.names,
+            surnames: resume.owner.associatedUser.surnames,
+            password: resume.owner.associatedUser.password,
+            address: resume.owner.address,
+            telephoneNumber: resume.owner.telephoneNumber,
+            careers: resume.owner.graduations,
+            resume: {
+              aboutMe: resume.aboutMe,
+              numberOfDownloads: resume.numberOfDownloads,
+              isVisible: resume.isVisible,
+              visibleSince: resume.visibleSince,
+              ciapCourses: resume.ciapCourses.map((ciapCourse) => {
+                return {
+                  id: ciapCourse.course.id,
+                  name: ciapCourse.course.name,
+                  date: ciapCourse.course.date,
+                  isVisible: ciapCourse.isVisible,
+                };
+              }),
+              knownLanguages: resume.knownLanguages,
+              technicalSkills: resume.technicalSkills,
+              higherEducationStudies: resume.higherEducationStudies,
+              industriesOfInterest: resume.industriesOfInterest,
+              portfolio: resume.portfolio,
+              positionsOfInterest: resume.positionsOfInterest,
+              softSkills: resume.softSkills,
+            },
+          }
+        : null;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new NotFoundError(
-            `There is no alumni with the given \`email\` (${email})`,
-            { cause: error },
-          );
-        }
-      }
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });

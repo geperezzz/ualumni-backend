@@ -10,7 +10,6 @@ import * as path from 'path';
 import * as pug from 'pug';
 import puppeteer from 'puppeteer';
 import { AlumniService } from 'src/alumni/alumni.service';
-import { AlumniWithResume } from 'src/alumni/alumni-with-resume.type';
 
 @Injectable()
 export class ResumeService {
@@ -18,12 +17,9 @@ export class ResumeService {
     private readonly prismaService: PrismaService,
     private readonly alumniService: AlumniService,
   ) {}
-  private buildResumeAsHtml = (alumni: AlumniWithResume) => {
-    const compiledFunction = pug.compileFile(
-      path.resolve(__dirname, 'templates/resume.pug'),
-    );
-    return compiledFunction({ alumni });
-  };
+  private buildResumeAsHtml = pug.compileFile(
+    path.resolve(__dirname, 'templates/resume.pug'),
+  );
 
   async exportAsPdf(email: string): Promise<Buffer> {
     const alumni =
@@ -37,12 +33,16 @@ export class ResumeService {
     const browser = await puppeteer.launch({ headless: 'new' });
 
     const resumePage = await browser.newPage();
-    await resumePage.setContent(this.buildResumeAsHtml(alumni), {
+    await resumePage.setContent(this.buildResumeAsHtml({ alumni }), {
       waitUntil: 'networkidle0',
     });
     const pdf = await resumePage.pdf();
 
     await browser.close();
+    await this.prismaService.resume.update({
+      where: { ownerEmail: email },
+      data: { numberOfDownloads: { increment: 1 } },
+    });
     return pdf;
   }
 
