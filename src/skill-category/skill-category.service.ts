@@ -86,7 +86,7 @@ export class SkillCategoryService {
     }
   }
 
-  async findManyWithSkills(
+  async findManyWithCareers(
     page: number,
     perPage: number,
   ): Promise<PageDto<SkillCategoryDto>> {

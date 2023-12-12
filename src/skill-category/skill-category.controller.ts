@@ -120,7 +120,7 @@ export class SkillCategoryController {
     }
   }
 
-  @Get('skills')
+  @Get('careers')
   @SessionNotRequired()
   @Allowed('all')
   @HttpCode(HttpStatus.OK)
@@ -140,7 +140,7 @@ export class SkillCategoryController {
       throw new BadRequestException('Invalid number of items per page');
     try {
       const skillCategories =
-        await this.skillCategoryService.findManyWithSkills(
+        await this.skillCategoryService.findManyWithCareers(
           paginationParamsDto.pageNumber,
           paginationParamsDto.itemsPerPage,
         );
