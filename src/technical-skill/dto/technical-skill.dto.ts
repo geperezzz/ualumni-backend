@@ -1,3 +1,6 @@
-import { TechnicalSkill } from '@prisma/client';
+import { Expose } from 'class-transformer';
 
-export type TechnicalSkillDto = TechnicalSkill;
+export class TechnicalSkillDto {
+  @Expose()
+  name: string;
+}

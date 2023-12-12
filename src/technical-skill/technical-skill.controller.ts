@@ -40,6 +40,7 @@ import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
+import { plainToInstance } from 'class-transformer';
 
 @ApiTags('technical-skill')
 @Controller('skillCategory/:skillCategory/technical-skill')
@@ -111,7 +112,15 @@ export class TechnicalSkillController {
       );
       return {
         statusCode: HttpStatus.OK,
-        data: paginationResponse,
+        data: {
+          page: paginationResponse.page,
+          perPage: paginationResponse.perPage,
+          totalCount: paginationResponse.totalCount,
+          pageCount: paginationResponse.pageCount,
+          items: plainToInstance(TechnicalSkillDto, paginationResponse.items, {
+            excludeExtraneousValues: true,
+          }),
+        },
       };
     } catch (error) {
       throw new InternalServerErrorException(
@@ -137,7 +146,7 @@ export class TechnicalSkillController {
   async findOne(
     @Param('skillCategory') categoryName: string,
     @Param('name') name: string,
-  ) {
+  ): Promise<ResponseDto<TechnicalSkillDto>> {
     const technicalSkill = await this.technicalSkillService.findOne(
       name,
       categoryName,
