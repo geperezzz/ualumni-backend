@@ -452,6 +452,7 @@ export class AlumniService {
             visibleSince: true,
             aboutMe: true,
             ciapCourses: {
+              where: { isVisible: true },
               select: {
                 course: {
                   select: {
@@ -464,6 +465,7 @@ export class AlumniService {
               },
             },
             knownLanguages: {
+              where: { isVisible: true },
               select: {
                 languageName: true,
                 masteryLevel: true,
@@ -471,6 +473,7 @@ export class AlumniService {
               },
             },
             technicalSkills: {
+              where: { isVisible: true },
               select: {
                 skillName: true,
                 skillCategoryName: true,
@@ -478,6 +481,7 @@ export class AlumniService {
               },
             },
             higherEducationStudies: {
+              where: { isVisible: true },
               select: {
                 title: true,
                 institution: true,
@@ -486,12 +490,14 @@ export class AlumniService {
               },
             },
             industriesOfInterest: {
+              where: { isVisible: true },
               select: {
                 industryName: true,
                 isVisible: true,
               },
             },
             portfolio: {
+              where: { isVisible: true },
               select: {
                 title: true,
                 isVisible: true,
@@ -499,12 +505,14 @@ export class AlumniService {
               },
             },
             positionsOfInterest: {
+              where: { isVisible: true },
               select: {
                 positionName: true,
                 isVisible: true,
               },
             },
             softSkills: {
+              where: { isVisible: true },
               select: {
                 skillName: true,
                 isVisible: true,
@@ -589,7 +597,7 @@ export class AlumniService {
 
   async findOneWithResume(email: string): Promise<AlumniWithResume | null> {
     try {
-      const resume = await this.prismaService.resume.findUniqueOrThrow({
+      const resume = await this.prismaService.resume.findUnique({
         where: { ownerEmail: email },
         select: {
           numberOfDownloads: true,
@@ -678,45 +686,179 @@ export class AlumniService {
         },
       });
 
-      return {
-        email: resume.owner.associatedUser.email,
-        names: resume.owner.associatedUser.names,
-        surnames: resume.owner.associatedUser.surnames,
-        password: resume.owner.associatedUser.password,
-        address: resume.owner.address,
-        telephoneNumber: resume.owner.telephoneNumber,
-        careers: resume.owner.graduations,
-        resume: {
-          aboutMe: resume.aboutMe,
-          numberOfDownloads: resume.numberOfDownloads,
-          isVisible: resume.isVisible,
-          visibleSince: resume.visibleSince,
-          ciapCourses: resume.ciapCourses.map((ciapCourse) => {
-            return {
-              id: ciapCourse.course.id,
-              name: ciapCourse.course.name,
-              date: ciapCourse.course.date,
-              isVisible: ciapCourse.isVisible,
-            };
-          }),
-          knownLanguages: resume.knownLanguages,
-          technicalSkills: resume.technicalSkills,
-          higherEducationStudies: resume.higherEducationStudies,
-          industriesOfInterest: resume.industriesOfInterest,
-          portfolio: resume.portfolio,
-          positionsOfInterest: resume.positionsOfInterest,
-          softSkills: resume.softSkills,
-        },
-      };
+      return resume
+        ? {
+            email: resume.owner.associatedUser.email,
+            names: resume.owner.associatedUser.names,
+            surnames: resume.owner.associatedUser.surnames,
+            password: resume.owner.associatedUser.password,
+            address: resume.owner.address,
+            telephoneNumber: resume.owner.telephoneNumber,
+            careers: resume.owner.graduations,
+            resume: {
+              aboutMe: resume.aboutMe,
+              numberOfDownloads: resume.numberOfDownloads,
+              isVisible: resume.isVisible,
+              visibleSince: resume.visibleSince,
+              ciapCourses: resume.ciapCourses.map((ciapCourse) => {
+                return {
+                  id: ciapCourse.course.id,
+                  name: ciapCourse.course.name,
+                  date: ciapCourse.course.date,
+                  isVisible: ciapCourse.isVisible,
+                };
+              }),
+              knownLanguages: resume.knownLanguages,
+              technicalSkills: resume.technicalSkills,
+              higherEducationStudies: resume.higherEducationStudies,
+              industriesOfInterest: resume.industriesOfInterest,
+              portfolio: resume.portfolio,
+              positionsOfInterest: resume.positionsOfInterest,
+              softSkills: resume.softSkills,
+            },
+          }
+        : null;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new NotFoundError(
-            `There is no alumni with the given \`email\` (${email})`,
-            { cause: error },
-          );
-        }
-      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
+  async findOneWithResumeOnlyVisibles(
+    email: string,
+  ): Promise<AlumniWithResume | null> {
+    try {
+      const resume = await this.prismaService.resume.findUnique({
+        where: { ownerEmail: email },
+        select: {
+          numberOfDownloads: true,
+          isVisible: true,
+          visibleSince: true,
+          aboutMe: true,
+          ciapCourses: {
+            where: { isVisible: true },
+            select: {
+              course: {
+                select: {
+                  id: true,
+                  name: true,
+                  date: true,
+                },
+              },
+              isVisible: true,
+            },
+          },
+          knownLanguages: {
+            where: { isVisible: true },
+            select: {
+              languageName: true,
+              masteryLevel: true,
+              isVisible: true,
+            },
+          },
+          technicalSkills: {
+            where: { isVisible: true },
+            select: {
+              skillName: true,
+              skillCategoryName: true,
+              isVisible: true,
+            },
+          },
+          higherEducationStudies: {
+            where: { isVisible: true },
+            select: {
+              title: true,
+              institution: true,
+              endDate: true,
+              isVisible: true,
+            },
+          },
+          industriesOfInterest: {
+            where: { isVisible: true },
+            select: {
+              industryName: true,
+              isVisible: true,
+            },
+          },
+          portfolio: {
+            where: { isVisible: true },
+            select: {
+              title: true,
+              isVisible: true,
+              sourceLink: true,
+            },
+          },
+          positionsOfInterest: {
+            where: { isVisible: true },
+            select: {
+              positionName: true,
+              isVisible: true,
+            },
+          },
+          softSkills: {
+            where: { isVisible: true },
+            select: {
+              skillName: true,
+              isVisible: true,
+            },
+          },
+          owner: {
+            select: {
+              address: true,
+              telephoneNumber: true,
+              graduations: {
+                select: {
+                  careerName: true,
+                  graduationDate: true,
+                },
+              },
+              associatedUser: {
+                select: {
+                  email: true,
+                  password: true,
+                  names: true,
+                  surnames: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      return resume
+        ? {
+            email: resume.owner.associatedUser.email,
+            names: resume.owner.associatedUser.names,
+            surnames: resume.owner.associatedUser.surnames,
+            password: resume.owner.associatedUser.password,
+            address: resume.owner.address,
+            telephoneNumber: resume.owner.telephoneNumber,
+            careers: resume.owner.graduations,
+            resume: {
+              aboutMe: resume.aboutMe,
+              numberOfDownloads: resume.numberOfDownloads,
+              isVisible: resume.isVisible,
+              visibleSince: resume.visibleSince,
+              ciapCourses: resume.ciapCourses.map((ciapCourse) => {
+                return {
+                  id: ciapCourse.course.id,
+                  name: ciapCourse.course.name,
+                  date: ciapCourse.course.date,
+                  isVisible: ciapCourse.isVisible,
+                };
+              }),
+              knownLanguages: resume.knownLanguages,
+              technicalSkills: resume.technicalSkills,
+              higherEducationStudies: resume.higherEducationStudies,
+              industriesOfInterest: resume.industriesOfInterest,
+              portfolio: resume.portfolio,
+              positionsOfInterest: resume.positionsOfInterest,
+              softSkills: resume.softSkills,
+            },
+          }
+        : null;
+    } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });

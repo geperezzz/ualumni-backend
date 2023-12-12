@@ -10,6 +10,8 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Header,
+  StreamableFile,
 } from '@nestjs/common';
 import { ResumeService } from './resume.service';
 import { UpdateResumeDto } from './dto/update-resume.dto';
@@ -28,12 +30,52 @@ import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
 import { User } from '@prisma/client';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
+import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
 @ApiTags('resume')
 @Controller('alumni')
 @UseGuards(SessionAuthGuard, PermissionsGuard)
 export class ResumeController {
   constructor(private readonly resumeService: ResumeService) {}
+
+  @Get('me/resume/pdf')
+  @Allowed('alumni')
+  @Header('Content-Type', 'application/pdf')
+  @Header('Content-Disposition', 'inline; filename=resume.pdf')
+  async exportAsPdfMine(@SessionUser() user: User): Promise<StreamableFile> {
+    try {
+      const pdf = await this.resumeService.exportAsPdf(user.email);
+      return new StreamableFile(pdf);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
+
+  @Get(':email/resume/pdf')
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
+  @Header('Content-Type', 'application/pdf')
+  @Header('Content-Disposition', 'inline; filename=resume.pdf')
+  async exportAsPdf(@Param('email') email: string): Promise<StreamableFile> {
+    try {
+      const pdf = await this.resumeService.exportAsPdf(email);
+      return new StreamableFile(pdf);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
 
   @Patch('me/resume')
   @Allowed('alumni')

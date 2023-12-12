@@ -146,7 +146,7 @@ export class AlumniController {
   async findOneWithResume(
     @Param('email') email: string,
   ): Promise<ResponseDto<AlumniWithResumeDto>> {
-    let alumni = await this.alumniService.findOneWithResume(email);
+    let alumni = await this.alumniService.findOneWithResumeOnlyVisibles(email);
 
     if (!alumni) {
       throw new NotFoundException(

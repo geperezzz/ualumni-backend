@@ -6,10 +6,44 @@ import { NotFoundError, UnexpectedError } from 'src/common/error/service.error';
 import { Prisma } from '@prisma/client';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Resume } from './resume.type';
+import * as path from 'path';
+import * as pug from 'pug';
+import puppeteer from 'puppeteer';
+import { AlumniService } from 'src/alumni/alumni.service';
 
 @Injectable()
 export class ResumeService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly alumniService: AlumniService,
+  ) {}
+  private buildResumeAsHtml = pug.compileFile(
+    path.resolve(__dirname, 'templates/resume.pug'),
+  );
+
+  async exportAsPdf(email: string): Promise<Buffer> {
+    const alumni =
+      await this.alumniService.findOneWithResumeOnlyVisibles(email);
+    if (!alumni) {
+      throw new NotFoundError(
+        `There is no alumni with the given \`email\` (${email})`,
+      );
+    }
+    const browser = await puppeteer.launch({ headless: 'new' });
+
+    const resumePage = await browser.newPage();
+    await resumePage.setContent(this.buildResumeAsHtml({ alumni }), {
+      waitUntil: 'networkidle0',
+    });
+    const pdf = await resumePage.pdf();
+
+    await browser.close();
+    await this.prismaService.resume.update({
+      where: { ownerEmail: email },
+      data: { numberOfDownloads: { increment: 1 } },
+    });
+    return pdf;
+  }
 
   async update(
     email: string,
