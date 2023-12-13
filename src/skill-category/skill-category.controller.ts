@@ -23,7 +23,7 @@ import {
   AlreadyExistsError,
   ForeignKeyError,
   NotFoundError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 import {
   ApiBadRequestResponse,

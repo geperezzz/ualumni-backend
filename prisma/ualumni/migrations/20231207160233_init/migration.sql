@@ -12,10 +12,21 @@ CREATE TABLE "JobOffer" (
     "position" TEXT NOT NULL,
     "offerLocation" TEXT NOT NULL,
     "offerTimestamp" TIMESTAMP(3) NOT NULL,
+    "isVisible" BOOLEAN NOT NULL DEFAULT true,
+    "visibleSince" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "careerName" TEXT NOT NULL,
     "contractTypeName" TEXT NOT NULL,
 
     CONSTRAINT "JobOffer_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "JobOfferTechnicalSkill" (
+    "jobOfferId" UUID NOT NULL,
+    "technicalSkillName" TEXT NOT NULL,
+    "technicalSkillCategoryName" TEXT NOT NULL,
+
+    CONSTRAINT "JobOfferTechnicalSkill_pkey" PRIMARY KEY ("jobOfferId","technicalSkillName","technicalSkillCategoryName")
 );
 
 -- CreateTable
@@ -84,8 +95,8 @@ CREATE TABLE "JobApplication" (
 CREATE TABLE "Resume" (
     "ownerEmail" TEXT NOT NULL,
     "numberOfDownloads" INTEGER NOT NULL DEFAULT 0,
-    "isVisible" BOOLEAN NOT NULL DEFAULT true,
-    "visibleSince" DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "isVisible" BOOLEAN NOT NULL DEFAULT false,
+    "visibleSince" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "aboutMe" TEXT,
 
     CONSTRAINT "Resume_pkey" PRIMARY KEY ("ownerEmail")
@@ -229,6 +240,12 @@ ALTER TABLE "JobOffer" ADD CONSTRAINT "JobOffer_careerName_fkey" FOREIGN KEY ("c
 
 -- AddForeignKey
 ALTER TABLE "JobOffer" ADD CONSTRAINT "JobOffer_contractTypeName_fkey" FOREIGN KEY ("contractTypeName") REFERENCES "ContractType"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "JobOfferTechnicalSkill" ADD CONSTRAINT "JobOfferTechnicalSkill_jobOfferId_fkey" FOREIGN KEY ("jobOfferId") REFERENCES "JobOffer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "JobOfferTechnicalSkill" ADD CONSTRAINT "JobOfferTechnicalSkill_technicalSkillName_technicalSkillCa_fkey" FOREIGN KEY ("technicalSkillName", "technicalSkillCategoryName") REFERENCES "TechnicalSkill"("name", "categoryName") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Alumni" ADD CONSTRAINT "Alumni_email_fkey" FOREIGN KEY ("email") REFERENCES "User"("email") ON DELETE CASCADE ON UPDATE CASCADE;

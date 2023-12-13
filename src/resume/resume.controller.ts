@@ -23,7 +23,7 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { NotFoundError } from 'src/common/error/service.error';
+import { NotFoundError } from 'src/common/errors/service.error';
 import { plainToInstance } from 'class-transformer';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';

@@ -1,3 +1,3 @@
-import { Language } from '@prisma/client';
+import { Language } from 'prisma/ualumni/client';
 
 export type LanguageDto = Language;

@@ -25,7 +25,7 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { ForeignKeyError } from 'src/common/error/service.error';
+import { ForeignKeyError } from 'src/common/errors/service.error';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';

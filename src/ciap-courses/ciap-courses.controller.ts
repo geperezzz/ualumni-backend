@@ -34,7 +34,7 @@ import {
 import {
   AlreadyExistsError,
   NotFoundError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';

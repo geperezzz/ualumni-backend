@@ -3,12 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   HttpStatus,
   HttpCode,
-  HttpException,
   Query,
   DefaultValuePipe,
   ParseIntPipe,
@@ -32,7 +30,7 @@ import {
 } from '@nestjs/swagger';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
-import { AlreadyExistsError } from 'src/common/error/service.error';
+import { AlreadyExistsError } from 'src/common/errors/service.error';
 import { NotFoundError } from 'rxjs';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';

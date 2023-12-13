@@ -1,27 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSkillCategoryDto } from './dto/create-skill-category.dto';
 import { UpdateSkillCategoryDto } from './dto/update-skill-category.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { SkillCategoryDto } from './dto/skill-category.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,
   NotFoundError,
   UnexpectedError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
 import { UpdateRelatedCareersDto } from './dto/update-related-careers.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class SkillCategoryService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
     createSkillCategoryDto: CreateSkillCategoryDto,
   ): Promise<SkillCategoryDto> {
     try {
-      return await this.prismaService.skillCategory.create({
+      return await this.ualumniDbService.skillCategory.create({
         data: {
           name: createSkillCategoryDto.name,
           relatedCareers: {
@@ -58,7 +58,7 @@ export class SkillCategoryService {
     perPage: number,
   ): Promise<PageDto<SkillCategoryDto>> {
     try {
-      const totalCount = await this.prismaService.skillCategory.count();
+      const totalCount = await this.ualumniDbService.skillCategory.count();
       const pageCount = Math.ceil(totalCount / perPage);
 
       if (page < 1) {
@@ -67,7 +67,7 @@ export class SkillCategoryService {
         page = pageCount;
       }
 
-      const data = await this.prismaService.skillCategory.findMany({
+      const data = await this.ualumniDbService.skillCategory.findMany({
         take: perPage,
         skip: (page - 1) * perPage,
       });
@@ -91,7 +91,7 @@ export class SkillCategoryService {
     perPage: number,
   ): Promise<PageDto<SkillCategoryDto>> {
     try {
-      const totalCount = await this.prismaService.skillCategory.count();
+      const totalCount = await this.ualumniDbService.skillCategory.count();
       const pageCount = Math.ceil(totalCount / perPage);
 
       if (page < 1) {
@@ -100,7 +100,7 @@ export class SkillCategoryService {
         page = pageCount;
       }
 
-      const data = await this.prismaService.skillCategory.findMany({
+      const data = await this.ualumniDbService.skillCategory.findMany({
         take: perPage,
         skip: (page - 1) * perPage,
         include: { relatedCareers: true },
@@ -126,7 +126,7 @@ export class SkillCategoryService {
     perPage: number,
   ): Promise<PageDto<SkillCategoryDto>> {
     try {
-      const totalCount = await this.prismaService.skillCategory.count({
+      const totalCount = await this.ualumniDbService.skillCategory.count({
         where: { relatedCareers: { some: { name: careerName } } },
       });
       const pageCount = Math.ceil(totalCount / perPage);
@@ -137,7 +137,7 @@ export class SkillCategoryService {
         page = pageCount;
       }
 
-      const data = await this.prismaService.skillCategory.findMany({
+      const data = await this.ualumniDbService.skillCategory.findMany({
         where: { relatedCareers: { some: { name: careerName } } },
         take: perPage,
         skip: (page - 1) * perPage,
@@ -160,7 +160,7 @@ export class SkillCategoryService {
 
   async findOne(name: string): Promise<SkillCategoryDto | null> {
     try {
-      return await this.prismaService.skillCategory.findUnique({
+      return await this.ualumniDbService.skillCategory.findUnique({
         where: { name },
         include: { relatedCareers: true },
       });
@@ -176,7 +176,7 @@ export class SkillCategoryService {
     updateSkillCategoryDto: UpdateSkillCategoryDto,
   ): Promise<SkillCategoryDto> {
     try {
-      return await this.prismaService.skillCategory.update({
+      return await this.ualumniDbService.skillCategory.update({
         where: { name },
         data: {
           name: updateSkillCategoryDto.name,
@@ -204,9 +204,50 @@ export class SkillCategoryService {
     }
   }
 
+  async updateRelatedCareers(
+    name: string,
+    updateRelatedCareersDto: UpdateRelatedCareersDto,
+  ): Promise<SkillCategoryDto> {
+    try {
+      return await this.ualumniDbService.skillCategory.update({
+        where: { name },
+        data: {
+          relatedCareers: {
+            disconnect: updateRelatedCareersDto.removeRelatedCareersNames?.map(
+              (name) => ({ name }),
+            ),
+            connect: updateRelatedCareersDto.addRelatedCareersNames?.map(
+              (name) => ({ name }),
+            ),
+          },
+        },
+        include: { relatedCareers: true },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        console.log(error.code);
+        if (error.code === 'P2016') {
+          throw new NotFoundError(
+            `There is no skill category with the given name (${name})`,
+            { cause: error },
+          );
+        }
+        if (error.code === 'P2025') {
+          throw new ForeignKeyError(
+            `There is no career with the given name/s (${updateRelatedCareersDto.addRelatedCareersNames})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
   async remove(name: string): Promise<SkillCategoryDto> {
     try {
-      return await this.prismaService.skillCategory.delete({
+      return await this.ualumniDbService.skillCategory.delete({
         where: { name },
         include: { relatedCareers: true },
       });

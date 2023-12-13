@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, SoftSkill } from '@prisma/client';
+import { Prisma, SoftSkill } from 'prisma/ualumni/client';
 import { CreateSoftSkillDto } from './dto/create-soft-skill.dto';
 import { UpdateSoftSkillDto } from './dto/update-soft-skill.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import {
   AlreadyExistsError,
   NotFoundError,
@@ -10,14 +9,15 @@ import {
 } from 'src/common/errors/service.error';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import { Page } from 'src/common/interfaces/page.interface';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class SoftSkillsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private ualumniDbService: UalumniDbService) {}
 
   async create(createSoftSkillDto: CreateSoftSkillDto): Promise<SoftSkill> {
     try {
-      return await this.prismaService.softSkill.create({
+      return await this.ualumniDbService.softSkill.create({
         data: createSoftSkillDto,
       });
     } catch (error) {
@@ -40,12 +40,12 @@ export class SoftSkillsService {
     itemsPerPage,
   }: PaginationParamsDto): Promise<Page<SoftSkill>> {
     try {
-      let [items, numberOfItems] = await this.prismaService.$transaction([
-        this.prismaService.softSkill.findMany({
+      let [items, numberOfItems] = await this.ualumniDbService.$transaction([
+        this.ualumniDbService.softSkill.findMany({
           take: itemsPerPage,
           skip: itemsPerPage * (pageNumber - 1),
         }),
-        this.prismaService.softSkill.count(),
+        this.ualumniDbService.softSkill.count(),
       ]);
 
       return {
@@ -66,7 +66,7 @@ export class SoftSkillsService {
 
   async findOne(name: string): Promise<SoftSkill | null> {
     try {
-      return await this.prismaService.softSkill.findFirst({
+      return await this.ualumniDbService.softSkill.findFirst({
         where: { name },
       });
     } catch (error) {
@@ -81,7 +81,7 @@ export class SoftSkillsService {
     updateSoftSkillDto: UpdateSoftSkillDto,
   ): Promise<SoftSkill> {
     try {
-      return await this.prismaService.softSkill.update({
+      return await this.ualumniDbService.softSkill.update({
         where: { name },
         data: updateSoftSkillDto,
       });
@@ -108,7 +108,7 @@ export class SoftSkillsService {
 
   async remove(name: string): Promise<SoftSkill> {
     try {
-      return await this.prismaService.softSkill.delete({
+      return await this.ualumniDbService.softSkill.delete({
         where: { name },
       });
     } catch (error) {

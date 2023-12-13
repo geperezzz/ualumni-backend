@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateJobApplicationDto } from './dto/create-job-application.dto';
 import { UpdateJobApplicationDto } from './dto/update-job-application.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { JobApplication, Prisma } from '@prisma/client';
+import { JobApplication, Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   NotFoundError,
@@ -10,17 +9,18 @@ import {
 } from 'src/common/errors/service.error';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import { Page } from 'src/common/interfaces/page.interface';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class JobApplicationsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private ualumniDbService: UalumniDbService) {}
 
   async create(
     alumniEmail: string,
     createJobApplicationDto: CreateJobApplicationDto,
   ): Promise<JobApplication> {
     try {
-      return await this.prismaService.jobApplication.create({
+      return await this.ualumniDbService.jobApplication.create({
         data: {
           alumniWhoAppliedEmail: alumniEmail,
           ...createJobApplicationDto,
@@ -59,13 +59,13 @@ export class JobApplicationsService {
     { itemsPerPage, pageNumber }: PaginationParamsDto,
   ): Promise<Page<JobApplication>> {
     try {
-      let [items, numberOfItems] = await this.prismaService.$transaction([
-        this.prismaService.jobApplication.findMany({
+      let [items, numberOfItems] = await this.ualumniDbService.$transaction([
+        this.ualumniDbService.jobApplication.findMany({
           where: { alumniWhoAppliedEmail: alumniEmail },
           take: itemsPerPage,
           skip: itemsPerPage * (pageNumber - 1),
         }),
-        this.prismaService.jobApplication.count(),
+        this.ualumniDbService.jobApplication.count(),
       ]);
 
       return {
@@ -89,7 +89,7 @@ export class JobApplicationsService {
     jobOfferId: string,
   ): Promise<JobApplication | null> {
     try {
-      return await this.prismaService.jobApplication.findUnique({
+      return await this.ualumniDbService.jobApplication.findUnique({
         where: {
           jobOfferId_alumniWhoAppliedEmail: {
             jobOfferId,
@@ -110,7 +110,7 @@ export class JobApplicationsService {
     updateJobApplicationDto: UpdateJobApplicationDto,
   ): Promise<JobApplication> {
     try {
-      return await this.prismaService.jobApplication.update({
+      return await this.ualumniDbService.jobApplication.update({
         where: {
           jobOfferId_alumniWhoAppliedEmail: {
             jobOfferId,
@@ -145,7 +145,7 @@ export class JobApplicationsService {
     jobOfferId: string,
   ): Promise<JobApplication> {
     try {
-      return await this.prismaService.jobApplication.delete({
+      return await this.ualumniDbService.jobApplication.delete({
         where: {
           jobOfferId_alumniWhoAppliedEmail: {
             jobOfferId,

@@ -2,22 +2,67 @@ import { Injectable } from '@nestjs/common';
 import { CreateCareerDto } from './dto/create-career.dto';
 import { UpdateCareerDto } from './dto/update-career.dto';
 import { CareerDto } from './dto/career.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   NotFoundError,
   UnexpectedError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
+import { UcabDbService } from 'src/ucab-db/ucab-db.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class CareerService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly ualumniDbService: UalumniDbService,
+    private readonly ucabDbService: UcabDbService,
+  ) {}
+
+  private async findUalumniDbCareer(name: string) {
+    try {
+      const data = await this.ualumniDbService.career.findUnique({
+        where: {
+          name: name,
+        },
+      });
+      return data ? data : undefined;
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
+  //Create career if not exists in ualumni db
+  @Cron(CronExpression.EVERY_10_SECONDS)
+  async synchronize() {
+    try {
+      const ucabDbCareers = await this.ucabDbService.career.findMany();
+
+      for (let ucabDbCareer of ucabDbCareers) {
+        const ualumniDbCiapCourse = await this.findUalumniDbCareer(
+          ucabDbCareer.name,
+        );
+        if (!ualumniDbCiapCourse) {
+          await this.ualumniDbService.career.create({
+            data: {
+              name: ucabDbCareer.name,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
 
   async create(createCareerDto: CreateCareerDto): Promise<CareerDto> {
     try {
-      return await this.prismaService.career.create({
+      return await this.ualumniDbService.career.create({
         data: {
           name: createCareerDto.name,
         },
@@ -39,7 +84,7 @@ export class CareerService {
 
   async findMany(page: number, perPage: number): Promise<PageDto<CareerDto>> {
     try {
-      const totalCount = await this.prismaService.career.count();
+      const totalCount = await this.ualumniDbService.career.count();
       const pageCount = Math.ceil(totalCount / perPage);
 
       if (page < 1) {
@@ -48,7 +93,7 @@ export class CareerService {
         page = pageCount;
       }
 
-      const data = await this.prismaService.career.findMany({
+      const data = await this.ualumniDbService.career.findMany({
         take: perPage,
         skip: (page - 1) * perPage,
       });
@@ -69,7 +114,7 @@ export class CareerService {
 
   async findOne(name: string): Promise<CareerDto | null> {
     try {
-      return await this.prismaService.career.findUnique({
+      return await this.ualumniDbService.career.findUnique({
         where: {
           name,
         },
@@ -86,7 +131,7 @@ export class CareerService {
     updateCareerDto: UpdateCareerDto,
   ): Promise<CareerDto> {
     try {
-      return await this.prismaService.career.update({
+      return await this.ualumniDbService.career.update({
         where: {
           name,
         },
@@ -117,7 +162,7 @@ export class CareerService {
 
   async remove(name: string): Promise<CareerDto> {
     try {
-      return await this.prismaService.career.delete({
+      return await this.ualumniDbService.career.delete({
         where: {
           name,
         },

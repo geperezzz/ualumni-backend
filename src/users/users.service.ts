@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { User } from 'prisma/ualumni/client';
 import { UnexpectedError } from 'src/common/errors/service.error';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private ualumniDbService: UalumniDbService) {}
 
   async findOne(email: string): Promise<User | null> {
     try {
-      return await this.prismaService.user.findUnique({
+      return await this.ualumniDbService.user.findUnique({
         where: { email },
       });
     } catch (error) {

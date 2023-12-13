@@ -1,3 +1,3 @@
-import { ResumeSoftSkill } from '@prisma/client';
+import { ResumeSoftSkill } from 'prisma/ualumni/client';
 
 export type ResumeSoftSkillDto = ResumeSoftSkill;

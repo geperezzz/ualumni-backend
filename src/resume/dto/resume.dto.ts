@@ -1,5 +1,4 @@
 import { Expose } from 'class-transformer';
-import { CiapCourse } from 'src/ciap-courses/entities/ciap-course.entity';
 import {
   HigherEducationStudy,
   IndustryOfInterest,
@@ -9,12 +8,16 @@ import {
   ResumeLanguage,
   ResumeSoftSkill,
   ResumeTechnicalSkill,
-} from '@prisma/client';
+  WorkExperience,
+  CiapCourse
+} from 'prisma/ualumni/client';
+import { Resume } from '../resume.type';
 
-export class ResumeDto {
+export class ResumeDto implements Resume {
   @Expose() ownerEmail: string;
   @Expose() numberOfDownloads: number;
   @Expose() isVisible: boolean;
+  @Expose() visibleSince: Date;
   @Expose() aboutMe: string;
   @Expose() ciapCourses: (CiapCourse &
     Omit<ResumeCiapCourse, 'resumeOwnerEmail' | 'courseId'>)[];
@@ -31,4 +34,5 @@ export class ResumeDto {
   @Expose() portfolio: Omit<PortfolioItem, 'resumeOwnerEmail'>[];
   @Expose() positionsOfInterest: Omit<PositionOfInterest, 'resumeOwnerEmail'>[];
   @Expose() softSkills: Omit<ResumeSoftSkill, 'resumeOwnerEmail'>[];
+  @Expose() workExperiences: Omit<WorkExperience, 'resumeOwnerEmail'>[];
 }

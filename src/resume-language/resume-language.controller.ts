@@ -32,7 +32,7 @@ import {
   AlreadyExistsError,
   ForeignKeyError,
   NotFoundError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { ResumeLanguageDto } from './dto/resume-language.dto';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';

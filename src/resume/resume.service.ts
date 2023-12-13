@@ -1,20 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateResumeDto } from './dto/update-resume.dto';
-import { ResumeDto } from './dto/resume.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { NotFoundError, UnexpectedError } from 'src/common/error/service.error';
-import { Prisma } from '@prisma/client';
+import {
+  NotFoundError,
+  UnexpectedError,
+} from 'src/common/errors/service.error';
+import { Prisma } from 'prisma/ualumni/client';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Resume } from './resume.type';
 import * as path from 'path';
 import * as pug from 'pug';
 import puppeteer from 'puppeteer';
 import { AlumniService } from 'src/alumni/alumni.service';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class ResumeService {
   constructor(
-    private readonly prismaService: PrismaService,
+    private readonly ualumniDbService: UalumniDbService,
     private readonly alumniService: AlumniService,
   ) {}
   private buildResumeAsHtml = pug.compileFile(
@@ -38,7 +40,7 @@ export class ResumeService {
     const pdf = await resumePage.pdf();
 
     await browser.close();
-    await this.prismaService.resume.update({
+    await this.ualumniDbService.resume.update({
       where: { ownerEmail: email },
       data: { numberOfDownloads: { increment: 1 } },
     });
@@ -50,7 +52,7 @@ export class ResumeService {
     updateResumeDto: UpdateResumeDto,
   ): Promise<Resume> {
     try {
-      const resume = await this.prismaService.resume.update({
+      const resume = await this.ualumniDbService.resume.update({
         where: { ownerEmail: email },
         data: {
           isVisible: updateResumeDto.isVisible,
@@ -124,6 +126,17 @@ export class ResumeService {
               isVisible: true,
             },
           },
+          workExperiences: {
+            select: {
+              number: true,
+              description: true,
+              companyName: true,
+              position: true,
+              startDate: true,
+              endDate: true,
+              isVisible: true,
+            }
+          }
         },
       });
       return {
@@ -145,6 +158,7 @@ export class ResumeService {
         portfolio: resume.portfolio,
         positionsOfInterest: resume.positionsOfInterest,
         softSkills: resume.softSkills,
+        workExperiences: resume.workExperiences
       };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -161,15 +175,15 @@ export class ResumeService {
     }
   }
 
-  //automatic hiding of resumes older than a month
+  // automatic hiding of resumes older than a month
   @Cron(CronExpression.EVERY_12_HOURS)
   async hide() {
     //calculate a month ago
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-    //update resume.visibleSince older than a month
-    const resumes = await this.prismaService.resume.updateMany({
+    // update resume.visibleSince older than a month
+    const resumes = await this.ualumniDbService.resume.updateMany({
       where: { visibleSince: { lte: oneMonthAgo } },
       data: { isVisible: false },
     });

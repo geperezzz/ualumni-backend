@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ContractTypeService } from './contract-type.service';
 import { ContractTypeController } from './contract-type.controller';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { UalumniDbModule } from 'src/ualumni-db/ualumni-db.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [UalumniDbModule],
   controllers: [ContractTypeController],
   providers: [ContractTypeService],
 })

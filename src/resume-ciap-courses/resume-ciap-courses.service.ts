@@ -1,23 +1,105 @@
 import { Injectable } from '@nestjs/common';
 import { CreateResumeCiapCourseDto } from './dto/create-resume-ciap-course.dto';
 import { ResumeCiapCourseDto } from './dto/resume-ciap-course.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   ForeignKeyError,
   UnexpectedError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
+import { UcabDbService } from 'src/ucab-db/ucab-db.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class ResumeCiapCoursesService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private ualumniDbService: UalumniDbService,
+    private ucabDbService: UcabDbService,
+  ) {}
+
+  private async findUcabDbCiapCourse(name: string, date: Date) {
+    try {
+      const data = await this.ucabDbService.ciapCourse.findUnique({
+        where: {
+          name_completionDate: {
+            name: name,
+            completionDate: date,
+          },
+        },
+        include: {
+          enrolledStudents: true,
+        },
+      });
+      return data;
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async synchronize() {
+    try {
+      //find ualumniDb courses with enrolledStudents
+      const ualumniDbCiapCourses =
+        await this.ualumniDbService.ciapCourse.findMany({
+          include: {
+            resumesListingThis: true,
+          },
+        });
+
+      //find course with enrolledStudents in ucabDb
+      for (let ualumniDbCiapCourse of ualumniDbCiapCourses) {
+        const ucabDbCiapCourse = await this.findUcabDbCiapCourse(
+          ualumniDbCiapCourse.name,
+          ualumniDbCiapCourse.date,
+        );
+
+        //check if alumni in ualumniDb is already enrolled
+        if (ucabDbCiapCourse) {
+          for (let ucabDbAlumni of ucabDbCiapCourse.enrolledStudents) {
+            const ualumniDbAlumniEnrolled =
+              ualumniDbCiapCourse.resumesListingThis.find(
+                (ualumniDbAlumni) =>
+                  ualumniDbAlumni.resumeOwnerEmail === ucabDbAlumni.email,
+              );
+
+            //create if not exists
+            if (!ualumniDbAlumniEnrolled) {
+              await this.ualumniDbService.resumeCiapCourse.create({
+                data: {
+                  isVisible: true,
+                  courseId: ualumniDbCiapCourse.id,
+                  resumeOwnerEmail: ucabDbAlumni.email,
+                },
+              });
+            }
+          }
+        }
+      }
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          throw new ForeignKeyError(
+            `Cannot create. There is no ciap course or alumni in UalumniDB with the given \`data\``,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
   async create(
     ownerEmail: string,
     createResumeCiapCourseDto: CreateResumeCiapCourseDto,
   ): Promise<ResumeCiapCourseDto> {
     try {
-      return await this.prismaService.resumeCiapCourse.create({
+      return await this.ualumniDbService.resumeCiapCourse.create({
         data: {
           isVisible: true,
           courseId: createResumeCiapCourseDto.id,
@@ -45,7 +127,7 @@ export class ResumeCiapCoursesService {
     itemsPerPage: number,
   ): Promise<PageDto<ResumeCiapCourseDto>> {
     try {
-      const totalCount = await this.prismaService.resumeCiapCourse.count({
+      const totalCount = await this.ualumniDbService.resumeCiapCourse.count({
         where: { resumeOwnerEmail: ownerEmail },
       });
       const pageCount = Math.ceil(totalCount / itemsPerPage);
@@ -55,7 +137,7 @@ export class ResumeCiapCoursesService {
       } else if (pageNumber > pageCount) {
         pageNumber = pageCount;
       }
-      const data = await this.prismaService.resumeCiapCourse.findMany({
+      const data = await this.ualumniDbService.resumeCiapCourse.findMany({
         where: {
           resumeOwnerEmail: ownerEmail,
         },
@@ -81,7 +163,7 @@ export class ResumeCiapCoursesService {
     id: string,
   ): Promise<ResumeCiapCourseDto | null> {
     try {
-      return await this.prismaService.resumeCiapCourse.findUnique({
+      return await this.ualumniDbService.resumeCiapCourse.findUnique({
         where: {
           resumeOwnerEmail_courseId: {
             resumeOwnerEmail: ownerEmail,
@@ -98,7 +180,7 @@ export class ResumeCiapCoursesService {
 
   async remove(ownerEmail: string, id: string): Promise<ResumeCiapCourseDto> {
     try {
-      return await this.prismaService.resumeCiapCourse.delete({
+      return await this.ualumniDbService.resumeCiapCourse.delete({
         where: {
           resumeOwnerEmail_courseId: {
             resumeOwnerEmail: ownerEmail,

@@ -32,7 +32,7 @@ import {
   AlreadyExistsError,
   ForeignKeyError,
   NotFoundError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { HigherEducationStudyDto } from './dto/higher-education-study.dto';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';

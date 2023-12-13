@@ -19,10 +19,12 @@ import { SkillCategoryModule } from './skill-category/skill-category.module';
 import { ResumeCiapCoursesModule } from './resume-ciap-courses/resume-ciap-courses.module';
 import { ResumeSoftSkillModule } from './resume-soft-skill/resume-soft-skill.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { PrismaModule } from './prisma/prisma.module';
+import { UalumniDbModule } from './ualumni-db/ualumni-db.module';
 import { PortfolioItemModule } from './portfolio-item/portfolio-item.module';
 import { ResumeLanguageModule } from './resume-language/resume-language.module';
 import { ResumeTechnicalSkillModule } from './resume-technical-skill/resume-technical-skill.module';
+import { UcabDbModule } from './ucab-db/ucab-db.module';
+import { WorkExperiencesModule } from './work-experiences/work-experiences.module';
 
 @Module({
   imports: [
@@ -47,10 +49,12 @@ import { ResumeTechnicalSkillModule } from './resume-technical-skill/resume-tech
     SkillCategoryModule,
     ResumeCiapCoursesModule,
     ResumeSoftSkillModule,
-    PrismaModule,
+    UalumniDbModule,
     PortfolioItemModule,
     ResumeLanguageModule,
     ResumeTechnicalSkillModule,
+    UcabDbModule,
+    WorkExperiencesModule,
   ],
 })
 export class AppModule {}

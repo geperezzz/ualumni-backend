@@ -1,24 +1,49 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCiapCourseDto } from './dto/create-ciap-course.dto';
 import { UpdateCiapCourseDto } from './dto/update-ciap-course.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { CiapCourseDto } from './dto/ciap-course.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
+  ForeignKeyError,
   NotFoundError,
   UnexpectedError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { UcabDbService } from 'src/ucab-db/ucab-db.service';
 
 @Injectable()
 export class CiapCoursesService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly ualumniDbService: UalumniDbService,
+    private readonly ucabDbService: UcabDbService,
+  ) {}
+
+  private async findUalumniDbCiapCourse(name: string, date: Date) {
+    try {
+      const data = await this.ualumniDbService.ciapCourse.findUnique({
+        where: {
+          name_date: {
+            name: name,
+            date: date,
+          },
+        },
+      });
+      return data ? data : undefined;
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
   async create(
     createCiapCourseDto: CreateCiapCourseDto,
   ): Promise<CiapCourseDto> {
     try {
-      return await this.prismaService.ciapCourse.create({
+      return await this.ualumniDbService.ciapCourse.create({
         data: {
           id: createCiapCourseDto.id,
           name: createCiapCourseDto.name,
@@ -45,7 +70,7 @@ export class CiapCoursesService {
     perPage: number,
   ): Promise<PageDto<CiapCourseDto>> {
     try {
-      const totalCount = await this.prismaService.ciapCourse.count();
+      const totalCount = await this.ualumniDbService.ciapCourse.count();
       const pageCount = Math.ceil(totalCount / perPage);
 
       if (page < 1) {
@@ -54,7 +79,7 @@ export class CiapCoursesService {
         page = pageCount;
       }
 
-      const data = await this.prismaService.ciapCourse.findMany({
+      const data = await this.ualumniDbService.ciapCourse.findMany({
         take: perPage,
         skip: (page - 1) * perPage,
       });
@@ -75,7 +100,7 @@ export class CiapCoursesService {
 
   async findOne(id: string): Promise<CiapCourseDto | null> {
     try {
-      return await this.prismaService.ciapCourse.findUnique({
+      return await this.ualumniDbService.ciapCourse.findUnique({
         where: { id },
       });
     } catch (error) {
@@ -90,7 +115,7 @@ export class CiapCoursesService {
     updateCiapCourseDto: UpdateCiapCourseDto,
   ): Promise<CiapCourseDto> {
     try {
-      return await this.prismaService.ciapCourse.update({
+      return await this.ualumniDbService.ciapCourse.update({
         where: { id },
         data: {
           id: updateCiapCourseDto.id,
@@ -123,7 +148,7 @@ export class CiapCoursesService {
 
   async remove(id: string): Promise<CiapCourseDto> {
     try {
-      return await this.prismaService.ciapCourse.delete({
+      return await this.ualumniDbService.ciapCourse.delete({
         where: { id },
       });
     } catch (error) {
@@ -131,6 +156,41 @@ export class CiapCoursesService {
         if (error.code === 'P2025') {
           throw new NotFoundError(
             `There is no CIAP course with the given \`id\` (${id})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
+  //Create ciap course if not exists in ualumni db
+  @Cron(CronExpression.EVERY_10_SECONDS)
+  async synchronize() {
+    try {
+      const ucabDbCiapCourses = await this.ucabDbService.ciapCourse.findMany();
+
+      for (let ucabDbCiapCourse of ucabDbCiapCourses) {
+        const ualumniDbCiapCourse = await this.findUalumniDbCiapCourse(
+          ucabDbCiapCourse.name,
+          ucabDbCiapCourse.completionDate,
+        );
+        if (!ualumniDbCiapCourse) {
+          await this.ualumniDbService.ciapCourse.create({
+            data: {
+              name: ucabDbCiapCourse.name,
+              date: ucabDbCiapCourse.completionDate,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          throw new ForeignKeyError(
+            `Cannot update. There is no career in UalumniDB with the given \`careerName\``,
             { cause: error },
           );
         }

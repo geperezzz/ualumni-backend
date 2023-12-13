@@ -14,7 +14,10 @@ import { RegisterDto } from './dto/register.dto';
 import { AlumniService } from 'src/alumni/alumni.service';
 import { plainToInstance } from 'class-transformer';
 import { AlumniDto } from 'src/alumni/dto/alumni.dto';
-import { AlreadyExistsError } from 'src/common/errors/service.error';
+import {
+  AlreadyExistsError,
+  NotFoundError,
+} from 'src/common/errors/service.error';
 import { ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
@@ -41,6 +44,9 @@ export class AuthController {
         data: createdAlumniDto,
       };
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new BadRequestException(error.message, { cause: error });
+      }
       if (error instanceof AlreadyExistsError) {
         throw new BadRequestException(error.message, { cause: error });
       }
@@ -72,10 +78,13 @@ export class AuthController {
   @UseGuards(SessionAuthGuard, PermissionsGuard)
   @Allowed('admin', 'alumni')
   logout(@Req() request: Request) {
-    request.session.destroy(() => {});
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Successfully logged out',
-    };
+    return new Promise((resolve) =>
+      request.logout(() =>
+        resolve({
+          statusCode: HttpStatus.OK,
+          message: 'Successfully logged out',
+        }),
+      ),
+    );
   }
 }

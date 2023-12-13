@@ -1,27 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePortfolioItemDto } from './dto/create-portfolio-item.dto';
 import { UpdatePortfolioItemDto } from './dto/update-portfolio-item.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,
   NotFoundError,
   UnexpectedError,
-} from 'src/common/error/service.error';
+} from 'src/common/errors/service.error';
 import { PortfolioItemDto } from './dto/portfolio-item.dto';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class PortfolioItemService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
     resumeOwnerEmail: string,
     createPortfolioItemDto: CreatePortfolioItemDto,
   ): Promise<PortfolioItemDto> {
     try {
-      return await this.prismaService.portfolioItem.create({
+      return await this.ualumniDbService.portfolioItem.create({
         data: {
           resumeOwnerEmail: resumeOwnerEmail,
           title: createPortfolioItemDto.title,
@@ -56,7 +56,7 @@ export class PortfolioItemService {
     perPage: number,
   ): Promise<PageDto<PortfolioItemDto>> {
     try {
-      const totalCount = await this.prismaService.portfolioItem.count({
+      const totalCount = await this.ualumniDbService.portfolioItem.count({
         where: { resumeOwnerEmail },
       });
       const pageCount = Math.ceil(totalCount / perPage);
@@ -66,7 +66,7 @@ export class PortfolioItemService {
       } else if (page > pageCount) {
         page = pageCount;
       }
-      const data = await this.prismaService.portfolioItem.findMany({
+      const data = await this.ualumniDbService.portfolioItem.findMany({
         where: {
           resumeOwnerEmail,
         },
@@ -93,7 +93,7 @@ export class PortfolioItemService {
     updatePortfolioItemDto: UpdatePortfolioItemDto,
   ): Promise<PortfolioItemDto> {
     try {
-      return await this.prismaService.portfolioItem.update({
+      return await this.ualumniDbService.portfolioItem.update({
         where: {
           resumeOwnerEmail_title: {
             title,
@@ -132,7 +132,7 @@ export class PortfolioItemService {
     resumeOwnerEmail: string,
   ): Promise<PortfolioItemDto | null> {
     try {
-      return await this.prismaService.portfolioItem.findUnique({
+      return await this.ualumniDbService.portfolioItem.findUnique({
         where: {
           resumeOwnerEmail_title: {
             title,
@@ -152,7 +152,7 @@ export class PortfolioItemService {
     resumeOwnerEmail: string,
   ): Promise<PortfolioItemDto> {
     try {
-      return await this.prismaService.portfolioItem.delete({
+      return await this.ualumniDbService.portfolioItem.delete({
         where: {
           resumeOwnerEmail_title: {
             title,

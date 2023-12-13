@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as session from 'express-session';
 import * as passport from 'passport';
-import { PrismaService } from './prisma/prisma.service';
+import { UalumniDbService } from './ualumni-db/ualumni-db.service';
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -17,7 +17,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const prismaClient = app.get(PrismaService);
+  const prismaClient = app.get(UalumniDbService);
   app.use(
     session({
       name: 'ualumni-session',

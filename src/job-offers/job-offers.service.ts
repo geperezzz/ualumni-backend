@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { CreateJobOfferDto } from './dto/create-job-offer.dto';
 import { UpdateJobOfferDto } from './dto/update-job-offer.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import {
   AlreadyExistsError,
   NotFoundError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/ualumni/client';
 import { RandomPage } from 'src/common/interfaces/random-page.interface';
 import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 import { JobOffersFilterParamsDto } from './dto/job-offers-filter-params.dto';
 import { JobOffer } from './job-offer.type';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class JobOffersService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private ualumniDbService: UalumniDbService) {}
 
   async create(createJobOfferDto: CreateJobOfferDto): Promise<JobOffer> {
     try {
-      return await this.prismaService.jobOffer.create({
+      return await this.ualumniDbService.jobOffer.create({
         data: createJobOfferDto,
         include: {
           technicalSkills: {
@@ -66,14 +66,16 @@ export class JobOffersService {
     randomizationSeed ??= Math.random();
 
     try {
-      let [_, idsWithCount] = await this.prismaService.$transaction([
-        this.prismaService.$queryRaw`
+      let [_, idsWithCount] = await this.ualumniDbService.$transaction([
+        this.ualumniDbService.$queryRaw`
           SELECT 0
           FROM (
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.prismaService.$queryRaw<{ jobOfferId: string; count: number }[]>`
+        this.ualumniDbService.$queryRaw<
+          { jobOfferId: string; count: number }[]
+        >`
           WITH filtered_job_offers AS (
             SELECT j.id::text AS "jobOfferId"
             FROM
@@ -139,7 +141,7 @@ export class JobOffersService {
         idsWithCount.length ? idsWithCount[0].count : 0,
       );
       const jobOffersPromises = idsWithCount.map(({ jobOfferId }) =>
-        this.prismaService.jobOffer.findUniqueOrThrow({
+        this.ualumniDbService.jobOffer.findUniqueOrThrow({
           where: { id: jobOfferId },
           include: {
             technicalSkills: {
@@ -172,7 +174,7 @@ export class JobOffersService {
 
   async findOne(id: string): Promise<JobOffer | null> {
     try {
-      return await this.prismaService.jobOffer.findUnique({
+      return await this.ualumniDbService.jobOffer.findUnique({
         where: { id },
         include: {
           technicalSkills: {
@@ -195,7 +197,7 @@ export class JobOffersService {
     updateJobOfferDto: UpdateJobOfferDto,
   ): Promise<JobOffer> {
     try {
-      return await this.prismaService.jobOffer.update({
+      return await this.ualumniDbService.jobOffer.update({
         where: { id },
         data: updateJobOfferDto,
         include: {
@@ -230,7 +232,7 @@ export class JobOffersService {
 
   async remove(id: string): Promise<JobOffer> {
     try {
-      return await this.prismaService.jobOffer.delete({
+      return await this.ualumniDbService.jobOffer.delete({
         where: { id },
         include: {
           technicalSkills: {
@@ -264,7 +266,7 @@ export class JobOffersService {
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
     //update jobOffer.visibleSince older than a month
-    const jobOffers = await this.prismaService.jobOffer.updateMany({
+    const jobOffers = await this.ualumniDbService.jobOffer.updateMany({
       where: { visibleSince: { lte: oneMonthAgo } },
       data: { isVisible: false },
     });

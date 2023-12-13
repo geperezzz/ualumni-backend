@@ -1,27 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { CreateResumeSoftSkillDto } from './dto/create-resume-soft-skill.dto';
 import { UpdateResumeSoftSkillDto } from './dto/update-resume-soft-skill.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import {
   AlreadyExistsError,
   ForeignKeyError,
   NotFoundError,
   UnexpectedError,
-} from 'src/common/error/service.error';
-import { Prisma } from '@prisma/client';
+} from 'src/common/errors/service.error';
+import { Prisma } from 'prisma/ualumni/client';
 import { ResumeSoftSkillDto } from './dto/resume-soft-skill.dto';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
 export class ResumeSoftSkillService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
     resumeOwnerEmail: string,
     createResumeSoftSkillDto: CreateResumeSoftSkillDto,
   ) {
     try {
-      return await this.prismaService.resumeSoftSkill.create({
+      return await this.ualumniDbService.resumeSoftSkill.create({
         data: {
           resumeOwnerEmail: resumeOwnerEmail,
           skillName: createResumeSoftSkillDto.skillName,
@@ -55,7 +55,7 @@ export class ResumeSoftSkillService {
     perPage: number,
   ): Promise<PageDto<ResumeSoftSkillDto>> {
     try {
-      const totalCount = await this.prismaService.resumeSoftSkill.count({
+      const totalCount = await this.ualumniDbService.resumeSoftSkill.count({
         where: { resumeOwnerEmail },
       });
       const pageCount = Math.ceil(totalCount / perPage);
@@ -66,7 +66,7 @@ export class ResumeSoftSkillService {
         page = pageCount;
       }
 
-      const data = await this.prismaService.resumeSoftSkill.findMany({
+      const data = await this.ualumniDbService.resumeSoftSkill.findMany({
         where: { resumeOwnerEmail },
         take: perPage,
         skip: (page - 1) * perPage,
@@ -91,7 +91,7 @@ export class ResumeSoftSkillService {
     resumeOwnerEmail: string,
   ): Promise<ResumeSoftSkillDto | null> {
     try {
-      return await this.prismaService.resumeSoftSkill.findUnique({
+      return await this.ualumniDbService.resumeSoftSkill.findUnique({
         where: {
           resumeOwnerEmail_skillName: {
             skillName,
@@ -112,7 +112,7 @@ export class ResumeSoftSkillService {
     updateResumeSoftSkillDto: UpdateResumeSoftSkillDto,
   ): Promise<ResumeSoftSkillDto> {
     try {
-      return await this.prismaService.resumeSoftSkill.update({
+      return await this.ualumniDbService.resumeSoftSkill.update({
         where: {
           resumeOwnerEmail_skillName: {
             skillName,
@@ -147,7 +147,7 @@ export class ResumeSoftSkillService {
     resumeOwnerEmail: string,
   ): Promise<ResumeSoftSkillDto> {
     try {
-      return await this.prismaService.resumeSoftSkill.delete({
+      return await this.ualumniDbService.resumeSoftSkill.delete({
         where: {
           resumeOwnerEmail_skillName: {
             skillName,
