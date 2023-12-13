@@ -73,7 +73,9 @@ export class JobOffersService {
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.ualumniDbService.$queryRaw<{ jobOfferId: string; count: number }[]>`
+        this.ualumniDbService.$queryRaw<
+          { jobOfferId: string; count: number }[]
+        >`
           WITH filtered_job_offers AS (
             SELECT j.id::text AS "jobOfferId"
             FROM

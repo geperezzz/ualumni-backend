@@ -66,7 +66,7 @@ export class AlumniService {
           graduations: true,
         },
       });
-      
+
       //Compare with ucab alumni
       for (let ualumniDbAlumni of allUalumni) {
         const ucabDbAlumni = await this.findUcabDbAlumni(ualumniDbAlumni.email);
@@ -113,7 +113,7 @@ export class AlumniService {
     try {
       const createdAlumni = await this.ualumniDbService.$transaction(
         async (tx) => {
-            await tx.alumni.create({
+          await tx.alumni.create({
             data: {
               address: ucabDbAlumni.address,
               telephoneNumber: ucabDbAlumni.telephoneNumber,
@@ -131,7 +131,7 @@ export class AlumniService {
               },
             },
           });
-          
+
           await Promise.all(
             ucabDbAlumni.enrolledCareers.map((career) =>
               tx.graduation.create({
@@ -143,7 +143,7 @@ export class AlumniService {
               }),
             ),
           );
-          
+
           return await tx.alumni.findUniqueOrThrow({
             where: { email: createAlumniDto.email },
             include: {
@@ -362,9 +362,9 @@ export class AlumniService {
           graduations: {
             select: {
               careerName: true,
-              graduationDate: true
-            }
-          }
+              graduationDate: true,
+            },
+          },
         },
       });
 
@@ -624,6 +624,17 @@ export class AlumniService {
                   isVisible: true,
                 },
               },
+              workExperiences: {
+                select: {
+                  number: true,
+                  companyName: true,
+                  description: true,
+                  position: true,
+                  startDate: true,
+                  endDate: true,
+                  isVisible: true,
+                },
+              },
             },
           },
           graduations: {
@@ -667,9 +678,9 @@ export class AlumniService {
           graduations: {
             select: {
               careerName: true,
-              graduationDate: true
-            }
-          }
+              graduationDate: true,
+            },
+          },
         },
       });
 
@@ -709,9 +720,9 @@ export class AlumniService {
           graduations: {
             select: {
               careerName: true,
-              graduationDate: true
-            }
-          }
+              graduationDate: true,
+            },
+          },
         },
       });
 
@@ -754,15 +765,15 @@ export class AlumniService {
             graduations: {
               select: {
                 careerName: true,
-                graduationDate: true
-              }
-            }
-          }
+                graduationDate: true,
+              },
+            },
+          },
         }),
         this.ualumniDbService.user.delete({
-          where: { email }
-        })
-      ])
+          where: { email },
+        }),
+      ]);
 
       const { associatedUser: userProps, ...rest } = removedAlumni;
       return { ...userProps, ...rest };

@@ -57,9 +57,11 @@ export class ResumeTechnicalSkillService {
     perPage: number,
   ): Promise<PageDto<ResumeTechnicalSkillDto>> {
     try {
-      const totalCount = await this.ualumniDbService.resumeTechnicalSkill.count({
-        where: { resumeOwnerEmail },
-      });
+      const totalCount = await this.ualumniDbService.resumeTechnicalSkill.count(
+        {
+          where: { resumeOwnerEmail },
+        },
+      );
       const pageCount = Math.ceil(totalCount / perPage);
 
       if (page < 1) {

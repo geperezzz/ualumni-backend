@@ -59,9 +59,11 @@ export class HigherEducationStudyService {
     perPage: number,
   ): Promise<PageDto<HigherEducationStudyDto>> {
     try {
-      const totalCount = await this.ualumniDbService.higherEducationStudy.count({
-        where: { resumeOwnerEmail },
-      });
+      const totalCount = await this.ualumniDbService.higherEducationStudy.count(
+        {
+          where: { resumeOwnerEmail },
+        },
+      );
       const pageCount = Math.ceil(totalCount / perPage);
 
       if (page < 1) {
