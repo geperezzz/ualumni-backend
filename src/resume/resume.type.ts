@@ -9,7 +9,8 @@ import {
   Resume as ResumeModel,
   ResumeSoftSkill,
   ResumeTechnicalSkill,
-} from '@prisma/client';
+} from 'prisma/ualumni/client';
+import { WorkExperience } from 'prisma/ualumni/client';
 
 export type Resume = ResumeModel & {
   ciapCourses: (CiapCourse &
@@ -28,4 +29,6 @@ export type Resume = ResumeModel & {
   positionsOfInterest: Omit<PositionOfInterest, 'resumeOwnerEmail'>[];
 } & {
   softSkills: Omit<ResumeSoftSkill, 'resumeOwnerEmail'>[];
+} & {
+  workExperiences: Omit<WorkExperience, 'resumeOwnerEmail'>[];
 };

@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 
-export class AlumniCareerDto {
+export class AlumniGraduationDto {
   careerName: string;
   graduationDate: Date;
 }
@@ -9,5 +9,5 @@ export class AlumniWithoutContactDto {
   @Expose() email: string;
   @Expose() names: string;
   @Expose() surnames: string;
-  @Expose() careers: AlumniCareerDto[];
+  @Expose() graduations: AlumniGraduationDto[];
 }
