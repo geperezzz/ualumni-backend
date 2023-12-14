@@ -69,46 +69,27 @@ body
       .name
         h1
           | #{alumni.names} #{alumni.surnames}
-          if alumni.careers.length > 0
-            each career, index in alumni.careers
+          if alumni.graduations.length > 0
+            each graduation, index in alumni.graduations
               br
               span 
-                |#{career.careerName}
-      //-.about
-        h2.title2 Experiencia Laboral
-        .box
-          .year_company
-            h5
-              i 2019 - Presente
-            h4 Macrosoft
-          .text
-            h4
-              span Senior UX Designer
-            p
-              | Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              | eiusmod tempor incididunt ut labore et dolore magna aliqua.
-        .box
-          .year_company
-            h5
-              i 2018 - 2019
-            h4 Franklin CO.
-          .text
-            h4
-              span Frontend developer
-            p
-              | Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              | eiusmod tempor incididunt ut labore et dolore magna aliqua.
-        .box
-          .year_company
-            h5
-              i 2017 - 2018
-            h4 Chicha 51
-          .text
-            h4
-              span Senior Chichero
-            p
-              | Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              | eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                |#{graduation.careerName}
+      if alumni.resume.workExperiences.length > 0
+        .about
+          h2.title2 Experiencia Laboral
+          each experience, index in alumni.resume.workExperiences
+            .box
+              .year_company
+                h5
+                  -experience.startDate.setDate(experience.startDate.getDate() + 1)
+                  i #{experience.startDate.toLocaleDateString()} - 
+                  -experience.endDate.setDate(experience.endDate.getDate() + 1)
+                    |#{experience.endDate.toLocaleDateString()} 
+                h4 #{experience.companyName}
+              .text
+                h4 
+                  span #{experience.position}
+                p #{experience.description}
       if alumni.resume.higherEducationStudies.length > 0
         .about
           h2.title2 Estudios realizados
@@ -121,12 +102,12 @@ body
                   h4 #{study.title}
                   p #{study.institution}
       if alumni.resume.technicalSkills.length > 0
-      .about
-        h2.title2 Habilidades Técnicas
-        .tecnicas
-          ul
-            each skill, index in alumni.resume.technicalSkills
-              li #{skill.skillName}
+        .about
+          h2.title2 Habilidades Técnicas
+          .tecnicas
+            ul
+              each skill, index in alumni.resume.technicalSkills
+                li #{skill.skillName}
       if alumni.resume.ciapCourses.length > 0
         .about
           h2.title2 Certificados CIAP
