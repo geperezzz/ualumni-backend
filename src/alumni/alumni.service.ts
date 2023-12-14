@@ -230,7 +230,11 @@ export class AlumniService {
                   ? PrismaUalumni.sql`AND i."isVisible" = TRUE`
                   : PrismaUalumni.empty
               }
-              ${skills ? PrismaUalumni.sql`AND rt."isVisible" = TRUE` : PrismaUalumni.empty}
+              ${
+                skills
+                  ? PrismaUalumni.sql`AND rt."isVisible" = TRUE`
+                  : PrismaUalumni.empty
+              }
           ), filtered_by_name AS (
             SELECT "email", "careerName", "positionName", "industryName", "skillName", "skillCategoryName"
 	          FROM filtered_by_visibility
@@ -431,7 +435,11 @@ export class AlumniService {
                   ? PrismaUalumni.sql`AND i."isVisible" = TRUE`
                   : PrismaUalumni.empty
               }
-              ${skills ? PrismaUalumni.sql`AND rt."isVisible" = TRUE` : PrismaUalumni.empty}
+              ${
+                skills
+                  ? PrismaUalumni.sql`AND rt."isVisible" = TRUE`
+                  : PrismaUalumni.empty
+              }
           ), filtered_by_name AS (
             SELECT "email", "careerName", "positionName", "industryName", "skillName", "skillCategoryName"
 	          FROM filtered_by_visibility
@@ -685,7 +693,7 @@ export class AlumniService {
             portfolio: resume.portfolio,
             positionsOfInterest: resume.positionsOfInterest,
             softSkills: resume.softSkills,
-            workExperiences: resume.workExperiences
+            workExperiences: resume.workExperiences,
           },
         };
       });
@@ -839,7 +847,7 @@ export class AlumniService {
               portfolio: resume.portfolio,
               positionsOfInterest: resume.positionsOfInterest,
               softSkills: resume.softSkills,
-              workExperiences: resume.workExperiences
+              workExperiences: resume.workExperiences,
             },
           }
         : null;
@@ -992,7 +1000,7 @@ export class AlumniService {
               portfolio: resume.portfolio,
               positionsOfInterest: resume.positionsOfInterest,
               softSkills: resume.softSkills,
-              workExperiences: resume.workExperiences
+              workExperiences: resume.workExperiences,
             },
           }
         : null;
@@ -1045,8 +1053,15 @@ export class AlumniService {
       let updatedAlumni = await this.ualumniDbService.alumni.update({
         where: { email },
         data: {
+          address: updateAlumniDto.address,
+          telephoneNumber: updateAlumniDto.telephoneNumber,
           associatedUser: {
-            update: updateAlumniDto,
+            update: {
+              email: updateAlumniDto.email,
+              password: updateAlumniDto.password,
+              names: updateAlumniDto.names,
+              surnames: updateAlumniDto.surnames,
+            },
           },
         },
         include: {
