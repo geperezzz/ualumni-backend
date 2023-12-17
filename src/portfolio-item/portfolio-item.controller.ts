@@ -36,7 +36,7 @@ import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { User } from '@prisma/client';
+import { PrismaClient} from '@prisma/client';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
@@ -56,7 +56,7 @@ export class PortfolioItemController {
     description: 'Already exists a Portfolio item with the given title',
   })
   async createMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Body() createPortfolioItemDto: CreatePortfolioItemDto,
   ): Promise<ResponseDto<PortfolioItemDto>> {
     try {
@@ -127,7 +127,7 @@ export class PortfolioItemController {
     description: 'An unexpected situation ocurred',
   })
   async findMyPage(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Query() paginationParamsDto: PaginationParamsDto,
   ) {
     try {
@@ -199,7 +199,7 @@ export class PortfolioItemController {
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
   })
-  async findMine(@SessionUser() user: User, @Param('title') title: string) {
+  async findMine(@SessionUser() user: PrismaClient, @Param('title') title: string) {
     const portfolioItem = await this.portfolioItemService.findOne(
       title,
       user.email,
@@ -263,7 +263,7 @@ export class PortfolioItemController {
     description: 'An unexpected situation ocurred',
   })
   async updateMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('title') title: string,
     @Body() updatePortfolioItemDto: UpdatePortfolioItemDto,
   ) {
@@ -344,7 +344,7 @@ export class PortfolioItemController {
     description: 'An unexpected situation ocurred',
   })
   async removeMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('title') title: string,
   ): Promise<ResponseDto<PortfolioItemDto>> {
     try {

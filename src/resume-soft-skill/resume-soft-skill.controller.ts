@@ -36,7 +36,7 @@ import { NotFoundError } from 'src/common/errors/service.error';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { ResumeSoftSkillDto } from './dto/resume-soft-skill.dto';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { User } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
@@ -62,7 +62,7 @@ export class ResumeSoftSkillController {
     description: 'Already exists a resume soft skill with the given title',
   })
   async addMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Body() createResumeSoftSkillDto: CreateResumeSoftSkillDto,
   ): Promise<ResponseDto<ResumeSoftSkillDto>> {
     try {
@@ -134,7 +134,7 @@ export class ResumeSoftSkillController {
     description: 'An unexpected situation ocurred',
   })
   async findPageMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<ResumeSoftSkillDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
@@ -204,7 +204,7 @@ export class ResumeSoftSkillController {
     description: 'An unexpected situation ocurred',
   })
   async findMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('title') title: string,
   ): Promise<ResponseDto<ResumeSoftSkillDto>> {
     const resumeSoftSkill = await this.resumeSoftSkillService.findOne(
@@ -270,7 +270,7 @@ export class ResumeSoftSkillController {
     description: 'An unexpected situation ocurred',
   })
   async updateMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('title') title: string,
     @Body() updateResumeSoftSkillDto: UpdateResumeSoftSkillDto,
   ): Promise<ResponseDto<ResumeSoftSkillDto>> {
@@ -349,7 +349,7 @@ export class ResumeSoftSkillController {
     description: 'An unexpected situation ocurred',
   })
   async removeMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('title') title: string,
   ): Promise<ResponseDto<ResumeSoftSkillDto>> {
     try {

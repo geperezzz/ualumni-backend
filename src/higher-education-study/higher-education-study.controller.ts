@@ -40,7 +40,7 @@ import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { User } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
@@ -62,7 +62,7 @@ export class HigherEducationStudyController {
     description: 'Already exists a higher education study with the given title',
   })
   async createMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Body() createHigherEducationStudyDto: CreateHigherEducationStudyDto,
   ): Promise<ResponseDto<HigherEducationStudyDto>> {
     try {
@@ -134,7 +134,7 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async findMyPage(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<HigherEducationStudyDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
@@ -207,7 +207,7 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async findMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('title') title: string,
   ): Promise<ResponseDto<HigherEducationStudyDto>> {
     const higherEducationStudy = await this.higherEducationStudyService.findOne(
@@ -275,7 +275,7 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async updateMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('title') title: string,
     @Body() updateHigherEducationStudyDto: UpdateHigherEducationStudyDto,
   ): Promise<ResponseDto<HigherEducationStudyDto>> {
@@ -358,7 +358,7 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async removeMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('title') title: string,
   ): Promise<ResponseDto<HigherEducationStudyDto>> {
     try {

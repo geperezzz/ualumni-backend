@@ -30,7 +30,7 @@ import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { User } from '@prisma/client';
+import { PrismaClient} from '@prisma/client';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
@@ -57,7 +57,7 @@ export class ResumeCiapCoursesController {
     description: 'An unexpected situation ocurred',
   })
   async addMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Body() createResumeCiapCourseDto: CreateResumeCiapCourseDto,
   ): Promise<ResponseDto<ResumeCiapCourseDto>> {
     try {
@@ -133,7 +133,7 @@ export class ResumeCiapCoursesController {
     description: 'An unexpected situation ocurred',
   })
   async findPageMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<ResumeCiapCourseDto>> {
     try {
@@ -205,7 +205,7 @@ export class ResumeCiapCoursesController {
   })
   @HttpCode(HttpStatus.OK)
   async findOneMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('id') id: string,
   ): Promise<ResponseDto<ResumeCiapCourseDto>> {
     const resumeCiapCourse = await this.resumeCiapCoursesService.findOne(
@@ -271,7 +271,7 @@ export class ResumeCiapCoursesController {
     description: 'An unexpected situation ocurred',
   })
   async removeMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('id') id: string,
   ): Promise<ResponseDto<ResumeCiapCourseDto>> {
     try {

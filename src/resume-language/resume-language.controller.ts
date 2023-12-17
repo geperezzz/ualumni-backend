@@ -39,7 +39,7 @@ import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { User } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
@@ -59,7 +59,7 @@ export class ResumeLanguageController {
     description: 'Already exists a language with the given name',
   })
   async addMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Body() createResumeLanguageDto: CreateResumeLanguageDto,
   ): Promise<ResponseDto<ResumeLanguageDto>> {
     try {
@@ -130,7 +130,7 @@ export class ResumeLanguageController {
     description: 'An unexpected situation ocurred',
   })
   async findPageMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<any> {
     if (paginationParamsDto.itemsPerPage < 1)
@@ -199,7 +199,7 @@ export class ResumeLanguageController {
     description: 'An unexpected situation ocurred',
   })
   async findMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('languageName') languageName: string,
   ) {
     const resumeLanguage = await this.resumeLanguageService.findOne(
@@ -265,7 +265,7 @@ export class ResumeLanguageController {
     description: 'An unexpected situation ocurred',
   })
   async updateMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('languageName') languageName: string,
     @Body() updateLanguageNameDto: UpdateResumeLanguageDto,
   ) {
@@ -345,7 +345,7 @@ export class ResumeLanguageController {
     description: 'An unexpected situation ocurred',
   })
   async removeMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('languageName') languageName: string,
   ): Promise<ResponseDto<ResumeLanguageDto>> {
     try {

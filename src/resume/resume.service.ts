@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateResumeDto } from './dto/update-resume.dto';
+import { ToggleResumeVisibilityDto } from './dto/toggle-resume-visibility.dto';
 import {
   NotFoundError,
   UnexpectedError,
@@ -174,6 +175,143 @@ export class ResumeService {
       });
     }
   }
+
+
+
+// Automatically updates the resume visibility date when visibility is set to true.
+
+async toggleVisibility(
+  email: string,
+  toggleResumeVisibilityDto: ToggleResumeVisibilityDto,
+): Promise<Resume> {
+  const { isVisible } = toggleResumeVisibilityDto;
+
+  try {
+    const resume = await this.ualumniDbService.resume.update({
+      where: { ownerEmail: email },
+      data: {
+        isVisible: isVisible,
+        visibleSince: isVisible ? new Date().toISOString() : undefined,
+      },
+      select: {
+        ownerEmail: true,
+        numberOfDownloads: true,
+        isVisible: true,
+        visibleSince: true,
+        aboutMe: true,
+        ciapCourses: {
+          select: {
+            course: {
+              select: {
+                id: true,
+                name: true,
+                date: true,
+              },
+            },
+            isVisible: true,
+          },
+        },
+        knownLanguages: {
+          select: {
+            languageName: true,
+            masteryLevel: true,
+            isVisible: true,
+          },
+        },
+        technicalSkills: {
+          select: {
+            skillName: true,
+            skillCategoryName: true,
+            isVisible: true,
+          },
+        },
+        higherEducationStudies: {
+          select: {
+            title: true,
+            institution: true,
+            endDate: true,
+            isVisible: true,
+          },
+        },
+        industriesOfInterest: {
+          select: {
+            industryName: true,
+            isVisible: true,
+          },
+        },
+        portfolio: {
+          select: {
+            title: true,
+            isVisible: true,
+            sourceLink: true,
+          },
+        },
+        positionsOfInterest: {
+          select: {
+            positionName: true,
+            isVisible: true,
+          },
+        },
+        softSkills: {
+          select: {
+            skillName: true,
+            isVisible: true,
+          },
+        },
+        workExperiences: {
+          select: {
+            number: true,
+            description: true,
+            companyName: true,
+            position: true,
+            startDate: true,
+            endDate: true,
+            isVisible: true,
+          }
+        }
+      },
+    });
+    
+
+    return {
+      ownerEmail: resume.ownerEmail,
+      numberOfDownloads: resume.numberOfDownloads,
+      isVisible: resume.isVisible,
+      visibleSince: resume.visibleSince,
+      aboutMe: resume.aboutMe,
+      ciapCourses: resume.ciapCourses.map((ciapCourse) => ({
+        id: ciapCourse.course.id,
+        name: ciapCourse.course.name,
+        date: ciapCourse.course.date,
+        isVisible: ciapCourse.isVisible,
+      })),
+      knownLanguages: resume.knownLanguages,
+      technicalSkills: resume.technicalSkills,
+      higherEducationStudies: resume.higherEducationStudies,
+      industriesOfInterest: resume.industriesOfInterest,
+      portfolio: resume.portfolio,
+      positionsOfInterest: resume.positionsOfInterest,
+      softSkills: resume.softSkills,
+      workExperiences: resume.workExperiences
+    };
+
+    
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2025') {
+        throw new NotFoundError(
+          `No existe un curriculum con el email dado (${email})`,
+          { cause: error },
+        );
+      }
+    }
+    throw new UnexpectedError('Ocurrió una situación inesperada', {
+      cause: error,
+    });
+  }
+}
+
+
 
   // automatic hiding of resumes older than a month
   @Cron(CronExpression.EVERY_12_HOURS)

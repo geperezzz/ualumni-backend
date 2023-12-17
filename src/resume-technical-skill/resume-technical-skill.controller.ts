@@ -39,7 +39,7 @@ import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { User } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
@@ -62,7 +62,7 @@ export class ResumeTechnicalSkillController {
     description: 'Already exists a technical skill with the given name',
   })
   async addMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Body() CreateResumeTechnicalSkillDto: CreateResumeTechnicalSkillDto,
   ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
     try {
@@ -133,7 +133,7 @@ export class ResumeTechnicalSkillController {
     description: 'An unexpected situation ocurred',
   })
   async findPageMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<ResumeTechnicalSkillDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
@@ -204,7 +204,7 @@ export class ResumeTechnicalSkillController {
     description: 'An unexpected situation ocurred',
   })
   async findMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('skillCategory') skillCategory: string,
     @Param('skillName') skillName: string,
   ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
@@ -274,7 +274,7 @@ export class ResumeTechnicalSkillController {
     description: 'An unexpected situation ocurred',
   })
   async updateMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('skillCategory') skillCategory: string,
     @Param('skillName') skillName: string,
     @Body() updateResumeTechnicalSkillDto: UpdateResumeTechnicalSkillDto,
@@ -360,7 +360,7 @@ export class ResumeTechnicalSkillController {
     description: 'An unexpected situation ocurred',
   })
   async removeMine(
-    @SessionUser() user: User,
+    @SessionUser() user: PrismaClient,
     @Param('skillCategory') skillCategory: string,
     @Param('skillName') skillName: string,
   ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
