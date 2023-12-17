@@ -24,7 +24,7 @@ export class CreateJobOfferDto {
 
   @IsString()
   @IsNotEmpty()
-  companyContact: string;
+  companyEmail: string;
 
   @IsBase64()
   @IsNotEmpty()

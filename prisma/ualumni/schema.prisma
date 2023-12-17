@@ -12,7 +12,7 @@ model JobOffer {
   id               String                   @id @default(uuid()) @db.Uuid
   description      String
   companyName      String
-  companyContact   String
+  companyEmail     String
   companyLogo      String
   department       String
   position         String
