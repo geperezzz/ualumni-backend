@@ -4,7 +4,6 @@ import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
-import e from 'express';
 
 @Controller('mailing')
 @UseGuards(SessionAuthGuard, PermissionsGuard)
@@ -17,7 +16,7 @@ export class MailingController {
   async send(  ) {
     try {
       let sentEmail =
-        await this.mailingService.sendMail('companyEmail');
+        await this.mailingService.sendResume('alumniEmail','companyEmail');
 
       return {
         statusCode: HttpStatus.CREATED
