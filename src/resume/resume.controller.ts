@@ -29,7 +29,7 @@ import { plainToInstance } from 'class-transformer';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { PrismaClient } from '@prisma/client';
+import { User } from 'prisma/ualumni/client';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
@@ -43,7 +43,7 @@ export class ResumeController {
   @Allowed('alumni')
   @Header('Content-Type', 'application/pdf')
   @Header('Content-Disposition', 'inline; filename=resume.pdf')
-  async exportAsPdfMine(@SessionUser() user: PrismaClient): Promise<StreamableFile> {
+  async exportAsPdfMine(@SessionUser() user: User): Promise<StreamableFile> {
     try {
       const pdf = await this.resumeService.exportAsPdf(user.email);
       return new StreamableFile(pdf);
@@ -89,7 +89,7 @@ export class ResumeController {
     description: 'An unexpected situation ocurred',
   })
   async updateMine(
-    @SessionUser() user: PrismaClient,
+    @SessionUser() user: User,
     @Body() updateResumeDto: UpdateResumeDto,
   ): Promise<ResponseDto<ResumeDto>> {
     try {

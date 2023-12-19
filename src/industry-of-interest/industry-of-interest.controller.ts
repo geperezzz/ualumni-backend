@@ -36,7 +36,7 @@ import {
 import { IndustryOfInterestDto } from './dto/industry-of-interest.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { PrismaClient } from '@prisma/client';
+import { User } from 'prisma/ualumni/client';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
@@ -64,7 +64,7 @@ export class IndustryOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async createMine(
-    @SessionUser() user: PrismaClient,
+    @SessionUser() user: User,
     @Body() createIndustryOfInterestDto: CreateIndustryOfInterestDto,
   ): Promise<ResponseDto<IndustryOfInterestDto>> {
     try {
@@ -138,7 +138,7 @@ export class IndustryOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async findMyPage(
-    @SessionUser() user: PrismaClient,
+    @SessionUser() user: User,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<IndustryOfInterestDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
@@ -212,7 +212,7 @@ export class IndustryOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async findMine(
-    @SessionUser() user: PrismaClient,
+    @SessionUser() user: User,
     @Param('industryName') industryName: string,
   ) {
     const industryOfInterest = await this.industryOfInterestService.findOne(
@@ -280,7 +280,7 @@ export class IndustryOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async updateMine(
-    @SessionUser() user: PrismaClient,
+    @SessionUser() user: User,
     @Param('industryName') industryName: string,
     @Body() updateIndustryOfInterestDto: UpdateIndustryOfInterestDto,
   ) {
@@ -363,7 +363,7 @@ export class IndustryOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async removeMine(
-    @SessionUser() user: PrismaClient,
+    @SessionUser() user: User,
     @Param('industryName') industryName: string,
   ): Promise<ResponseDto<IndustryOfInterestDto>> {
     try {
