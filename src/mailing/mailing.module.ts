@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
 import { MailingService } from './mailing.service';
-import { MailingController } from './mailing.controller';
 import { ResumeService } from 'src/resume/resume.service';
 import { UalumniDbModule } from 'src/ualumni-db/ualumni-db.module';
 import { AlumniModule } from 'src/alumni/alumni.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
+import { JobOffersService } from 'src/job-offers/job-offers.service';
 
 @Module({
   imports: [
+    UalumniDbModule,
     MailerModule.forRoot({
       transport: {
         host: process.env.MAIL_HOST,
@@ -30,7 +31,7 @@ import { join } from 'path';
     UalumniDbModule,
     AlumniModule,
   ],
-  controllers: [MailingController],
-  providers: [MailingService, ResumeService],
+  providers: [MailingService, ResumeService, JobOffersService],
+  exports: [MailingService],
 })
 export class MailingModule {}
