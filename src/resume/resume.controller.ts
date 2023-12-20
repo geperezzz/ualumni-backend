@@ -114,48 +114,81 @@ export class ResumeController {
     }
   }
 
-
-
-@Patch(':email/resume/visibility')
-@HttpCode(HttpStatus.OK)
-@ApiOkResponse({ description: 'La visibilidad del currículum se actualizó correctamente' })
-@ApiNotFoundResponse({
-  description: 'No se encontró el currículum del usuario con el email solicitado',
-})
-@ApiInternalServerErrorResponse({
-  description: 'Ocurrió una situación inesperada',
-})
-async toggleVisibility(
-  @Param('email') email: string,
-  @Body() toggleResumeVisibilityDto: ToggleResumeVisibilityDto,
-): Promise<ResponseDto<ResumeDto>> {
-  try {
-    const updatedResume = await this.resumeService.toggleVisibility(
-      email,
-      toggleResumeVisibilityDto,
-    );
-    return {
-      statusCode: 200,
-      data: plainToInstance(ResumeDto, updatedResume, {
-        excludeExtraneousValues: true,
-      }),
-    };
-  } catch (error) {
-    if (error instanceof NotFoundError) {
-      throw new NotFoundException(error.message, { cause: error });
+  @Patch('me/resume/visibility')
+  @Allowed('alumni')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'The visibility of the resume was succesfully updated',
+  })
+  @ApiNotFoundResponse({
+    description: 'The resume user with the requested email was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async toggleMyVisibility(
+    @SessionUser() user: User,
+    @Body() toggleResumeVisibilityDto: ToggleResumeVisibilityDto,
+  ): Promise<ResponseDto<ResumeDto>> {
+    try {
+      const updatedResume = await this.resumeService.toggleVisibility(
+        user.email,
+        toggleResumeVisibilityDto,
+      );
+      return {
+        statusCode: 200,
+        data: plainToInstance(ResumeDto, updatedResume, {
+          excludeExtraneousValues: true,
+        }),
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'Ocurrió una situación inesperada',
+        { cause: error },
+      );
     }
-    throw new InternalServerErrorException(
-      'Ocurrió una situación inesperada',
-      { cause: error },
-    );
   }
-}
 
-
-
-
-
-
+  @Patch(':email/resume/visibility')
+  @HttpCode(HttpStatus.OK)
+  @Allowed('admin')
+  @ApiOkResponse({
+    description: 'The visibility of the resume was succesfully updated',
+  })
+  @ApiNotFoundResponse({
+    description: 'The resume user with the requested email was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async toggleVisibility(
+    @Param('email') email: string,
+    @Body() toggleResumeVisibilityDto: ToggleResumeVisibilityDto,
+  ): Promise<ResponseDto<ResumeDto>> {
+    try {
+      const updatedResume = await this.resumeService.toggleVisibility(
+        email,
+        toggleResumeVisibilityDto,
+      );
+      return {
+        statusCode: 200,
+        data: plainToInstance(ResumeDto, updatedResume, {
+          excludeExtraneousValues: true,
+        }),
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'Ocurrió una situación inesperada',
+        { cause: error },
+      );
+    }
+  }
 
   @Patch(':email/resume')
   @Allowed('admin')
