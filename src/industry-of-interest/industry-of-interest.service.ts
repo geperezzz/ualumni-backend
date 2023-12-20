@@ -24,7 +24,7 @@ export class IndustryOfInterestService {
       return await this.ualumniDbService.industryOfInterest.create({
         data: {
           resumeOwnerEmail: resumeOwnerEmail,
-          ...createIndustryOfInterestDto
+          ...createIndustryOfInterestDto,
         },
       });
     } catch (error) {
@@ -123,7 +123,7 @@ export class IndustryOfInterestService {
           );
         } else if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `Cannot update the \`name\` to \`${updateIndustryOfInterestDto.industryName}\`, there already exists a industry of interest with the given \`name\` (${updateIndustryOfInterestDto.industryName}) for the user \`email\`: ${updateIndustryOfInterestDto.resumeOwnerEmail}`,
+            `Cannot update the \`name\` to \`${updateIndustryOfInterestDto.industryName}\`, there already exists a industry of interest with the given \`name\` (${updateIndustryOfInterestDto.industryName}) for the user \`email\`: ${resumeOwnerEmail}`,
           );
         }
       }

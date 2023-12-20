@@ -1,11 +1,6 @@
-import { PartialType } from '@nestjs/swagger';
-import { IsBoolean, IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class UpdateIndustryOfInterestDto {
-  @IsEmail()
-  @IsOptional()
-  resumeOwnerEmail?: string;
-
   @IsString()
   @IsOptional()
   industryName?: string;
