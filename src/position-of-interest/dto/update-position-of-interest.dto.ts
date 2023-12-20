@@ -1,9 +1,9 @@
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
-export class UpdateIndustryOfInterestDto {
+export class UpdatePositionOfInterestDto {
   @IsString()
   @IsOptional()
-  industryName?: string;
+  positionName?: string;
 
   @IsBoolean()
   @IsOptional()

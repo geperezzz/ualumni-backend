@@ -1,37 +1,36 @@
 import { Injectable } from '@nestjs/common';
-import { CreateIndustryOfInterestDto } from './dto/create-industry-of-interest.dto';
-import { UpdateIndustryOfInterestDto } from './dto/update-industry-of-interest.dto';
+import { CreatePositionOfInterestDto } from './dto/create-position-of-interest.dto';
+import { UpdatePositionOfInterestDto } from './dto/update-position-of-interest.dto';
+import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
+import { PositionOfInterestDto } from './dto/position-of-interest.dto';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,
   NotFoundError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
-import { IndustryOfInterestDto } from './dto/industry-of-interest.dto';
-import { Prisma } from 'prisma/ualumni/client';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
-import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 
 @Injectable()
-export class IndustryOfInterestService {
+export class PositionOfInterestService {
   constructor(private readonly ualumniDbService: UalumniDbService) {}
-
   async create(
     resumeOwnerEmail: string,
-    createIndustryOfInterestDto: CreateIndustryOfInterestDto,
-  ): Promise<IndustryOfInterestDto> {
+    createPositionOfInterestDto: CreatePositionOfInterestDto,
+  ): Promise<PositionOfInterestDto> {
     try {
-      return await this.ualumniDbService.industryOfInterest.create({
+      return await this.ualumniDbService.positionOfInterest.create({
         data: {
           resumeOwnerEmail: resumeOwnerEmail,
-          ...createIndustryOfInterestDto,
+          ...createPositionOfInterestDto,
         },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `There already exists a industry of interest with the given \`name\` (${createIndustryOfInterestDto.industryName}) for the user \`email\`: ${resumeOwnerEmail}`,
+            `There already exists a position of interest with the given \`name\` (${createPositionOfInterestDto.positionName}) for the user \`email\`: ${resumeOwnerEmail}`,
             { cause: error },
           );
         }
@@ -52,31 +51,24 @@ export class IndustryOfInterestService {
     resumeOwnerEmail: string,
     page: number,
     perPage: number,
-  ): Promise<PageDto<IndustryOfInterestDto>> {
+  ): Promise<PageDto<PositionOfInterestDto>> {
     try {
-      const totalCount = await this.ualumniDbService.industryOfInterest.count({
+      const totalCount = await this.ualumniDbService.positionOfInterest.count({
         where: { resumeOwnerEmail },
       });
       const pageCount = Math.ceil(totalCount / perPage);
-
-      if (totalCount == 0 || page < 1) {
-        page = 1;
-      } else if (page > pageCount) {
-        page = pageCount;
-      }
-
-      const data = await this.ualumniDbService.industryOfInterest.findMany({
-        where: { resumeOwnerEmail },
-        take: perPage,
-        skip: (page - 1) * perPage,
-      });
-
+      const positionsOfInterest =
+        await this.ualumniDbService.positionOfInterest.findMany({
+          where: { resumeOwnerEmail },
+          skip: (page - 1) * perPage,
+          take: perPage,
+        });
       return {
-        page: page,
-        perPage: data.length,
-        pageCount,
         totalCount,
-        items: data,
+        pageCount,
+        page,
+        perPage,
+        items: positionsOfInterest,
       };
     } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
@@ -87,12 +79,12 @@ export class IndustryOfInterestService {
 
   async findOne(
     resumeOwnerEmail: string,
-    industryName: string,
-  ): Promise<IndustryOfInterestDto | null> {
+    positionName: string,
+  ): Promise<PositionOfInterestDto | null> {
     try {
-      return await this.ualumniDbService.industryOfInterest.findUnique({
+      return await this.ualumniDbService.positionOfInterest.findUnique({
         where: {
-          resumeOwnerEmail_industryName: { industryName, resumeOwnerEmail },
+          resumeOwnerEmail_positionName: { resumeOwnerEmail, positionName },
         },
       });
     } catch (error) {
@@ -104,26 +96,26 @@ export class IndustryOfInterestService {
 
   async update(
     resumeOwnerEmail: string,
-    industryName: string,
-    updateIndustryOfInterestDto: UpdateIndustryOfInterestDto,
-  ): Promise<IndustryOfInterestDto> {
+    positionName: string,
+    updatePositionOfInterestDto: UpdatePositionOfInterestDto,
+  ): Promise<PositionOfInterestDto> {
     try {
-      return await this.ualumniDbService.industryOfInterest.update({
+      return await this.ualumniDbService.positionOfInterest.update({
         where: {
-          resumeOwnerEmail_industryName: { industryName, resumeOwnerEmail },
+          resumeOwnerEmail_positionName: { resumeOwnerEmail, positionName },
         },
-        data: updateIndustryOfInterestDto,
+        data: updatePositionOfInterestDto,
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no industry of interest with the given \`name\` (${industryName})`,
+            `There is no position of interest with the given \`name\` (${positionName})`,
             { cause: error },
           );
         } else if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `Cannot update the \`name\` to \`${updateIndustryOfInterestDto.industryName}\`, there already exists a industry of interest with the given \`name\` (${updateIndustryOfInterestDto.industryName}) for the user \`email\`: ${resumeOwnerEmail}`,
+            `Cannot update the \`name\` to \`${updatePositionOfInterestDto.positionName}\`, there already exists a industry of interest with the given \`name\` (${updatePositionOfInterestDto.positionName}) for the user \`email\`: ${resumeOwnerEmail}`,
           );
         }
       }
@@ -135,19 +127,19 @@ export class IndustryOfInterestService {
 
   async remove(
     resumeOwnerEmail: string,
-    industryName: string,
-  ): Promise<IndustryOfInterestDto> {
+    positionName: string,
+  ): Promise<PositionOfInterestDto> {
     try {
-      return await this.ualumniDbService.industryOfInterest.delete({
+      return await this.ualumniDbService.positionOfInterest.delete({
         where: {
-          resumeOwnerEmail_industryName: { industryName, resumeOwnerEmail },
+          resumeOwnerEmail_positionName: { resumeOwnerEmail, positionName },
         },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no industry of interest with the given \`name\` (${industryName})`,
+            `There is no position of interest with the given \`name\` (${positionName})`,
             { cause: error },
           );
         }
