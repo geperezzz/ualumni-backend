@@ -1,10 +1,6 @@
-import { IsNotEmpty, IsEmail, IsString, IsBoolean } from 'class-validator';
+import { IsNotEmpty, IsString, IsBoolean } from 'class-validator';
 
 export class CreateResumeSoftSkillDto {
-  @IsNotEmpty()
-  @IsEmail()
-  resumeOwnerEmail: string;
-
   @IsNotEmpty()
   @IsString()
   skillName: string;
@@ -12,8 +8,4 @@ export class CreateResumeSoftSkillDto {
   @IsNotEmpty()
   @IsBoolean()
   isVisible: boolean;
-
-  //     skill            SoftSkill @relation(fields: [skillName], references: [name])
-  //     resume           Resume    @relation(fields: [resumeOwnerEmail], references: [ownerEmail])
-  //   @@id([resumeOwnerEmail, skillName])
 }
