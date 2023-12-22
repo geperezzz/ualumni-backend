@@ -8,12 +8,4 @@ export class CreateAlumniToVerifyDto {
   @IsString()
   @IsNotEmpty()
   password: string;
-  
-  @IsString()
-  @IsNotEmpty()
-  names: string;
-  
-  @IsString()
-  @IsNotEmpty()
-  surnames: string;
 }

@@ -67,8 +67,6 @@ model User {
 model AlumniToVerify {
   email    String @id
   password String
-  names    String
-  surnames String
   token    String
 }
 

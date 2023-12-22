@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, BadRequestException } from '@nestjs/common';
 import { AlumniToVerifyService } from './alumni-to-verify.service';
 import { CreateAlumniToVerifyDto } from './dto/create-alumni-to-verify.dto';
-import { UpdateAlumniToVerifyDto } from './dto/update-alumni-to-verify.dto';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { ApiTags } from '@nestjs/swagger';

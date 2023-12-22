@@ -9,6 +9,7 @@ import { SessionAuthGuard } from './session/session.guard';
 import { AlumniModule } from 'src/alumni/alumni.module';
 import { AlumniToVerifyService } from 'src/alumni-to-verify/alumni-to-verify.service';
 import { AlumniToVerifyModule } from 'src/alumni-to-verify/alumni-to-verify.module';
+import { AuthService } from './auth.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { AlumniToVerifyModule } from 'src/alumni-to-verify/alumni-to-verify.modu
     LocalAuthGuard,
     SessionAuthGuard,
     SessionSerializer,
+    AuthService,
   ],
 })
 export class AuthModule {}
