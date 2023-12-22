@@ -12,6 +12,7 @@ import {
   UseGuards,
   Header,
   StreamableFile,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ResumeService } from './resume.service';
 import { UpdateResumeDto } from './dto/update-resume.dto';
@@ -44,7 +45,7 @@ export class ResumeController {
   @Header('Content-Disposition', 'inline; filename=resume.pdf')
   async exportAsPdfMine(@SessionUser() user: User): Promise<StreamableFile> {
     try {
-      const pdf = await this.resumeService.exportAsPdf(user.email);
+      const pdf = await this.resumeService.exportAsPdf(user.id);
       return new StreamableFile(pdf);
     } catch (error) {
       if (error instanceof NotFoundError) {
@@ -57,14 +58,14 @@ export class ResumeController {
     }
   }
 
-  @Get(':email/resume/pdf')
+  @Get(':alumniId/resume/pdf')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @Header('Content-Type', 'application/pdf')
   @Header('Content-Disposition', 'inline; filename=resume.pdf')
-  async exportAsPdf(@Param('email') email: string): Promise<StreamableFile> {
+  async exportAsPdf(@Param('alumniId', ParseUUIDPipe) alumniId: string): Promise<StreamableFile> {
     try {
-      const pdf = await this.resumeService.exportAsPdf(email);
+      const pdf = await this.resumeService.exportAsPdf(alumniId);
       return new StreamableFile(pdf);
     } catch (error) {
       if (error instanceof NotFoundError) {
@@ -82,7 +83,7 @@ export class ResumeController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Resume was succesfully updated' })
   @ApiNotFoundResponse({
-    description: 'The resume user with the requested email was not found',
+    description: 'The resume for the alumni with the requested id was not found',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
@@ -93,7 +94,7 @@ export class ResumeController {
   ): Promise<ResponseDto<ResumeDto>> {
     try {
       const updatedResume = await this.resumeService.update(
-        user.email,
+        user.id,
         updateResumeDto,
       );
       return {
@@ -113,23 +114,23 @@ export class ResumeController {
     }
   }
 
-  @Patch(':email/resume')
+  @Patch(':alumniId/resume')
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Resume was succesfully updated' })
   @ApiNotFoundResponse({
-    description: 'The resume user with the requested email was not found',
+    description: 'The resume for the alumni with the requested id was not found',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
   })
   async update(
-    @Param('email') email: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Body() updateResumeDto: UpdateResumeDto,
   ): Promise<ResponseDto<ResumeDto>> {
     try {
       const updatedResume = await this.resumeService.update(
-        email,
+        alumniId,
         updateResumeDto,
       );
       return {

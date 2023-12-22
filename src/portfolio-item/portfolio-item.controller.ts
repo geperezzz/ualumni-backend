@@ -13,6 +13,7 @@ import {
   InternalServerErrorException,
   Query,
   UseGuards,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { PortfolioItemService } from './portfolio-item.service';
 import { CreatePortfolioItemDto } from './dto/create-portfolio-item.dto';
@@ -61,7 +62,7 @@ export class PortfolioItemController {
   ): Promise<ResponseDto<PortfolioItemDto>> {
     try {
       const data = await this.portfolioItemService.create(
-        user.email,
+        user.id,
         createPortfolioItemDto,
       );
       return {
@@ -80,7 +81,7 @@ export class PortfolioItemController {
     }
   }
 
-  @Post(':email/portfolio-item')
+  @Post(':alumniId/portfolio-item')
   @Allowed('admin')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
@@ -90,12 +91,12 @@ export class PortfolioItemController {
     description: 'Already exists a Portfolio item with the given title',
   })
   async create(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Body() createPortfolioItemDto: CreatePortfolioItemDto,
   ): Promise<ResponseDto<PortfolioItemDto>> {
     try {
       const data = await this.portfolioItemService.create(
-        resumeOwnerEmail,
+        alumniId,
         createPortfolioItemDto,
       );
       return {
@@ -132,7 +133,7 @@ export class PortfolioItemController {
   ) {
     try {
       const data = await this.portfolioItemService.findMany(
-        user.email,
+        user.id,
         paginationParamsDto.pageNumber,
         paginationParamsDto.itemsPerPage,
       );
@@ -150,7 +151,7 @@ export class PortfolioItemController {
     }
   }
 
-  @Get(':alumniEmail/portfolio')
+  @Get(':alumniId/portfolio')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -164,12 +165,12 @@ export class PortfolioItemController {
     description: 'An unexpected situation ocurred',
   })
   async findPage(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Query() paginationParamsDto: PaginationParamsDto,
   ) {
     try {
       const data = await this.portfolioItemService.findMany(
-        alumniEmail,
+        alumniId,
         paginationParamsDto.pageNumber,
         paginationParamsDto.itemsPerPage,
       );
@@ -202,7 +203,7 @@ export class PortfolioItemController {
   async findMine(@SessionUser() user: User, @Param('title') title: string) {
     const portfolioItem = await this.portfolioItemService.findOne(
       title,
-      user.email,
+      user.id,
     );
 
     if (!portfolioItem)
@@ -215,7 +216,7 @@ export class PortfolioItemController {
     };
   }
 
-  @Get(':alumniEmail/portfolio-item/:title')
+  @Get(':alumniId/portfolio-item/:title')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -229,12 +230,12 @@ export class PortfolioItemController {
     description: 'An unexpected situation ocurred',
   })
   async findOne(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('title') title: string,
   ) {
     const portfolioItem = await this.portfolioItemService.findOne(
       title,
-      alumniEmail,
+      alumniId,
     );
 
     if (!portfolioItem)
@@ -271,7 +272,7 @@ export class PortfolioItemController {
       const updatedHigherEducationStudy =
         await this.portfolioItemService.update(
           title,
-          user.email,
+          user.id,
           updatePortfolioItemDto,
         );
       return { statusCode: HttpStatus.OK, data: updatedHigherEducationStudy };
@@ -289,7 +290,7 @@ export class PortfolioItemController {
     }
   }
 
-  @Patch(':alumniEmail/portfolio-item/:title')
+  @Patch(':alumniId/portfolio-item/:title')
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -305,7 +306,7 @@ export class PortfolioItemController {
     description: 'An unexpected situation ocurred',
   })
   async update(
-    @Param('alumniEmail') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('title') title: string,
     @Body() updatePortfolioItemDto: UpdatePortfolioItemDto,
   ) {
@@ -313,7 +314,7 @@ export class PortfolioItemController {
       const updatedHigherEducationStudy =
         await this.portfolioItemService.update(
           title,
-          resumeOwnerEmail,
+          alumniId,
           updatePortfolioItemDto,
         );
       return { statusCode: HttpStatus.OK, data: updatedHigherEducationStudy };
@@ -349,7 +350,7 @@ export class PortfolioItemController {
   ): Promise<ResponseDto<PortfolioItemDto>> {
     try {
       const deletedHigherEducationStudy =
-        await this.portfolioItemService.remove(title, user.email);
+        await this.portfolioItemService.remove(title, user.id);
       return {
         statusCode: HttpStatus.OK,
         data: deletedHigherEducationStudy,
@@ -365,7 +366,7 @@ export class PortfolioItemController {
     }
   }
 
-  @Delete(':alumniEmail/portfolio-item/:title')
+  @Delete(':alumniId/portfolio-item/:title')
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -378,12 +379,12 @@ export class PortfolioItemController {
     description: 'An unexpected situation ocurred',
   })
   async remove(
-    @Param('alumniEmail') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('title') title: string,
   ): Promise<ResponseDto<PortfolioItemDto>> {
     try {
       const deletedHigherEducationStudy =
-        await this.portfolioItemService.remove(title, resumeOwnerEmail);
+        await this.portfolioItemService.remove(title, alumniId);
       return {
         statusCode: HttpStatus.OK,
         data: deletedHigherEducationStudy,

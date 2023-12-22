@@ -14,7 +14,7 @@ import {
 import { Resume } from '../resume.type';
 
 export class ResumeDto implements Resume {
-  @Expose() ownerEmail: string;
+  @Expose() ownerId: string;
   @Expose() numberOfDownloads: number;
   @Expose() isVisible: boolean;
   @Expose() visibleSince: Date;

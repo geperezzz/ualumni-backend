@@ -17,13 +17,13 @@ export class IndustryOfInterestService {
   constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     createIndustryOfInterestDto: CreateIndustryOfInterestDto,
   ): Promise<IndustryOfInterestDto> {
     try {
       return await this.ualumniDbService.industryOfInterest.create({
         data: {
-          resumeOwnerEmail: resumeOwnerEmail,
+          resumeOwnerId,
           ...createIndustryOfInterestDto
         },
       });
@@ -31,13 +31,13 @@ export class IndustryOfInterestService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `There already exists a industry of interest with the given \`name\` (${createIndustryOfInterestDto.industryName}) for the user \`email\`: ${resumeOwnerEmail}`,
+            `There already exists a industry of interest with the given \`name\` (${createIndustryOfInterestDto.industryName}) for the alumni with \`id\`: ${resumeOwnerId}`,
             { cause: error },
           );
         }
         if (error.code === 'P2003') {
           throw new ForeignKeyError(
-            `There is no user with the given \`email\` (${resumeOwnerEmail})`,
+            `There is no alumni with the given \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
@@ -49,13 +49,13 @@ export class IndustryOfInterestService {
   }
 
   async findMany(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     page: number,
     perPage: number,
   ): Promise<PageDto<IndustryOfInterestDto>> {
     try {
       const totalCount = await this.ualumniDbService.industryOfInterest.count({
-        where: { resumeOwnerEmail },
+        where: { resumeOwnerId },
       });
       const pageCount = Math.ceil(totalCount / perPage);
 
@@ -66,7 +66,7 @@ export class IndustryOfInterestService {
       }
 
       const data = await this.ualumniDbService.industryOfInterest.findMany({
-        where: { resumeOwnerEmail },
+        where: { resumeOwnerId },
         take: perPage,
         skip: (page - 1) * perPage,
       });
@@ -86,13 +86,13 @@ export class IndustryOfInterestService {
   }
 
   async findOne(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     industryName: string,
   ): Promise<IndustryOfInterestDto | null> {
     try {
       return await this.ualumniDbService.industryOfInterest.findUnique({
         where: {
-          resumeOwnerEmail_industryName: { industryName, resumeOwnerEmail },
+          resumeOwnerId_industryName: { industryName, resumeOwnerId },
         },
       });
     } catch (error) {
@@ -103,14 +103,14 @@ export class IndustryOfInterestService {
   }
 
   async update(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     industryName: string,
     updateIndustryOfInterestDto: UpdateIndustryOfInterestDto,
   ): Promise<IndustryOfInterestDto> {
     try {
       return await this.ualumniDbService.industryOfInterest.update({
         where: {
-          resumeOwnerEmail_industryName: { industryName, resumeOwnerEmail },
+          resumeOwnerId_industryName: { industryName, resumeOwnerId },
         },
         data: updateIndustryOfInterestDto,
       });
@@ -123,7 +123,7 @@ export class IndustryOfInterestService {
           );
         } else if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `Cannot update the \`name\` to \`${updateIndustryOfInterestDto.industryName}\`, there already exists a industry of interest with the given \`name\` (${updateIndustryOfInterestDto.industryName}) for the user \`email\`: ${updateIndustryOfInterestDto.resumeOwnerEmail}`,
+            `Cannot update the \`name\` to \`${updateIndustryOfInterestDto.industryName}\`, there already exists a industry of interest with the given \`name\` (${updateIndustryOfInterestDto.industryName}) for the alumni with \`id\`: ${updateIndustryOfInterestDto.resumeOwnerId}`,
           );
         }
       }
@@ -134,13 +134,13 @@ export class IndustryOfInterestService {
   }
 
   async remove(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     industryName: string,
   ): Promise<IndustryOfInterestDto> {
     try {
       return await this.ualumniDbService.industryOfInterest.delete({
         where: {
-          resumeOwnerEmail_industryName: { industryName, resumeOwnerEmail },
+          resumeOwnerId_industryName: { industryName, resumeOwnerId },
         },
       });
     } catch (error) {

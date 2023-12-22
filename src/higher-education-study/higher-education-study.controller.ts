@@ -16,6 +16,7 @@ import {
   InternalServerErrorException,
   Query,
   UseGuards,
+  ParseUUIDPipe
 } from '@nestjs/common';
 import { HigherEducationStudyService } from './higher-education-study.service';
 import { CreateHigherEducationStudyDto } from './dto/create-higher-education-study.dto';
@@ -67,7 +68,7 @@ export class HigherEducationStudyController {
   ): Promise<ResponseDto<HigherEducationStudyDto>> {
     try {
       const data = await this.higherEducationStudyService.create(
-        user.email,
+        user.id,
         createHigherEducationStudyDto,
       );
       return {
@@ -86,7 +87,7 @@ export class HigherEducationStudyController {
     }
   }
 
-  @Post(':alumniEmail/higher-education-studies')
+  @Post(':alumniId/higher-education-studies')
   @Allowed('admin')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
@@ -96,12 +97,12 @@ export class HigherEducationStudyController {
     description: 'Already exists a higher education study with the given title',
   })
   async create(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Body() createHigherEducationStudyDto: CreateHigherEducationStudyDto,
   ): Promise<ResponseDto<HigherEducationStudyDto>> {
     try {
       const data = await this.higherEducationStudyService.create(
-        alumniEmail,
+        alumniId,
         createHigherEducationStudyDto,
       );
       return {
@@ -142,7 +143,7 @@ export class HigherEducationStudyController {
     try {
       const paginationResponse =
         await this.higherEducationStudyService.findMany(
-          user.email,
+          user.id,
           paginationParamsDto.pageNumber,
           paginationParamsDto.itemsPerPage,
         );
@@ -156,7 +157,7 @@ export class HigherEducationStudyController {
     }
   }
 
-  @Get(':alumniEmail/higher-education-studies')
+  @Get(':alumniId/higher-education-studies')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -171,7 +172,7 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async findPage(
-    @Param('alumniEmail') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<HigherEducationStudyDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
@@ -179,7 +180,7 @@ export class HigherEducationStudyController {
     try {
       const paginationResponse =
         await this.higherEducationStudyService.findMany(
-          resumeOwnerEmail,
+          alumniId,
           paginationParamsDto.pageNumber,
           paginationParamsDto.itemsPerPage,
         );
@@ -212,7 +213,7 @@ export class HigherEducationStudyController {
   ): Promise<ResponseDto<HigherEducationStudyDto>> {
     const higherEducationStudy = await this.higherEducationStudyService.findOne(
       title,
-      user.email,
+      user.id,
     );
 
     if (!higherEducationStudy)
@@ -225,7 +226,7 @@ export class HigherEducationStudyController {
     };
   }
 
-  @Get(':alumniEmail/higher-education-studies/:title')
+  @Get(':alumniId/higher-education-studies/:title')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -240,12 +241,12 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async findOne(
-    @Param('alumniEmail') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('title') title: string,
   ): Promise<ResponseDto<HigherEducationStudyDto>> {
     const higherEducationStudy = await this.higherEducationStudyService.findOne(
       title,
-      resumeOwnerEmail,
+      alumniId,
     );
 
     if (!higherEducationStudy)
@@ -283,7 +284,7 @@ export class HigherEducationStudyController {
       const updatedHigherEducationStudy =
         await this.higherEducationStudyService.update(
           title,
-          user.email,
+          user.id,
           updateHigherEducationStudyDto,
         );
       return { statusCode: HttpStatus.OK, data: updatedHigherEducationStudy };
@@ -301,7 +302,7 @@ export class HigherEducationStudyController {
     }
   }
 
-  @Patch(':alumniEmail/higher-education-studies/:title')
+  @Patch(':alumniId/higher-education-studies/:title')
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -318,7 +319,7 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async update(
-    @Param('alumniEmail') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('title') title: string,
     @Body() updateHigherEducationStudyDto: UpdateHigherEducationStudyDto,
   ): Promise<ResponseDto<HigherEducationStudyDto>> {
@@ -326,7 +327,7 @@ export class HigherEducationStudyController {
       const updatedHigherEducationStudy =
         await this.higherEducationStudyService.update(
           title,
-          resumeOwnerEmail,
+          alumniId,
           updateHigherEducationStudyDto,
         );
       return { statusCode: HttpStatus.OK, data: updatedHigherEducationStudy };
@@ -363,7 +364,7 @@ export class HigherEducationStudyController {
   ): Promise<ResponseDto<HigherEducationStudyDto>> {
     try {
       const deletedHigherEducationStudy =
-        await this.higherEducationStudyService.remove(title, user.email);
+        await this.higherEducationStudyService.remove(title, user.id);
       return {
         statusCode: HttpStatus.OK,
         data: deletedHigherEducationStudy,
@@ -379,7 +380,7 @@ export class HigherEducationStudyController {
     }
   }
 
-  @Delete(':alumniEmail/higher-education-studies/:title')
+  @Delete(':alumniId/higher-education-studies/:title')
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -393,12 +394,12 @@ export class HigherEducationStudyController {
     description: 'An unexpected situation ocurred',
   })
   async remove(
-    @Param('alumniEmail') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('title') title: string,
   ): Promise<ResponseDto<HigherEducationStudyDto>> {
     try {
       const deletedHigherEducationStudy =
-        await this.higherEducationStudyService.remove(title, resumeOwnerEmail);
+        await this.higherEducationStudyService.remove(title, alumniId);
       return {
         statusCode: HttpStatus.OK,
         data: deletedHigherEducationStudy,

@@ -12,6 +12,7 @@ import {
   Query,
   UseGuards,
   Req,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { AlumniService } from './alumni.service';
 import { CreateAlumniDto } from './dto/create-alumni.dto';
@@ -142,11 +143,11 @@ export class AlumniController {
   async findMeWithResume(
     @SessionUser() user: User,
   ): Promise<ResponseDto<AlumniWithResumeDto>> {
-    let alumni = await this.alumniService.findOneWithResume(user.email);
+    let alumni = await this.alumniService.findOneWithResume(user.id);
 
     if (!alumni) {
       throw new NotFoundException(
-        `There is no alumni with the given \`email\` (${user.email})`,
+        `There is no alumni with the given \`id\` (${user.id})`,
         {},
       );
     }
@@ -160,23 +161,23 @@ export class AlumniController {
     };
   }
 
-  @Get(':email/resume')
+  @Get(':id/resume')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   async findOneWithResume(
-    @Param('email') email: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @SessionUser() user?: User,
   ): Promise<ResponseDto<AlumniWithResumeWithoutContactDto | AlumniWithResume>> {
     let alumniWithResume: AlumniWithResume | null;
     if (user) {
-      alumniWithResume = await this.alumniService.findOneWithResume(email);
+      alumniWithResume = await this.alumniService.findOneWithResume(id);
     } else {
-      alumniWithResume = await this.alumniService.findOneWithResumeOnlyVisibles(email);
+      alumniWithResume = await this.alumniService.findOneWithResumeOnlyVisibles(id);
     }
 
     if (!alumniWithResume) {
       throw new NotFoundException(
-        `There is no alumni with the given \`email\` (${email})`,
+        `There is no alumni with the given \`id\` (${id})`,
         {},
       );
     }
@@ -201,11 +202,11 @@ export class AlumniController {
   @Get('me')
   @Allowed('alumni')
   async findMe(@SessionUser() user: User): Promise<ResponseDto<AlumniDto>> {
-    let alumni = await this.alumniService.findOne(user.email);
+    let alumni = await this.alumniService.findOne(user.id);
 
     if (!alumni) {
       throw new NotFoundException(
-        `There is no alumni with the given \`email\` (${user.email})`,
+        `There is no alumni with the given \`id\` (${user.id})`,
         {},
       );
     }
@@ -219,18 +220,18 @@ export class AlumniController {
     };
   }
 
-  @Get(':email')
+  @Get(':id')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   async findOne(
-    @Param('email') email: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @SessionUser() user: User,
   ): Promise<ResponseDto<Alumni | AlumniWithoutContactDto>> {
-    let alumni = await this.alumniService.findOne(email);
+    let alumni = await this.alumniService.findOne(id);
 
     if (!alumni) {
       throw new NotFoundException(
-        `There is no alumni with the given \`email\` (${email})`,
+        `There is no alumni with the given \`id\` (${id})`,
         {},
       );
     }
@@ -260,7 +261,7 @@ export class AlumniController {
   ): Promise<ResponseDto<AlumniDto>> {
     try {
       let updatedAlumni = await this.alumniService.update(
-        user.email,
+        user.id,
         updateAlumniDto,
       );
       let updatedAlumniDto = plainToInstance(AlumniDto, updatedAlumni, {
@@ -282,15 +283,15 @@ export class AlumniController {
     }
   }
 
-  @Patch(':email')
+  @Patch(':id')
   @Allowed('admin')
   async update(
-    @Param('email') email: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateAlumniDto: UpdateAlumniDto,
   ): Promise<ResponseDto<Alumni>> {
     try {
       let updatedAlumni = await this.alumniService.update(
-        email,
+        id,
         updateAlumniDto,
       );
 
@@ -316,7 +317,7 @@ export class AlumniController {
     @Req() request: Request,
   ): Promise<ResponseDto<AlumniDto>> {
     try {
-      let removedAlumni = await this.alumniService.remove(user.email);
+      let removedAlumni = await this.alumniService.remove(user.id);
       let removedAlumniDto = plainToInstance(AlumniDto, removedAlumni, {
         excludeExtraneousValues: true,
       });
@@ -337,11 +338,11 @@ export class AlumniController {
     }
   }
 
-  @Delete(':email')
+  @Delete(':id')
   @Allowed('admin')
-  async remove(@Param('email') email: string): Promise<ResponseDto<Alumni>> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<ResponseDto<Alumni>> {
     try {
-      let removedAlumni = await this.alumniService.remove(email);
+      let removedAlumni = await this.alumniService.remove(id);
 
       return {
         statusCode: HttpStatus.OK,

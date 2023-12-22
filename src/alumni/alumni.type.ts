@@ -4,9 +4,9 @@ import {
   Graduation as PrismaGraduation,
 } from 'prisma/ualumni/client';
 
-export type Graduation = Omit<PrismaGraduation, 'alumniEmail'>;
+export type Graduation = Omit<PrismaGraduation, 'alumniId'>;
 
 export type Alumni = Omit<User, 'role'> &
-  Omit<PrismaAlumni, 'email'> & {
+  Omit<PrismaAlumni, 'id'> & {
     graduations: Graduation[];
   };

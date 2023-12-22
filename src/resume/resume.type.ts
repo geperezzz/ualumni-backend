@@ -9,26 +9,26 @@ import {
   Resume as ResumeModel,
   ResumeSoftSkill,
   ResumeTechnicalSkill,
+  WorkExperience
 } from 'prisma/ualumni/client';
-import { WorkExperience } from 'prisma/ualumni/client';
 
 export type Resume = ResumeModel & {
   ciapCourses: (CiapCourse &
-    Omit<ResumeCiapCourse, 'resumeOwnerEmail' | 'courseId'>)[];
+    Omit<ResumeCiapCourse, 'resumeOwnerId' | 'courseId'>)[];
 } & {
-  knownLanguages: Omit<ResumeLanguage, 'resumeOwnerEmail'>[];
+  knownLanguages: Omit<ResumeLanguage, 'resumeOwnerId'>[];
 } & {
-  technicalSkills: Omit<ResumeTechnicalSkill, 'resumeOwnerEmail'>[];
+  technicalSkills: Omit<ResumeTechnicalSkill, 'resumeOwnerId'>[];
 } & {
-  higherEducationStudies: Omit<HigherEducationStudy, 'resumeOwnerEmail'>[];
+  higherEducationStudies: Omit<HigherEducationStudy, 'resumeOwnerId'>[];
 } & {
-  industriesOfInterest: Omit<IndustryOfInterest, 'resumeOwnerEmail'>[];
+  industriesOfInterest: Omit<IndustryOfInterest, 'resumeOwnerId'>[];
 } & {
-  portfolio: Omit<PortfolioItem, 'resumeOwnerEmail'>[];
+  portfolio: Omit<PortfolioItem, 'resumeOwnerId'>[];
 } & {
-  positionsOfInterest: Omit<PositionOfInterest, 'resumeOwnerEmail'>[];
+  positionsOfInterest: Omit<PositionOfInterest, 'resumeOwnerId'>[];
 } & {
-  softSkills: Omit<ResumeSoftSkill, 'resumeOwnerEmail'>[];
+  softSkills: Omit<ResumeSoftSkill, 'resumeOwnerId'>[];
 } & {
-  workExperiences: Omit<WorkExperience, 'resumeOwnerEmail'>[];
+  workExperiences: Omit<WorkExperience, 'resumeOwnerId'>[];
 };

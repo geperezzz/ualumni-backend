@@ -11,6 +11,7 @@ import {
   Query,
   NotFoundException,
   UseGuards,
+  ParseUUIDPipe
 } from '@nestjs/common';
 import { JobApplicationsService } from './job-applications.service';
 import { CreateJobApplicationDto } from './dto/create-job-application.dto';
@@ -45,7 +46,7 @@ export class JobApplicationsController {
   ) {
     try {
       let createdJobApplication = await this.jobApplicationsService.create(
-        user.email,
+        user.id,
         createJobApplicationDto,
       );
       return {
@@ -63,15 +64,15 @@ export class JobApplicationsController {
     }
   }
 
-  @Post(':alumniEmail/job-applications')
+  @Post(':alumniId/job-applications')
   @Allowed('admin')
   async create(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Body() createJobApplicationDto: CreateJobApplicationDto,
   ) {
     try {
       let createdJobApplication = await this.jobApplicationsService.create(
-        alumniEmail,
+        alumniId,
         createJobApplicationDto,
       );
       return {
@@ -96,7 +97,7 @@ export class JobApplicationsController {
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PagedResponseDto<JobApplicationDto>> {
     let jobApplicationsPage = await this.jobApplicationsService.findPage(
-      user.email,
+      user.id,
       paginationParamsDto,
     );
     return {
@@ -105,14 +106,14 @@ export class JobApplicationsController {
     };
   }
 
-  @Get(':alumniEmail/job-applications')
+  @Get(':alumniId/job-applications')
   @Allowed('admin')
   async findPage(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PagedResponseDto<JobApplicationDto>> {
     let jobApplicationsPage = await this.jobApplicationsService.findPage(
-      alumniEmail,
+      alumniId,
       paginationParamsDto,
     );
     return {
@@ -128,13 +129,13 @@ export class JobApplicationsController {
     @Param('jobOfferId') jobOfferId: string,
   ) {
     let jobApplication = await this.jobApplicationsService.findOne(
-      user.email,
+      user.id,
       jobOfferId,
     );
 
     if (!jobApplication) {
       throw new NotFoundException(
-        `There is no job application for offer with \`id\` equal to \`${jobOfferId}\` corresponding to alumni with \`email\` equal to \`${user.email}\``,
+        `There is no job application for offer with \`id\` equal to \`${jobOfferId}\` corresponding to alumni with \`id\` equal to \`${user.id}\``,
         {},
       );
     }
@@ -145,20 +146,20 @@ export class JobApplicationsController {
     };
   }
 
-  @Get(':alumniEmail/job-applications/:jobOfferId')
+  @Get(':alumniId/job-applications/:jobOfferId')
   @Allowed('admin')
   async findOne(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('jobOfferId') jobOfferId: string,
   ) {
     let jobApplication = await this.jobApplicationsService.findOne(
-      alumniEmail,
+      alumniId,
       jobOfferId,
     );
 
     if (!jobApplication) {
       throw new NotFoundException(
-        `There is no job application for offer with \`id\` equal to \`${jobOfferId}\` corresponding to alumni with \`email\` equal to \`${alumniEmail}\``,
+        `There is no job application for offer with \`id\` equal to \`${jobOfferId}\` corresponding to alumni with \`id\` equal to \`${alumniId}\``,
         {},
       );
     }
@@ -178,7 +179,7 @@ export class JobApplicationsController {
   ) {
     try {
       let updatedJobApplication = await this.jobApplicationsService.update(
-        user.email,
+        user.id,
         jobOfferId,
         updateJobApplicationDto,
       );
@@ -198,16 +199,16 @@ export class JobApplicationsController {
     }
   }
 
-  @Patch(':alumniEmail/job-applications/:jobOfferId')
+  @Patch(':alumniId/job-applications/:jobOfferId')
   @Allowed('admin')
   async update(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('jobOfferId') jobOfferId: string,
     @Body() updateJobApplicationDto: UpdateJobApplicationDto,
   ) {
     try {
       let updatedJobApplication = await this.jobApplicationsService.update(
-        alumniEmail,
+        alumniId,
         jobOfferId,
         updateJobApplicationDto,
       );
@@ -235,7 +236,7 @@ export class JobApplicationsController {
   ) {
     try {
       let removedJobApplication = await this.jobApplicationsService.remove(
-        user.email,
+        user.id,
         jobOfferId,
       );
 
@@ -251,15 +252,15 @@ export class JobApplicationsController {
     }
   }
 
-  @Delete(':alumniEmail/job-applications/:jobOfferId')
+  @Delete(':alumniId/job-applications/:jobOfferId')
   @Allowed('admin')
   async remove(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('jobOfferId') jobOfferId: string,
   ) {
     try {
       let removedJobApplication = await this.jobApplicationsService.remove(
-        alumniEmail,
+        alumniId,
         jobOfferId,
       );
 

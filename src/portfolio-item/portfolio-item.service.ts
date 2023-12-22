@@ -17,13 +17,13 @@ export class PortfolioItemService {
   constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     createPortfolioItemDto: CreatePortfolioItemDto,
   ): Promise<PortfolioItemDto> {
     try {
       return await this.ualumniDbService.portfolioItem.create({
         data: {
-          resumeOwnerEmail: resumeOwnerEmail,
+          resumeOwnerId,
           title: createPortfolioItemDto.title,
           sourceLink: createPortfolioItemDto.sourceLink,
           isVisible: createPortfolioItemDto.isVisible,
@@ -33,13 +33,13 @@ export class PortfolioItemService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `El link proporcionado ya existe \`sourceLink\` (${createPortfolioItemDto.sourceLink}) por el usuario \`email\` (${resumeOwnerEmail})`,
+            `El link proporcionado ya existe \`sourceLink\` (${createPortfolioItemDto.sourceLink}) por el egresado con \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
         if (error.code === 'P2003') {
           throw new ForeignKeyError(
-            `No existe usuario con el siguient email \`email\` (${resumeOwnerEmail})`,
+            `No existe usuario con el siguiente \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
@@ -51,13 +51,13 @@ export class PortfolioItemService {
   }
 
   async findMany(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     page: number,
     perPage: number,
   ): Promise<PageDto<PortfolioItemDto>> {
     try {
       const totalCount = await this.ualumniDbService.portfolioItem.count({
-        where: { resumeOwnerEmail },
+        where: { resumeOwnerId },
       });
       const pageCount = Math.ceil(totalCount / perPage);
 
@@ -68,7 +68,7 @@ export class PortfolioItemService {
       }
       const data = await this.ualumniDbService.portfolioItem.findMany({
         where: {
-          resumeOwnerEmail,
+          resumeOwnerId,
         },
         take: perPage,
         skip: (page - 1) * perPage,
@@ -89,15 +89,15 @@ export class PortfolioItemService {
 
   async update(
     title: string,
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     updatePortfolioItemDto: UpdatePortfolioItemDto,
   ): Promise<PortfolioItemDto> {
     try {
       return await this.ualumniDbService.portfolioItem.update({
         where: {
-          resumeOwnerEmail_title: {
+          resumeOwnerId_title: {
             title,
-            resumeOwnerEmail,
+            resumeOwnerId,
           },
         },
         data: {
@@ -116,7 +116,7 @@ export class PortfolioItemService {
         }
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `No puede actualizarse ya que ya existe \`title\` (${updatePortfolioItemDto.title}) para el usuario \`email\` (${resumeOwnerEmail})`,
+            `No puede actualizarse ya que ya existe \`title\` (${updatePortfolioItemDto.title}) para el egresado con \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
@@ -129,14 +129,14 @@ export class PortfolioItemService {
 
   async findOne(
     title: string,
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
   ): Promise<PortfolioItemDto | null> {
     try {
       return await this.ualumniDbService.portfolioItem.findUnique({
         where: {
-          resumeOwnerEmail_title: {
+          resumeOwnerId_title: {
             title,
-            resumeOwnerEmail,
+            resumeOwnerId,
           },
         },
       });
@@ -149,14 +149,14 @@ export class PortfolioItemService {
 
   async remove(
     title: string,
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
   ): Promise<PortfolioItemDto> {
     try {
       return await this.ualumniDbService.portfolioItem.delete({
         where: {
-          resumeOwnerEmail_title: {
+          resumeOwnerId_title: {
             title,
-            resumeOwnerEmail,
+            resumeOwnerId,
           },
         },
       });

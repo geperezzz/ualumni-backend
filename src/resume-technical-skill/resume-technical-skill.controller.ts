@@ -16,6 +16,7 @@ import {
   InternalServerErrorException,
   Query,
   UseGuards,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ResumeTechnicalSkillService } from './resume-technical-skill.service';
 import { CreateResumeTechnicalSkillDto } from './dto/create-resume-technical-skill.dto';
@@ -67,7 +68,7 @@ export class ResumeTechnicalSkillController {
   ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
     try {
       const data = await this.resumeTechnicalSkillService.create(
-        user.email,
+        user.id,
         CreateResumeTechnicalSkillDto,
       );
       return {
@@ -86,7 +87,7 @@ export class ResumeTechnicalSkillController {
     }
   }
 
-  @Post(':email/resume/skill-category/technical-skill')
+  @Post(':alumniId/resume/skill-category/technical-skill')
   @Allowed('admin')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
@@ -96,12 +97,12 @@ export class ResumeTechnicalSkillController {
     description: 'Already exists a technical skill with the given name',
   })
   async add(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Body() CreateResumeTechnicalSkillDto: CreateResumeTechnicalSkillDto,
   ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
     try {
       const data = await this.resumeTechnicalSkillService.create(
-        resumeOwnerEmail,
+        alumniId,
         CreateResumeTechnicalSkillDto,
       );
       return {
@@ -141,7 +142,7 @@ export class ResumeTechnicalSkillController {
     try {
       const paginationResponse =
         await this.resumeTechnicalSkillService.findMany(
-          user.email,
+          user.id,
           paginationParamsDto.pageNumber,
           paginationParamsDto.itemsPerPage,
         );
@@ -155,7 +156,7 @@ export class ResumeTechnicalSkillController {
     }
   }
 
-  @Get(':email/resume/skill-category/technical-skill')
+  @Get(':alumniId/resume/skill-category/technical-skill')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -169,7 +170,7 @@ export class ResumeTechnicalSkillController {
     description: 'An unexpected situation ocurred',
   })
   async findPage(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<ResumeTechnicalSkillDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
@@ -177,7 +178,7 @@ export class ResumeTechnicalSkillController {
     try {
       const paginationResponse =
         await this.resumeTechnicalSkillService.findMany(
-          resumeOwnerEmail,
+          alumniId,
           paginationParamsDto.pageNumber,
           paginationParamsDto.itemsPerPage,
         );
@@ -209,7 +210,7 @@ export class ResumeTechnicalSkillController {
     @Param('skillName') skillName: string,
   ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
     const resumeTechnicalSkill = await this.resumeTechnicalSkillService.findOne(
-      user.email,
+      user.id,
       skillCategory,
       skillName,
     );
@@ -224,7 +225,7 @@ export class ResumeTechnicalSkillController {
     };
   }
 
-  @Get(':email/resume/skill-category/:skillCategory/technical-skill/:skillName')
+  @Get(':alumniId/resume/skill-category/:skillCategory/technical-skill/:skillName')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -238,12 +239,12 @@ export class ResumeTechnicalSkillController {
     description: 'An unexpected situation ocurred',
   })
   async findOne(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('skillCategory') skillCategory: string,
     @Param('skillName') skillName: string,
   ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
     const resumeTechnicalSkill = await this.resumeTechnicalSkillService.findOne(
-      resumeOwnerEmail,
+      alumniId,
       skillCategory,
       skillName,
     );
@@ -281,7 +282,7 @@ export class ResumeTechnicalSkillController {
   ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
     try {
       const updateLanguageName = await this.resumeTechnicalSkillService.update(
-        user.email,
+        user.id,
         skillCategory,
         skillName,
         updateResumeTechnicalSkillDto,
@@ -302,7 +303,7 @@ export class ResumeTechnicalSkillController {
   }
 
   @Patch(
-    ':email/resume/skill-category/:skillCategory/technical-skill/:skillName',
+    ':alumniId/resume/skill-category/:skillCategory/technical-skill/:skillName',
   )
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
@@ -319,14 +320,14 @@ export class ResumeTechnicalSkillController {
     description: 'An unexpected situation ocurred',
   })
   async update(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('skillCategory') skillCategory: string,
     @Param('skillName') skillName: string,
     @Body() updateResumeTechnicalSkillDto: UpdateResumeTechnicalSkillDto,
   ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
     try {
       const updateLanguageName = await this.resumeTechnicalSkillService.update(
-        resumeOwnerEmail,
+        alumniId,
         skillCategory,
         skillName,
         updateResumeTechnicalSkillDto,
@@ -367,7 +368,7 @@ export class ResumeTechnicalSkillController {
     try {
       const deletedResumeTechnicalSkill =
         await this.resumeTechnicalSkillService.remove(
-          user.email,
+          user.id,
           skillCategory,
           skillName,
         );
@@ -387,7 +388,7 @@ export class ResumeTechnicalSkillController {
   }
 
   @Delete(
-    ':email/resume/skill-category/:skillCategory/technical-skill/:skillName',
+    ':alumniId/resume/skill-category/:skillCategory/technical-skill/:skillName',
   )
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
@@ -402,14 +403,14 @@ export class ResumeTechnicalSkillController {
     description: 'An unexpected situation ocurred',
   })
   async remove(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('skillCategory') skillCategory: string,
     @Param('skillName') skillName: string,
   ): Promise<ResponseDto<ResumeTechnicalSkillDto>> {
     try {
       const deletedResumeTechnicalSkill =
         await this.resumeTechnicalSkillService.remove(
-          resumeOwnerEmail,
+          alumniId,
           skillCategory,
           skillName,
         );

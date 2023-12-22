@@ -17,13 +17,13 @@ export class ResumeSoftSkillService {
   constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     createResumeSoftSkillDto: CreateResumeSoftSkillDto,
   ) {
     try {
       return await this.ualumniDbService.resumeSoftSkill.create({
         data: {
-          resumeOwnerEmail: resumeOwnerEmail,
+          resumeOwnerId,
           skillName: createResumeSoftSkillDto.skillName,
           isVisible: createResumeSoftSkillDto.isVisible,
         },
@@ -32,13 +32,13 @@ export class ResumeSoftSkillService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `There already exists a resume soft skill with the given \`skillName\` (${createResumeSoftSkillDto.skillName}) for the given \`resumeOwnerEmail\` (${resumeOwnerEmail})`,
+            `There already exists a resume soft skill with the given \`skillName\` (${createResumeSoftSkillDto.skillName}) for the given \`resumeOwnerId\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
         if (error.code === 'P2003') {
           throw new ForeignKeyError(
-            `There is no user with the given \`${resumeOwnerEmail}\` (${resumeOwnerEmail}) or there is no soft skill with the given \`skillName\` (${createResumeSoftSkillDto.skillName})`,
+            `There is no alumni with the given \`id\` (${resumeOwnerId}) or there is no soft skill with the given \`skillName\` (${createResumeSoftSkillDto.skillName})`,
             { cause: error },
           );
         }
@@ -50,13 +50,13 @@ export class ResumeSoftSkillService {
   }
 
   async findMany(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     page: number,
     perPage: number,
   ): Promise<PageDto<ResumeSoftSkillDto>> {
     try {
       const totalCount = await this.ualumniDbService.resumeSoftSkill.count({
-        where: { resumeOwnerEmail },
+        where: { resumeOwnerId },
       });
       const pageCount = Math.ceil(totalCount / perPage);
 
@@ -67,7 +67,7 @@ export class ResumeSoftSkillService {
       }
 
       const data = await this.ualumniDbService.resumeSoftSkill.findMany({
-        where: { resumeOwnerEmail },
+        where: { resumeOwnerId },
         take: perPage,
         skip: (page - 1) * perPage,
       });
@@ -88,14 +88,14 @@ export class ResumeSoftSkillService {
 
   async findOne(
     skillName: string,
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
   ): Promise<ResumeSoftSkillDto | null> {
     try {
       return await this.ualumniDbService.resumeSoftSkill.findUnique({
         where: {
-          resumeOwnerEmail_skillName: {
+          resumeOwnerId_skillName: {
             skillName,
-            resumeOwnerEmail,
+            resumeOwnerId,
           },
         },
       });
@@ -108,15 +108,15 @@ export class ResumeSoftSkillService {
 
   async update(
     skillName: string,
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     updateResumeSoftSkillDto: UpdateResumeSoftSkillDto,
   ): Promise<ResumeSoftSkillDto> {
     try {
       return await this.ualumniDbService.resumeSoftSkill.update({
         where: {
-          resumeOwnerEmail_skillName: {
+          resumeOwnerId_skillName: {
             skillName,
-            resumeOwnerEmail,
+            resumeOwnerId,
           },
         },
         data: updateResumeSoftSkillDto,
@@ -125,13 +125,13 @@ export class ResumeSoftSkillService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no resume soft skill with the given \`skillName\` (${skillName}) for the given \`resumeOwnerEmail\` (${resumeOwnerEmail})`,
+            `There is no resume soft skill with the given \`skillName\` (${skillName}) for the given \`resumeOwnerId\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `Cannot update the resume soft skill, there already exists a resume soft skill with the given \`title\` (${updateResumeSoftSkillDto.skillName}) for the given \`resumeOwnerEmail\` (${resumeOwnerEmail})`,
+            `Cannot update the resume soft skill, there already exists a resume soft skill with the given \`title\` (${updateResumeSoftSkillDto.skillName}) for the given \`resumeOwnerId\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
@@ -144,14 +144,14 @@ export class ResumeSoftSkillService {
 
   async remove(
     skillName: string,
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
   ): Promise<ResumeSoftSkillDto> {
     try {
       return await this.ualumniDbService.resumeSoftSkill.delete({
         where: {
-          resumeOwnerEmail_skillName: {
+          resumeOwnerId_skillName: {
             skillName,
-            resumeOwnerEmail,
+            resumeOwnerId,
           },
         },
       });
@@ -159,7 +159,7 @@ export class ResumeSoftSkillService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no resume soft skill with the given \`skillName\` (${skillName}) for the given \`resumeOwnerEmail\` (${resumeOwnerEmail})`,
+            `There is no resume soft skill with the given \`skillName\` (${skillName}) for the given \`resumeOwnerId\` (${resumeOwnerId})`,
             { cause: error },
           );
         }

@@ -11,16 +11,16 @@ export class SessionSerializer extends PassportSerializer {
 
   serializeUser(
     user: User,
-    done: (error: null, userEmail: string) => void,
+    done: (error: null, userId: string) => void,
   ): void {
-    done(null, user.email);
+    done(null, user.id);
   }
 
   async deserializeUser(
-    userEmail: string,
+    userId: string,
     done: (error: null, user: User | false) => void,
   ): Promise<void> {
-    let user = await this.usersService.findOne(userEmail);
+    let user = await this.usersService.findOne(userId);
     if (!user) {
       done(null, false);
     } else {

@@ -62,16 +62,21 @@ export class AlumniService {
   @Cron(CronExpression.EVERY_12_HOURS)
   async synchronize() {
     try {
-      //get ualumni alumni
+      // Get ualumni alumni
       const allUalumni = await this.ualumniDbService.alumni.findMany({
         include: {
+          associatedUser: {
+            select: {
+              email: true,
+            }
+          },
           graduations: true,
         },
       });
 
-      //Compare with ucab alumni
+      // Compare with ucab alumni
       for (let ualumniDbAlumni of allUalumni) {
-        const ucabDbAlumni = await this.findUcabDbAlumni(ualumniDbAlumni.email);
+        const ucabDbAlumni = await this.findUcabDbAlumni(ualumniDbAlumni.associatedUser.email);
         for (let ucabDbCareer of ucabDbAlumni.enrolledCareers) {
           // Create graduation if not exists
           const ualumniDbCareer = ualumniDbAlumni.graduations.find(
@@ -82,7 +87,7 @@ export class AlumniService {
           if (!ualumniDbCareer) {
             await this.ualumniDbService.graduation.create({
               data: {
-                alumniEmail: ualumniDbAlumni.email,
+                alumniId: ualumniDbAlumni.id,
                 careerName: ucabDbCareer.careerName,
                 graduationDate: ucabDbCareer.graduationDate
                   ? ucabDbCareer.graduationDate
@@ -115,7 +120,7 @@ export class AlumniService {
     try {
       const createdAlumni = await this.ualumniDbService.$transaction(
         async (tx) => {
-          await tx.alumni.create({
+          const createdAlumni = await tx.alumni.create({
             data: {
               address: ucabDbAlumni.address,
               telephoneNumber: ucabDbAlumni.telephoneNumber,
@@ -138,7 +143,7 @@ export class AlumniService {
             ucabDbAlumni.enrolledCareers.map((career) =>
               tx.graduation.create({
                 data: {
-                  alumniEmail: createAlumniDto.email,
+                  alumniId: createdAlumni.id,
                   careerName: career.careerName,
                   graduationDate: career.graduationDate!,
                 },
@@ -147,10 +152,11 @@ export class AlumniService {
           );
 
           return await tx.alumni.findUniqueOrThrow({
-            where: { email: createAlumniDto.email },
+            where: { id: createdAlumni.id },
             include: {
               associatedUser: {
                 select: {
+                  email: true,
                   names: true,
                   surnames: true,
                   password: true,
@@ -209,16 +215,16 @@ export class AlumniService {
           ) AS randomization_seed
         `,
         this.ualumniDbService.$queryRaw<
-          { email: string; totalCount: number }[]
+          { id: string; totalCount: number }[]
         >`
           WITH filtered_by_visibility AS (
-            SELECT a."email", u."names", u."surnames", g."careerName", p."positionName", i."industryName", rt."skillName", rt."skillCategoryName"
-            FROM "User" u INNER JOIN "Alumni" a USING("email")
-            LEFT JOIN "Resume" r ON a."email" = r."ownerEmail"
-            LEFT JOIN "PositionOfInterest" p ON r."ownerEmail" = p."resumeOwnerEmail"
-            LEFT JOIN "IndustryOfInterest" i ON r."ownerEmail" = i."resumeOwnerEmail"
-            LEFT JOIN "ResumeTechnicalSkill" rt ON r."ownerEmail" = rt."resumeOwnerEmail"
-            LEFT JOIN "Graduation" g ON a."email" = g."alumniEmail"
+            SELECT a."id", u."names", u."surnames", g."careerName", p."positionName", i."industryName", rt."skillName", rt."skillCategoryName"
+            FROM "User" u INNER JOIN "Alumni" a USING("id")
+            LEFT JOIN "Resume" r ON a."id" = r."ownerId"
+            LEFT JOIN "PositionOfInterest" p ON r."ownerId" = p."resumeOwnerId"
+            LEFT JOIN "IndustryOfInterest" i ON r."ownerId" = i."resumeOwnerId"
+            LEFT JOIN "ResumeTechnicalSkill" rt ON r."ownerId" = rt."resumeOwnerId"
+            LEFT JOIN "Graduation" g ON a."id" = g."alumniId"
             WHERE r."isVisible" = TRUE
               ${
                 positionsOfInterest
@@ -236,13 +242,13 @@ export class AlumniService {
                   : PrismaUalumni.empty
               }
           ), filtered_by_name AS (
-            SELECT "email", "careerName", "positionName", "industryName", "skillName", "skillCategoryName"
+            SELECT "id", "careerName", "positionName", "industryName", "skillName", "skillCategoryName"
 	          FROM filtered_by_visibility
             WHERE CONCAT(unaccent("names"), ' ', unaccent("surnames")) ILIKE unaccent(${
               alumniName ? `%${alumniName.replaceAll(' ', '%')}%` : '%'
             })
           ), filtered_by_career AS (
-            SELECT "email", "positionName", "industryName", "skillName", "skillCategoryName"
+            SELECT "id", "positionName", "industryName", "skillName", "skillCategoryName"
             FROM filtered_by_name
 	          ${
               careersNames
@@ -250,7 +256,7 @@ export class AlumniService {
                     WHERE "careerName" IN (${PrismaUalumni.join(careersNames)})`
                 : PrismaUalumni.empty
             }
-            GROUP BY "email", "positionName", "industryName", "skillName", "skillCategoryName"
+            GROUP BY "id", "positionName", "industryName", "skillName", "skillCategoryName"
             ${
               careersNames
                 ? PrismaUalumni.sql`
@@ -258,7 +264,7 @@ export class AlumniService {
                 : PrismaUalumni.empty
             }
           ), filtered_by_position AS (
-            SELECT "email", "industryName", "skillName", "skillCategoryName"
+            SELECT "id", "industryName", "skillName", "skillCategoryName"
             FROM filtered_by_career
             ${
               positionsOfInterest
@@ -268,7 +274,7 @@ export class AlumniService {
                     )})`
                 : PrismaUalumni.empty
             }
-            GROUP BY "email", "industryName", "skillName", "skillCategoryName"
+            GROUP BY "id", "industryName", "skillName", "skillCategoryName"
             ${
               positionsOfInterest
                 ? PrismaUalumni.sql`
@@ -276,7 +282,7 @@ export class AlumniService {
                 : PrismaUalumni.empty
             }
           ), filtered_by_industry AS (
-            SELECT "email", "skillName", "skillCategoryName"
+            SELECT "id", "skillName", "skillCategoryName"
             FROM filtered_by_position
             ${
               industriesOfInterest
@@ -286,7 +292,7 @@ export class AlumniService {
                     )})`
                 : PrismaUalumni.empty
             }
-            GROUP BY "email", "skillName", "skillCategoryName"
+            GROUP BY "id", "skillName", "skillCategoryName"
             ${
               industriesOfInterest
                 ? PrismaUalumni.sql`
@@ -294,7 +300,7 @@ export class AlumniService {
                 : PrismaUalumni.empty
             }
           ), filtered_by_skill_categories AS (
-            SELECT "email", "skillName", "skillCategoryName"
+            SELECT "id", "skillName", "skillCategoryName"
             FROM filtered_by_industry
             ${
               skillCategories
@@ -304,7 +310,7 @@ export class AlumniService {
                     )}) `
                 : PrismaUalumni.empty
             }
-            GROUP BY "email", "skillName", "skillCategoryName"
+            GROUP BY "id", "skillName", "skillCategoryName"
             ${
               skillCategories
                 ? PrismaUalumni.sql`
@@ -313,9 +319,9 @@ export class AlumniService {
             }
           ), 
           filtered_by_skills AS (
-            SELECT "email", COUNT("email") AS "filteredAlumniCount"
+            SELECT "id", COUNT("id") AS "filteredAlumniCount"
             FROM filtered_by_skill_categories
-            GROUP BY "email"
+            GROUP BY "id"
             ${
               skills
                 ? PrismaUalumni.sql`
@@ -333,9 +339,9 @@ export class AlumniService {
         
           )
          
-          SELECT "email", "totalCount"
+          SELECT "id", "totalCount"
           FROM filtered_by_skills, filtered_total_count
-          GROUP BY "email", "totalCount"
+          GROUP BY "id", "totalCount"
           ORDER BY random()
           LIMIT ${itemsPerPage}
           OFFSET ${itemsPerPage * (pageNumber - 1)}
@@ -348,8 +354,8 @@ export class AlumniService {
 
       const result = await this.ualumniDbService.alumni.findMany({
         where: {
-          email: {
-            in: filteredAlumni.map((alumni) => alumni.email),
+          id: {
+            in: filteredAlumni.map((alumni) => alumni.id),
           },
         },
         include: {
@@ -414,16 +420,16 @@ export class AlumniService {
           ) AS randomization_seed
         `,
         this.ualumniDbService.$queryRaw<
-          { email: string; totalCount: number }[]
+          { id: string; totalCount: number }[]
         >`
           WITH filtered_by_visibility AS (
-            SELECT a."email", u."names", u."surnames", g."careerName", p."positionName", i."industryName", rt."skillName", rt."skillCategoryName"
-            FROM "User" u INNER JOIN "Alumni" a USING("email")
-            LEFT JOIN "Resume" r ON a."email" = r."ownerEmail"
-            LEFT JOIN "PositionOfInterest" p ON r."ownerEmail" = p."resumeOwnerEmail"
-            LEFT JOIN "IndustryOfInterest" i ON r."ownerEmail" = i."resumeOwnerEmail"
-            LEFT JOIN "ResumeTechnicalSkill" rt ON r."ownerEmail" = rt."resumeOwnerEmail"
-            LEFT JOIN "Graduation" g ON a."email" = g."alumniEmail"
+            SELECT a."id", u."names", u."surnames", g."careerName", p."positionName", i."industryName", rt."skillName", rt."skillCategoryName"
+            FROM "User" u INNER JOIN "Alumni" a USING("id")
+            LEFT JOIN "Resume" r ON a."id" = r."ownerId"
+            LEFT JOIN "PositionOfInterest" p ON r."ownerId" = p."resumeOwnerId"
+            LEFT JOIN "IndustryOfInterest" i ON r."ownerId" = i."resumeOwnerId"
+            LEFT JOIN "ResumeTechnicalSkill" rt ON r."ownerId" = rt."resumeOwnerId"
+            LEFT JOIN "Graduation" g ON a."id" = g."alumniId"
             WHERE r."isVisible" = TRUE
               ${
                 positionsOfInterest
@@ -441,13 +447,13 @@ export class AlumniService {
                   : PrismaUalumni.empty
               }
           ), filtered_by_name AS (
-            SELECT "email", "careerName", "positionName", "industryName", "skillName", "skillCategoryName"
+            SELECT "id", "careerName", "positionName", "industryName", "skillName", "skillCategoryName"
 	          FROM filtered_by_visibility
             WHERE CONCAT(unaccent("names"), ' ', unaccent("surnames")) ILIKE unaccent(${
               alumniName ? `%${alumniName.replaceAll(' ', '%')}%` : '%'
             })
           ), filtered_by_career AS (
-            SELECT "email", "positionName", "industryName", "skillName", "skillCategoryName"
+            SELECT "id", "positionName", "industryName", "skillName", "skillCategoryName"
             FROM filtered_by_name
 	          ${
               careersNames
@@ -455,7 +461,7 @@ export class AlumniService {
                     WHERE "careerName" IN (${PrismaUalumni.join(careersNames)})`
                 : PrismaUalumni.empty
             }
-            GROUP BY "email", "positionName", "industryName", "skillName", "skillCategoryName"
+            GROUP BY "id", "positionName", "industryName", "skillName", "skillCategoryName"
             ${
               careersNames
                 ? PrismaUalumni.sql`
@@ -463,7 +469,7 @@ export class AlumniService {
                 : PrismaUalumni.empty
             }
           ), filtered_by_position AS (
-            SELECT "email", "industryName", "skillName", "skillCategoryName"
+            SELECT "id", "industryName", "skillName", "skillCategoryName"
             FROM filtered_by_career
             ${
               positionsOfInterest
@@ -473,7 +479,7 @@ export class AlumniService {
                     )})`
                 : PrismaUalumni.empty
             }
-            GROUP BY "email", "industryName", "skillName", "skillCategoryName"
+            GROUP BY "id", "industryName", "skillName", "skillCategoryName"
             ${
               positionsOfInterest
                 ? PrismaUalumni.sql`
@@ -481,7 +487,7 @@ export class AlumniService {
                 : PrismaUalumni.empty
             }
           ), filtered_by_industry AS (
-            SELECT "email", "skillName", "skillCategoryName"
+            SELECT "id", "skillName", "skillCategoryName"
             FROM filtered_by_position
             ${
               industriesOfInterest
@@ -491,7 +497,7 @@ export class AlumniService {
                     )})`
                 : PrismaUalumni.empty
             }
-            GROUP BY "email", "skillName", "skillCategoryName"
+            GROUP BY "id", "skillName", "skillCategoryName"
             ${
               industriesOfInterest
                 ? PrismaUalumni.sql`
@@ -499,7 +505,7 @@ export class AlumniService {
                 : PrismaUalumni.empty
             }
           ), filtered_by_skill_categories AS (
-            SELECT "email", "skillName", "skillCategoryName"
+            SELECT "id", "skillName", "skillCategoryName"
             FROM filtered_by_industry
             ${
               skillCategories
@@ -509,7 +515,7 @@ export class AlumniService {
                     )}) `
                 : PrismaUalumni.empty
             }
-            GROUP BY "email", "skillName", "skillCategoryName"
+            GROUP BY "id", "skillName", "skillCategoryName"
             ${
               skillCategories
                 ? PrismaUalumni.sql`
@@ -518,9 +524,9 @@ export class AlumniService {
             }
           ), 
           filtered_by_skills AS (
-            SELECT "email", COUNT("email") AS "filteredAlumniCount"
+            SELECT "id", COUNT("id") AS "filteredAlumniCount"
             FROM filtered_by_skill_categories
-            GROUP BY "email"
+            GROUP BY "id"
             ${
               skills
                 ? PrismaUalumni.sql`
@@ -538,9 +544,9 @@ export class AlumniService {
         
           )
          
-          SELECT "email", "totalCount"
+          SELECT "id", "totalCount"
           FROM filtered_by_skills, filtered_total_count
-          GROUP BY "email", "totalCount"
+          GROUP BY "id", "totalCount"
           ORDER BY random()
           LIMIT ${itemsPerPage}
           OFFSET ${itemsPerPage * (pageNumber - 1)}
@@ -551,9 +557,9 @@ export class AlumniService {
         : '0n';
       const numberOfItems = Number(stringTotalCount.replace('n', ''));
 
-      const resumesPromises = filteredAlumni.map(({ email }) => {
+      const resumesPromises = filteredAlumni.map(({ id }) => {
         return this.ualumniDbService.resume.findUniqueOrThrow({
-          where: { ownerEmail: email },
+          where: { ownerId: id },
           select: {
             numberOfDownloads: true,
             isVisible: true,
@@ -639,9 +645,7 @@ export class AlumniService {
               },
             },
             owner: {
-              select: {
-                address: true,
-                telephoneNumber: true,
+              include: {
                 graduations: {
                   select: {
                     careerName: true,
@@ -666,6 +670,7 @@ export class AlumniService {
 
       const items: AlumniWithResume[] = resumes.map((resume) => {
         return {
+          id: resume.owner.id,
           email: resume.owner.associatedUser.email,
           names: resume.owner.associatedUser.names,
           surnames: resume.owner.associatedUser.surnames,
@@ -716,10 +721,10 @@ export class AlumniService {
     }
   }
 
-  async findOneWithResume(email: string): Promise<AlumniWithResume | null> {
+  async findOneWithResume(id: string): Promise<AlumniWithResume | null> {
     try {
       const resume = await this.ualumniDbService.resume.findUnique({
-        where: { ownerEmail: email },
+        where: { ownerId: id },
         select: {
           numberOfDownloads: true,
           isVisible: true,
@@ -796,9 +801,7 @@ export class AlumniService {
             },
           },
           owner: {
-            select: {
-              address: true,
-              telephoneNumber: true,
+            include: {
               graduations: {
                 select: {
                   careerName: true,
@@ -820,6 +823,7 @@ export class AlumniService {
 
       return resume
         ? {
+            id: resume.owner.id,
             email: resume.owner.associatedUser.email,
             names: resume.owner.associatedUser.names,
             surnames: resume.owner.associatedUser.surnames,
@@ -859,11 +863,11 @@ export class AlumniService {
   }
 
   async findOneWithResumeOnlyVisibles(
-    email: string,
+    id: string,
   ): Promise<AlumniWithResume | null> {
     try {
       const resume = await this.ualumniDbService.resume.findUnique({
-        where: { ownerEmail: email },
+        where: { ownerId: id },
         select: {
           numberOfDownloads: true,
           isVisible: true,
@@ -949,9 +953,7 @@ export class AlumniService {
             },
           },
           owner: {
-            select: {
-              address: true,
-              telephoneNumber: true,
+            include: {
               graduations: {
                 select: {
                   careerName: true,
@@ -973,6 +975,7 @@ export class AlumniService {
 
       return resume
         ? {
+            id: resume.owner.id,
             email: resume.owner.associatedUser.email,
             names: resume.owner.associatedUser.names,
             surnames: resume.owner.associatedUser.surnames,
@@ -1011,13 +1014,14 @@ export class AlumniService {
     }
   }
 
-  async findOne(email: string): Promise<Alumni | null> {
+  async findOne(id: string): Promise<Alumni | null> {
     try {
       let alumni = await this.ualumniDbService.alumni.findFirst({
-        where: { email },
+        where: { id },
         include: {
           associatedUser: {
             select: {
+              email: true,
               password: true,
               names: true,
               surnames: true,
@@ -1046,12 +1050,12 @@ export class AlumniService {
   }
 
   async update(
-    email: string,
+    id: string,
     updateAlumniDto: UpdateAlumniDto,
   ): Promise<Alumni> {
     try {
       let updatedAlumni = await this.ualumniDbService.alumni.update({
-        where: { email },
+        where: { id },
         data: {
           address: updateAlumniDto.address,
           telephoneNumber: updateAlumniDto.telephoneNumber,
@@ -1067,6 +1071,7 @@ export class AlumniService {
         include: {
           associatedUser: {
             select: {
+              email: true,
               password: true,
               names: true,
               surnames: true,
@@ -1087,7 +1092,7 @@ export class AlumniService {
       if (error instanceof PrismaUalumni.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no alumni with the given \`email\` (${email})`,
+            `There is no alumni with the given \`id\` (${id})`,
             { cause: error },
           );
         }
@@ -1104,14 +1109,15 @@ export class AlumniService {
     }
   }
 
-  async remove(email: string): Promise<Alumni> {
+  async remove(id: string): Promise<Alumni> {
     try {
       const [removedAlumni, _] = await this.ualumniDbService.$transaction([
         this.ualumniDbService.alumni.delete({
-          where: { email },
+          where: { id },
           include: {
             associatedUser: {
               select: {
+                email: true,
                 password: true,
                 names: true,
                 surnames: true,
@@ -1126,7 +1132,7 @@ export class AlumniService {
           },
         }),
         this.ualumniDbService.user.delete({
-          where: { email },
+          where: { id },
         }),
       ]);
 
@@ -1136,7 +1142,7 @@ export class AlumniService {
       if (error instanceof PrismaUalumni.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no alumni with the given \`email\` (${email})`,
+            `There is no alumni with the given \`id\` (${id})`,
             { cause: error },
           );
         }

@@ -15,6 +15,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   UseGuards,
+  ParseUUIDPipe
 } from '@nestjs/common';
 import { IndustryOfInterestService } from './industry-of-interest.service';
 import { CreateIndustryOfInterestDto } from './dto/create-industry-of-interest.dto';
@@ -69,7 +70,7 @@ export class IndustryOfInterestController {
   ): Promise<ResponseDto<IndustryOfInterestDto>> {
     try {
       const data = await this.industryOfInterestService.create(
-        user.email,
+        user.id,
         createIndustryOfInterestDto,
       );
       return {
@@ -88,7 +89,7 @@ export class IndustryOfInterestController {
     }
   }
 
-  @Post(':alumniEmail/industry-of-interest')
+  @Post(':alumniId/industry-of-interest')
   @Allowed('admin')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
@@ -101,12 +102,12 @@ export class IndustryOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async create(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Body() createIndustryOfInterestDto: CreateIndustryOfInterestDto,
   ): Promise<ResponseDto<IndustryOfInterestDto>> {
     try {
       const data = await this.industryOfInterestService.create(
-        alumniEmail,
+        alumniId,
         createIndustryOfInterestDto,
       );
       return {
@@ -145,7 +146,7 @@ export class IndustryOfInterestController {
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse = await this.industryOfInterestService.findMany(
-        user.email,
+        user.id,
         paginationParamsDto.pageNumber,
         paginationParamsDto.itemsPerPage,
       );
@@ -161,7 +162,7 @@ export class IndustryOfInterestController {
     }
   }
 
-  @Get(':alumniEmail/industry-of-interest')
+  @Get(':alumniId/industry-of-interest')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -175,14 +176,14 @@ export class IndustryOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async findMany(
-    @Param('alumniEmail') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<IndustryOfInterestDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse = await this.industryOfInterestService.findMany(
-        resumeOwnerEmail,
+        alumniId,
         paginationParamsDto.pageNumber,
         paginationParamsDto.itemsPerPage,
       );
@@ -216,7 +217,7 @@ export class IndustryOfInterestController {
     @Param('industryName') industryName: string,
   ) {
     const industryOfInterest = await this.industryOfInterestService.findOne(
-      user.email,
+      user.id,
       industryName,
     );
 
@@ -230,7 +231,7 @@ export class IndustryOfInterestController {
     };
   }
 
-  @Get(':alumniEmail/industry-of-interest/:industryName')
+  @Get(':alumniId/industry-of-interest/:industryName')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -245,11 +246,11 @@ export class IndustryOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async findOne(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('industryName') industryName: string,
   ) {
     const industryOfInterest = await this.industryOfInterestService.findOne(
-      alumniEmail,
+      alumniId,
       industryName,
     );
 
@@ -287,7 +288,7 @@ export class IndustryOfInterestController {
     try {
       const updatedIndustryOfInterest =
         await this.industryOfInterestService.update(
-          user.email,
+          user.id,
           industryName,
           updateIndustryOfInterestDto,
         );
@@ -306,7 +307,7 @@ export class IndustryOfInterestController {
     }
   }
 
-  @Patch(':alumniEmail/industry-of-interest/:industryName')
+  @Patch(':alumniId/industry-of-interest/:industryName')
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -323,14 +324,14 @@ export class IndustryOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async update(
-    @Param('alumniEmail') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('industryName') industryName: string,
     @Body() updateIndustryOfInterestDto: UpdateIndustryOfInterestDto,
   ) {
     try {
       const updatedIndustryOfInterest =
         await this.industryOfInterestService.update(
-          resumeOwnerEmail,
+          alumniId,
           industryName,
           updateIndustryOfInterestDto,
         );
@@ -368,7 +369,7 @@ export class IndustryOfInterestController {
   ): Promise<ResponseDto<IndustryOfInterestDto>> {
     try {
       const deletedIndustryOfInterest =
-        await this.industryOfInterestService.remove(user.email, industryName);
+        await this.industryOfInterestService.remove(user.id, industryName);
       return {
         statusCode: HttpStatus.OK,
         data: deletedIndustryOfInterest,
@@ -384,7 +385,7 @@ export class IndustryOfInterestController {
     }
   }
 
-  @Delete(':alumniEmail/industry-of-interest/:industryName')
+  @Delete(':alumniId/industry-of-interest/:industryName')
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -398,13 +399,13 @@ export class IndustryOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async remove(
-    @Param('alumniEmail') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('industryName') industryName: string,
   ): Promise<ResponseDto<IndustryOfInterestDto>> {
     try {
       const deletedIndustryOfInterest =
         await this.industryOfInterestService.remove(
-          resumeOwnerEmail,
+          alumniId,
           industryName,
         );
       return {

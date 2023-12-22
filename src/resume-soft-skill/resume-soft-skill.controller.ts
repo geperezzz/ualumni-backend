@@ -16,6 +16,7 @@ import {
   HttpException,
   NotFoundException,
   UseGuards,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ResumeSoftSkillService } from './resume-soft-skill.service';
 import { CreateResumeSoftSkillDto } from './dto/create-resume-soft-skill.dto';
@@ -67,7 +68,7 @@ export class ResumeSoftSkillController {
   ): Promise<ResponseDto<ResumeSoftSkillDto>> {
     try {
       const data = await this.resumeSoftSkillService.create(
-        user.email,
+        user.id,
         createResumeSoftSkillDto,
       );
       return {
@@ -86,7 +87,7 @@ export class ResumeSoftSkillController {
     }
   }
 
-  @Post(':email/resume/soft-skill')
+  @Post(':alumniId/resume/soft-skill')
   @Allowed('admin')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
@@ -96,12 +97,12 @@ export class ResumeSoftSkillController {
     description: 'Already exists a resume soft skill with the given title',
   })
   async add(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Body() createResumeSoftSkillDto: CreateResumeSoftSkillDto,
   ): Promise<ResponseDto<ResumeSoftSkillDto>> {
     try {
       const data = await this.resumeSoftSkillService.create(
-        resumeOwnerEmail,
+        alumniId,
         createResumeSoftSkillDto,
       );
       return {
@@ -141,7 +142,7 @@ export class ResumeSoftSkillController {
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse = await this.resumeSoftSkillService.findMany(
-        user.email,
+        user.id,
         paginationParamsDto.pageNumber,
         paginationParamsDto.itemsPerPage,
       );
@@ -155,7 +156,7 @@ export class ResumeSoftSkillController {
     }
   }
 
-  @Get(':email/resume/soft-skill')
+  @Get(':alumniId/resume/soft-skill')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -170,14 +171,14 @@ export class ResumeSoftSkillController {
     description: 'An unexpected situation ocurred',
   })
   async findPage(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<ResumeSoftSkillDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse = await this.resumeSoftSkillService.findMany(
-        resumeOwnerEmail,
+        alumniId,
         paginationParamsDto.pageNumber,
         paginationParamsDto.itemsPerPage,
       );
@@ -209,7 +210,7 @@ export class ResumeSoftSkillController {
   ): Promise<ResponseDto<ResumeSoftSkillDto>> {
     const resumeSoftSkill = await this.resumeSoftSkillService.findOne(
       title,
-      user.email,
+      user.id,
     );
 
     if (!resumeSoftSkill)
@@ -222,7 +223,7 @@ export class ResumeSoftSkillController {
     };
   }
 
-  @Get(':email/resume/soft-skill/:title')
+  @Get(':alumniId/resume/soft-skill/:title')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -236,12 +237,12 @@ export class ResumeSoftSkillController {
     description: 'An unexpected situation ocurred',
   })
   async findOne(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('title') title: string,
   ): Promise<ResponseDto<ResumeSoftSkillDto>> {
     const resumeSoftSkill = await this.resumeSoftSkillService.findOne(
       title,
-      resumeOwnerEmail,
+      alumniId,
     );
 
     if (!resumeSoftSkill)
@@ -277,7 +278,7 @@ export class ResumeSoftSkillController {
     try {
       const updatedResumeSoftSkill = await this.resumeSoftSkillService.update(
         title,
-        user.email,
+        user.id,
         updateResumeSoftSkillDto,
       );
       return { statusCode: HttpStatus.OK, data: updatedResumeSoftSkill };
@@ -295,7 +296,7 @@ export class ResumeSoftSkillController {
     }
   }
 
-  @Patch(':email/resume/soft-skill/:title')
+  @Patch(':alumniId/resume/soft-skill/:title')
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -311,14 +312,14 @@ export class ResumeSoftSkillController {
     description: 'An unexpected situation ocurred',
   })
   async update(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('title') title: string,
     @Body() updateResumeSoftSkillDto: UpdateResumeSoftSkillDto,
   ): Promise<ResponseDto<ResumeSoftSkillDto>> {
     try {
       const updatedResumeSoftSkill = await this.resumeSoftSkillService.update(
         title,
-        resumeOwnerEmail,
+        alumniId,
         updateResumeSoftSkillDto,
       );
       return { statusCode: HttpStatus.OK, data: updatedResumeSoftSkill };
@@ -355,7 +356,7 @@ export class ResumeSoftSkillController {
     try {
       const deletedResumeSoftSkill = await this.resumeSoftSkillService.remove(
         title,
-        user.email,
+        user.id,
       );
       return {
         statusCode: HttpStatus.OK,
@@ -372,7 +373,7 @@ export class ResumeSoftSkillController {
     }
   }
 
-  @Delete(':email/resume/soft-skill/:title')
+  @Delete(':alumniId/resume/soft-skill/:title')
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -385,13 +386,13 @@ export class ResumeSoftSkillController {
     description: 'An unexpected situation ocurred',
   })
   async remove(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('title') title: string,
   ): Promise<ResponseDto<ResumeSoftSkillDto>> {
     try {
       const deletedResumeSoftSkill = await this.resumeSoftSkillService.remove(
         title,
-        resumeOwnerEmail,
+        alumniId,
       );
       return {
         statusCode: HttpStatus.OK,
