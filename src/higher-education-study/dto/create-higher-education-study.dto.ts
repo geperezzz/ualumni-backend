@@ -1,10 +1,4 @@
-import {
-  IsNotEmpty,
-  IsString,
-  IsDateString,
-  IsEmail,
-  IsBoolean,
-} from 'class-validator';
+import { IsNotEmpty, IsString, IsDateString, IsBoolean } from 'class-validator';
 
 export class CreateHigherEducationStudyDto {
   @IsNotEmpty()
