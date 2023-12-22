@@ -29,13 +29,50 @@ export class MailingService {
       await this.mailerService.sendMail({
         to: jobOffer?.companyEmail,
         subject: `Currículum ${alumni?.names} ${alumni?.surnames} - ${jobOffer?.position}`,
-        template: './send-resume', // `.hbs` extension is appended automatically
+        template: './send-resume', 
         context: {
           alumni: name,
           position: jobOffer?.position,
         },
         attachments: [
           { filename: `Currículum ${name}.pdf`, content: resume },
+          {
+            filename: 'logo.jpg',
+            path: __dirname + '/templates/images/logo.png',
+            cid: 'logo',
+          },
+          {
+            filename: 'instagram.jpg',
+            path: __dirname + '/templates/images/instagram.png',
+            cid: 'instagram',
+          },
+        ],
+      });
+    } catch (error) {
+      console.log('Error sending email: ', error);
+    }
+  }
+
+  async sendVerification(alumniEmail: string, token: string) {
+    const alumni = await this.ualumniDBService.user.findUnique({
+      where: { email: alumniEmail },
+    });
+    const name = `${alumni?.names.split(' ')[0]} ${alumni?.surnames.split(
+      ' ',
+    )[0]}`;
+
+    const link = `http://localhost:3000/auth/confirm?token=${token}&email=${alumniEmail}` // probablemente deba ser un link del front pero shh
+
+    try {
+      await this.mailerService.sendMail({
+        to: alumniEmail,
+        subject: `Verificación  UAlumni - ${alumni?.names} ${alumni?.surnames}`,
+        template: './email-verification', 
+        context: {
+          link,
+          alumni: name,
+        },
+        attachments: [
           {
             filename: 'logo.jpg',
             path: __dirname + '/templates/images/logo.png',

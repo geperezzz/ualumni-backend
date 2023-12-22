@@ -5,6 +5,7 @@ import {
   Get,
   HttpStatus,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -17,22 +18,60 @@ import { AlumniDto } from 'src/alumni/dto/alumni.dto';
 import {
   AlreadyExistsError,
   NotFoundError,
+  TokenError,
 } from 'src/common/errors/service.error';
 import { ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { SessionAuthGuard } from './session/session.guard';
+import { AlumniToVerifyService } from 'src/alumni-to-verify/alumni-to-verify.service';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
-  constructor(private alumniService: AlumniService) {}
+  constructor(
+    private alumniService: AlumniService,
+    private alumniToVerifyService: AlumniToVerifyService,
+  ) {}
 
   @Post('register')
   @UseGuards(PermissionsGuard)
   @Allowed('visitor')
-  async register(@Body() registerDto: RegisterDto) {
+  async register(@Query('token') token: string, @Query('email') email: string) {
+    try {
+      let alumniToVerify = await this.alumniToVerifyService.findOne(email);
+      if (token != alumniToVerify?.token) {
+        throw new TokenError('Invalid token');
+      }
+
+      let createdAlumni = await this.alumniService.create(alumniToVerify);
+      let createdAlumniDto = plainToInstance(AlumniDto, createdAlumni, {
+        excludeExtraneousValues: true,
+      });
+      await this.alumniToVerifyService.remove(email);
+
+      return {
+        statusCode: HttpStatus.CREATED,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new BadRequestException(error.message, { cause: error });
+      }
+      if (error instanceof AlreadyExistsError) {
+        throw new BadRequestException(error.message, { cause: error });
+      }
+      if (error instanceof TokenError) {
+        throw new BadRequestException(error.message, { cause: error });
+      }
+      throw error;
+    }
+  }
+
+  /*@Post('register')
+    @UseGuards(PermissionsGuard)
+    @Allowed('visitor')
+    async register(@Body() registerDto: RegisterDto) {
     try {
       let createdAlumni = await this.alumniService.create(registerDto);
       let createdAlumniDto = plainToInstance(AlumniDto, createdAlumni, {
@@ -52,7 +91,7 @@ export class AuthController {
       }
       throw error;
     }
-  }
+  }*/
 
   @Post('login')
   @UseGuards(LocalAuthGuard, PermissionsGuard)

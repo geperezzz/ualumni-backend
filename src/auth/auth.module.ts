@@ -7,6 +7,8 @@ import { UsersModule } from 'src/users/users.module';
 import { LocalAuthGuard } from './local/local.guard';
 import { SessionAuthGuard } from './session/session.guard';
 import { AlumniModule } from 'src/alumni/alumni.module';
+import { AlumniToVerifyService } from 'src/alumni-to-verify/alumni-to-verify.service';
+import { AlumniToVerifyModule } from 'src/alumni-to-verify/alumni-to-verify.module';
 
 @Module({
   imports: [
@@ -15,6 +17,7 @@ import { AlumniModule } from 'src/alumni/alumni.module';
     PassportModule.register({
       session: true,
     }),
+    AlumniToVerifyModule
   ],
   controllers: [AuthController],
   providers: [

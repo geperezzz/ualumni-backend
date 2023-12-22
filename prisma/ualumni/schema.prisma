@@ -64,6 +64,14 @@ model User {
   associatedAlumni Alumni?
 }
 
+model AlumniToVerify {
+  email    String @id
+  password String
+  names    String
+  surnames String
+  token    String
+}
+
 model Alumni {
   associatedUser  User             @relation(fields: [email], references: [email], onUpdate: Cascade, onDelete: Cascade)
   email           String           @id

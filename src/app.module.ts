@@ -26,6 +26,7 @@ import { ResumeTechnicalSkillModule } from './resume-technical-skill/resume-tech
 import { UcabDbModule } from './ucab-db/ucab-db.module';
 import { WorkExperiencesModule } from './work-experiences/work-experiences.module';
 import { MailingModule } from './mailing/mailing.module';
+import { AlumniToVerifyModule } from './alumni-to-verify/alumni-to-verify.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { MailingModule } from './mailing/mailing.module';
     UcabDbModule,
     WorkExperiencesModule,
     MailingModule,
+    AlumniToVerifyModule,
   ],
 })
 export class AppModule {}
