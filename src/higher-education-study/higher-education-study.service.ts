@@ -128,7 +128,9 @@ export class HigherEducationStudyService {
         data: {
           title: updateHigherEducationStudyDto.title,
           institution: updateHigherEducationStudyDto.institution,
-          endDate: updateHigherEducationStudyDto.endDate,
+          endDate: updateHigherEducationStudyDto.endDate
+            ? new Date(updateHigherEducationStudyDto.endDate).toISOString()
+            : undefined,
           isVisible: updateHigherEducationStudyDto.isVisible,
         },
       });

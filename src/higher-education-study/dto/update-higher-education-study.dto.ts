@@ -11,7 +11,7 @@ export class UpdateHigherEducationStudyDto {
 
   @IsDateString()
   @IsOptional()
-  endDate?: Date;
+  endDate?: string;
 
   @IsBoolean()
   @IsOptional()
