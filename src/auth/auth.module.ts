@@ -10,6 +10,7 @@ import { AlumniModule } from 'src/alumni/alumni.module';
 import { AlumniToVerifyService } from 'src/alumni-to-verify/alumni-to-verify.service';
 import { AlumniToVerifyModule } from 'src/alumni-to-verify/alumni-to-verify.module';
 import { AuthService } from './auth.service';
+import { MailingModule } from 'src/mailing/mailing.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { AuthService } from './auth.service';
     PassportModule.register({
       session: true,
     }),
-    AlumniToVerifyModule
+    AlumniToVerifyModule,
+    MailingModule
   ],
   controllers: [AuthController],
   providers: [

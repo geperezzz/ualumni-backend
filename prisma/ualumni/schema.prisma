@@ -65,9 +65,10 @@ model User {
 }
 
 model AlumniToVerify {
-  email    String @id
-  password String
-  token    String
+  email        String   @id
+  password     String
+  token        String
+  creationDate DateTime @default(now())
 }
 
 model Alumni {

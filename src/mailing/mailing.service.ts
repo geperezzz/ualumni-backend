@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { ResumeService } from 'src/resume/resume.service';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
+import { UcabDbService } from 'src/ucab-db/ucab-db.service';
 
 @Injectable()
 export class MailingService {
@@ -10,6 +11,7 @@ export class MailingService {
     private mailerService: MailerService,
     private resumeService: ResumeService,
     private ualumniDBService: UalumniDbService,
+    private ucabDBService: UcabDbService
   ) {}
 
   async sendResume(alumniEmail: string, jobOfferId: string) {
@@ -54,14 +56,14 @@ export class MailingService {
   }
 
   async sendVerification(alumniEmail: string, token: string) {
-    const alumni = await this.ualumniDBService.user.findUnique({
+    const alumni = await this.ucabDBService.student.findUnique({
       where: { email: alumniEmail },
     });
     const name = `${alumni?.names.split(' ')[0]} ${alumni?.surnames.split(
       ' ',
     )[0]}`;
 
-    const link = `http://localhost:3000/auth/confirm?token=${token}&email=${alumniEmail}` // probablemente deba ser un link del front pero shh
+    const link = `http://localhost:3000/auth/verify-registration?token=${token}&email=${alumniEmail}` // probablemente deba ser un link del front pero shh
 
     try {
       await this.mailerService.sendMail({
@@ -69,8 +71,9 @@ export class MailingService {
         subject: `Verificación  UAlumni - ${alumni?.names} ${alumni?.surnames}`,
         template: './email-verification', 
         context: {
-          link,
           alumni: name,
+          token,
+          link,
         },
         attachments: [
           {

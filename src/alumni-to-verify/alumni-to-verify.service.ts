@@ -9,6 +9,7 @@ import { Prisma as PrismaUalumni } from 'prisma/ualumni/client';
 import { AlumniToVerify } from 'prisma/ualumni/client';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 import { AlumniService } from 'src/alumni/alumni.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class AlumniToVerifyService {
@@ -24,16 +25,22 @@ export class AlumniToVerifyService {
       createAlumnitoVerifyDto.email,
     );
     if (!isAnAlumni) {
-      throw new NotFoundError(`There is no alumni with \`email\` equal to \`${createAlumnitoVerifyDto.email}\``, {});
+      throw new NotFoundError(
+        `There is no alumni with \`email\` equal to \`${createAlumnitoVerifyDto.email}\``,
+        {},
+      );
     }
 
     const isAlreadyRegistrated = await this.alumniService.findOne(
       createAlumnitoVerifyDto.email,
     );
     if (isAlreadyRegistrated) {
-      throw new AlreadyExistsError(`The alumni with \`email\` equal to \`${createAlumnitoVerifyDto.email}\` is already registered`, {});
+      throw new AlreadyExistsError(
+        `The alumni with \`email\` equal to \`${createAlumnitoVerifyDto.email}\` is already registered`,
+        {},
+      );
     }
-    
+
     const token = Math.floor(1000 + Math.random() * 9000).toString();
 
     try {
@@ -61,13 +68,11 @@ export class AlumniToVerifyService {
     }
   }
 
-  async findOne(
-    alumniEmail: string,
-  ): Promise<AlumniToVerify | null> {
+  async findOne(alumniEmail: string): Promise<AlumniToVerify | null> {
     try {
       return await this.ualumniDbService.alumniToVerify.findUnique({
         where: {
-          email: alumniEmail
+          email: alumniEmail,
         },
       });
     } catch (error) {
@@ -93,6 +98,23 @@ export class AlumniToVerifyService {
           );
         }
       }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
+  @Cron(CronExpression.EVERY_HOUR)
+  async autoRemove() {
+    console.log('lmao');
+    try {
+      let expirationTime = new Date();
+      expirationTime.setHours(expirationTime.getHours() - 5); // 5 hours to expire
+
+      const expiredRegisters = await this.ualumniDbService.alumniToVerify.deleteMany({
+        where: { creationDate: { lte: expirationTime } },
+      });
+    } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });

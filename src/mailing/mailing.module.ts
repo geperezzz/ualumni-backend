@@ -7,9 +7,11 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
 import { JobOffersService } from 'src/job-offers/job-offers.service';
+import { UcabDbModule } from 'src/ucab-db/ucab-db.module';
 
 @Module({
   imports: [
+    UcabDbModule,
     UalumniDbModule,
     MailerModule.forRoot({
       transport: {
