@@ -31,7 +31,7 @@ import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { PositionOfInterestDto } from './dto/position-of-interest.dto';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { User } from 'prisma/ualumni/client';
+import { User } from '../../prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,

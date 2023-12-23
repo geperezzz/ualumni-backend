@@ -2,7 +2,7 @@ import {
   User,
   Alumni as PrismaAlumni,
   Graduation as PrismaGraduation,
-} from 'prisma/ualumni/client';
+} from '../../prisma/ualumni/client';
 
 export type Graduation = Omit<PrismaGraduation, 'alumniEmail'>;
 

@@ -40,7 +40,7 @@ import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { User } from 'prisma/ualumni/client';
+import { User } from '../../prisma/ualumni/client';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 

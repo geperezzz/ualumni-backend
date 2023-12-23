@@ -21,7 +21,7 @@ import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { User } from 'prisma/ualumni/client';
+import { User } from '../../prisma/ualumni/client';
 import { ApiTags } from '@nestjs/swagger';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 import { ResponseDto } from 'src/common/dto/response.dto';

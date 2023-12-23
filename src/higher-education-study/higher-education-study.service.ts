@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateHigherEducationStudyDto } from './dto/create-higher-education-study.dto';
 import { UpdateHigherEducationStudyDto } from './dto/update-higher-education-study.dto';
-import { Prisma } from 'prisma/ualumni/client';
+import { Prisma } from '../../prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,

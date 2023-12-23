@@ -6,7 +6,7 @@ import {
   NotFoundError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
-import { Prisma } from 'prisma/ualumni/client';
+import { Prisma } from '../../prisma/ualumni/client';
 import { RandomPage } from 'src/common/interfaces/random-page.interface';
 import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';
 import { JobOffersFilterParamsDto } from './dto/job-offers-filter-params.dto';

@@ -3,7 +3,7 @@ import { CreateCareerDto } from './dto/create-career.dto';
 import { UpdateCareerDto } from './dto/update-career.dto';
 import { CareerDto } from './dto/career.dto';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
-import { Prisma } from 'prisma/ualumni/client';
+import { Prisma } from '../../prisma/ualumni/client';
 import {
   AlreadyExistsError,
   NotFoundError,

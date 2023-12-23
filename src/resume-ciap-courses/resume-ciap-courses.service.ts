@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateResumeCiapCourseDto } from './dto/create-resume-ciap-course.dto';
 import { ResumeCiapCourseDto } from './dto/resume-ciap-course.dto';
-import { Prisma } from 'prisma/ualumni/client';
+import { Prisma } from '../../prisma/ualumni/client';
 import {
   ForeignKeyError,
   UnexpectedError,

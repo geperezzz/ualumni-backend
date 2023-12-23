@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateGraduationDto } from './dto/create-graduation.dto';
 import { UpdateGraduationDto } from './dto/update-graduation.dto';
-import { Graduation, Prisma } from 'prisma/ualumni/client';
+import { Graduation, Prisma } from '../../prisma/ualumni/client';
 import { Page } from 'src/common/interfaces/page.interface';
 import {
   AlreadyExistsError,

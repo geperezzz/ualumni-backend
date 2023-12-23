@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateCiapCourseDto } from './dto/create-ciap-course.dto';
 import { UpdateCiapCourseDto } from './dto/update-ciap-course.dto';
 import { CiapCourseDto } from './dto/ciap-course.dto';
-import { Prisma } from 'prisma/ualumni/client';
+import { Prisma } from '../../prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,

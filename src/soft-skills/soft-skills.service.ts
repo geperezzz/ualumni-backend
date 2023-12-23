@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, SoftSkill } from 'prisma/ualumni/client';
+import { Prisma, SoftSkill } from '../../prisma/ualumni/client';
 import { CreateSoftSkillDto } from './dto/create-soft-skill.dto';
 import { UpdateSoftSkillDto } from './dto/update-soft-skill.dto';
 import {

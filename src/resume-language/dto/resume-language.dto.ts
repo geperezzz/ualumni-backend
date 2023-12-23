@@ -1,3 +1,3 @@
-import { ResumeLanguage } from 'prisma/ualumni/client';
+import { ResumeLanguage } from '../../../prisma/ualumni/client';
 
 export type ResumeLanguageDto = ResumeLanguage;

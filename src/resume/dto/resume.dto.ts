@@ -10,7 +10,7 @@ import {
   ResumeTechnicalSkill,
   WorkExperience,
   CiapCourse
-} from 'prisma/ualumni/client';
+} from '../../../prisma/ualumni/client';
 import { Resume } from '../resume.type';
 
 export class ResumeDto implements Resume {

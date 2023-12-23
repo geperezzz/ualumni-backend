@@ -1,3 +1,3 @@
-import { WorkExperience } from 'prisma/ualumni/client';
+import { WorkExperience } from '../../../prisma/ualumni/client';
 
 export type WorkExperienceDto = WorkExperience;

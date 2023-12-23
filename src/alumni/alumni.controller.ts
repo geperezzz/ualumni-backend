@@ -31,7 +31,7 @@ import { SessionNotRequired } from 'src/auth/session/session-not-required.decora
 import { SessionUser } from 'src/auth/session/session-user.decorator';
 import { Alumni } from './alumni.type';
 import { Request } from 'express';
-import { User } from 'prisma/ualumni/client';
+import { User } from '../../prisma/ualumni/client';
 import { AlumniFilterParamsDto } from './dto/alumni-filter-params.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { RandomPaginationParamsDto } from 'src/common/dto/random-pagination-params.dto';

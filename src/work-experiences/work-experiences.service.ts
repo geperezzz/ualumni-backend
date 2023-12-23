@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateWorkExperienceDto } from './dto/create-work-experience.dto';
 import { UpdateWorkExperienceDto } from './dto/update-work-experience.dto';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
-import { Prisma, WorkExperience } from 'prisma/ualumni/client';
+import { Prisma, WorkExperience } from '../../prisma/ualumni/client';
 import { Page } from 'src/common/interfaces/page.interface';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import {

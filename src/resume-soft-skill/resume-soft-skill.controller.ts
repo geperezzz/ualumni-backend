@@ -36,7 +36,7 @@ import { NotFoundError } from 'src/common/errors/service.error';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { ResumeSoftSkillDto } from './dto/resume-soft-skill.dto';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { User } from 'prisma/ualumni/client';
+import { User } from '../../prisma/ualumni/client';
 import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
