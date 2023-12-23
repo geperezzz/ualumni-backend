@@ -12,6 +12,7 @@ import {
   NotFoundException,
   UseGuards,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { ResumeCiapCoursesService } from './resume-ciap-courses.service';
 import { CreateResumeCiapCourseDto } from './dto/create-resume-ciap-course.dto';
@@ -34,6 +35,7 @@ import { User } from 'prisma/ualumni/client';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 import { PaginationParamsDto } from 'src/common/dto/pagination-params.dto';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
+import { UpdateResumeCiapCourseDto } from './dto/update-resume-ciap-course.dto';
 
 @ApiTags('resume-ciap-courses')
 @Controller('alumni')
@@ -255,6 +257,86 @@ export class ResumeCiapCoursesController {
       statusCode: HttpStatus.OK,
       data: resumeCiapCourse,
     };
+  }
+
+  @Patch('me/resume/ciap-courses/:id')
+  @Allowed('alumni')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'CIAP course did by the alumni was succesfully updated',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'The CIAP course did by the alumni with the requested id was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async updateMine(
+    @SessionUser() user: User,
+    @Param('id') id: string,
+    @Body() updateResumeCiapCourseDto: UpdateResumeCiapCourseDto,
+  ): Promise<ResponseDto<ResumeCiapCourseDto>> {
+    try {
+      const updatedResumeCiapCourse =
+        await this.resumeCiapCoursesService.update(
+          user.email,
+          id,
+          updateResumeCiapCourseDto,
+        );
+      return {
+        statusCode: HttpStatus.OK,
+        data: updatedResumeCiapCourse,
+      };
+    } catch (error) {
+      if (error instanceof ForeignKeyError) {
+        throw new BadRequestException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
+  }
+
+  @Patch(':email/resume/ciap-courses/:id')
+  @Allowed('admin')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'CIAP course did by the alumni was succesfully updated',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'The CIAP course did by the alumni with the requested id was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An unexpected situation ocurred',
+  })
+  async update(
+    @Param('email') ownerEmail: string,
+    @Param('id') id: string,
+    @Body() updateResumeCiapCourseDto: UpdateResumeCiapCourseDto,
+  ): Promise<ResponseDto<ResumeCiapCourseDto>> {
+    try {
+      const updatedResumeCiapCourse =
+        await this.resumeCiapCoursesService.update(
+          ownerEmail,
+          id,
+          updateResumeCiapCourseDto,
+        );
+      return {
+        statusCode: HttpStatus.OK,
+        data: updatedResumeCiapCourse,
+      };
+    } catch (error) {
+      if (error instanceof ForeignKeyError) {
+        throw new BadRequestException(error.message, { cause: error });
+      }
+      throw new InternalServerErrorException(
+        'An unexpected situation ocurred',
+        { cause: error },
+      );
+    }
   }
 
   @Delete('me/resume/ciap-courses/:id')

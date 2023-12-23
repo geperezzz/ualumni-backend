@@ -10,6 +10,7 @@ import { PageDto } from 'src/common/dto/paginated-response.dto';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 import { UcabDbService } from 'src/ucab-db/ucab-db.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { UpdateResumeCiapCourseDto } from './dto/update-resume-ciap-course.dto';
 
 @Injectable()
 export class ResumeCiapCoursesService {
@@ -172,6 +173,38 @@ export class ResumeCiapCoursesService {
         },
       });
     } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
+  async update(
+    ownerEmail: string,
+    id: string,
+    updateResumeCiapCourseDto: UpdateResumeCiapCourseDto,
+  ): Promise<ResumeCiapCourseDto> {
+    try {
+      return await this.ualumniDbService.resumeCiapCourse.update({
+        where: {
+          resumeOwnerEmail_courseId: {
+            resumeOwnerEmail: ownerEmail,
+            courseId: id,
+          },
+        },
+        data: {
+          isVisible: updateResumeCiapCourseDto.isVisible,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new ForeignKeyError(
+            `There is no ciap course did by alumni with the \`email\` (${ownerEmail}) with the given \`id\` (${id})`,
+            { cause: error },
+          );
+        }
+      }
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });
