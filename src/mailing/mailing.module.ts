@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { MailingService } from './mailing.service';
 import { ResumeService } from 'src/resume/resume.service';
 import { UalumniDbModule } from 'src/ualumni-db/ualumni-db.module';

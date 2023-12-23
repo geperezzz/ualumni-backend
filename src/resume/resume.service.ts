@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import {
   NotFoundError,
@@ -12,13 +12,17 @@ import * as pug from 'pug';
 import puppeteer from 'puppeteer';
 import { AlumniService } from 'src/alumni/alumni.service';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
+import { MailingService } from 'src/mailing/mailing.service';
 
 @Injectable()
 export class ResumeService {
   constructor(
+    @Inject(forwardRef(() => MailingService))
+    private readonly mailingService: MailingService,
     private readonly ualumniDbService: UalumniDbService,
     private readonly alumniService: AlumniService,
   ) {}
+
   private buildResumeAsHtml = pug.compileFile(
     path.resolve(__dirname, 'templates/resume.pug'),
   );
@@ -135,8 +139,8 @@ export class ResumeService {
               startDate: true,
               endDate: true,
               isVisible: true,
-            }
-          }
+            },
+          },
         },
       });
       return {
@@ -158,7 +162,7 @@ export class ResumeService {
         portfolio: resume.portfolio,
         positionsOfInterest: resume.positionsOfInterest,
         softSkills: resume.softSkills,
-        workExperiences: resume.workExperiences
+        workExperiences: resume.workExperiences,
       };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -187,5 +191,25 @@ export class ResumeService {
       where: { visibleSince: { lte: oneMonthAgo } },
       data: { isVisible: false },
     });
+  }
+
+  // send visibility reminder a week before hiding
+  @Cron(CronExpression.EVERY_DAY_AT_10AM)
+  async sendReminder() {
+    const reminderDate = new Date(); 
+    reminderDate.setDate(reminderDate.getDate() - 21); 
+
+    const alumniForReminder = await this.ualumniDbService.resume.findMany({
+      where: {
+        visibleSince: { lte: reminderDate },
+        isVisible: true,
+      },
+    });
+
+    for (let alumni of alumniForReminder) {
+      const sentEmail = await this.mailingService.sendResumeVisibilityReminder(
+        alumni.ownerEmail,
+      );
+    }
   }
 }

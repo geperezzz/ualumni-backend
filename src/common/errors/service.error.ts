@@ -7,5 +7,3 @@ export class UnexpectedError extends ServiceError {}
 export class AlreadyExistsError extends ServiceError {}
 
 export class ForeignKeyError extends ServiceError {}
-
-export class TokenError extends ServiceError {}

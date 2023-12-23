@@ -1,5 +1,5 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { ResumeService } from 'src/resume/resume.service';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
@@ -8,8 +8,9 @@ import { UcabDbService } from 'src/ucab-db/ucab-db.service';
 @Injectable()
 export class MailingService {
   constructor(
-    private mailerService: MailerService,
+    @Inject(forwardRef(() => ResumeService))
     private resumeService: ResumeService,
+    private mailerService: MailerService,
     private ualumniDBService: UalumniDbService,
     private ucabDBService: UcabDbService
   ) {}
@@ -68,11 +69,48 @@ export class MailingService {
     try {
       await this.mailerService.sendMail({
         to: alumniEmail,
-        subject: `Verificación  UAlumni - ${alumni?.names} ${alumni?.surnames}`,
+        subject: `Verificación  UAlumni - ${name}`,
         template: './email-verification', 
         context: {
           alumni: name,
           token,
+          link,
+        },
+        attachments: [
+          {
+            filename: 'logo.jpg',
+            path: __dirname + '/templates/images/logo.png',
+            cid: 'logo',
+          },
+          {
+            filename: 'instagram.jpg',
+            path: __dirname + '/templates/images/instagram.png',
+            cid: 'instagram',
+          },
+        ],
+      });
+    } catch (error) {
+      console.log('Error sending email: ', error);
+    }
+  }
+  
+  async sendResumeVisibilityReminder(alumniEmail: string) {
+    const alumni = await this.ucabDBService.student.findUnique({
+      where: { email: alumniEmail },
+    });
+    const name = `${alumni?.names.split(' ')[0]} ${alumni?.surnames.split(
+      ' ',
+    )[0]}`;
+
+    const link = `http://localhost:3000/auth/login` // homepage UAlumni
+
+    try {
+      await this.mailerService.sendMail({
+        to: alumniEmail,
+        subject: `Renovación de Visibilidad de Currículum UAlumni - ${name}`,
+        template: './resume-reminder', 
+        context: {
+          alumni: name,
           link,
         },
         attachments: [
