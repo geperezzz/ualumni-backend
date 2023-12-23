@@ -3,7 +3,7 @@ import { CreatePositionOfInterestDto } from './dto/create-position-of-interest.d
 import { UpdatePositionOfInterestDto } from './dto/update-position-of-interest.dto';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 import { PositionOfInterestDto } from './dto/position-of-interest.dto';
-import { Prisma } from '../../prisma/ualumni/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,

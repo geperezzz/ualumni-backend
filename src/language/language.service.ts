@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { LanguageDto } from './dto/language.dto';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
-import { Prisma } from '../../prisma/ualumni/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   NotFoundError,

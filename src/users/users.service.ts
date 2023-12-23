@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '../../prisma/ualumni/client';
+import { User } from 'prisma/ualumni/client';
 import { UnexpectedError } from 'src/common/errors/service.error';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 

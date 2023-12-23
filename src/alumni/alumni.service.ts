@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAlumniDto } from './dto/create-alumni.dto';
 import { UpdateAlumniDto } from './dto/update-alumni.dto';
-import { Prisma as PrismaUalumni } from '../../prisma/ualumni/client';
-import { Prisma as PrismaUcab } from '../../prisma/ucab/client';
+import { Prisma as PrismaUalumni } from 'prisma/ualumni/client';
+import { Prisma as PrismaUcab } from 'prisma/ucab/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,

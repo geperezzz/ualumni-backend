@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateSkillCategoryDto } from './dto/create-skill-category.dto';
 import { UpdateSkillCategoryDto } from './dto/update-skill-category.dto';
 import { SkillCategoryDto } from './dto/skill-category.dto';
-import { Prisma } from '../../prisma/ualumni/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,

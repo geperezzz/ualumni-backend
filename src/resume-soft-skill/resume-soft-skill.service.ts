@@ -7,7 +7,7 @@ import {
   NotFoundError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
-import { Prisma } from '../../prisma/ualumni/client';
+import { Prisma } from 'prisma/ualumni/client';
 import { ResumeSoftSkillDto } from './dto/resume-soft-skill.dto';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateResumeLanguageDto } from './dto/create-resume-language.dto';
 import { UpdateResumeLanguageDto } from './dto/update-resume-language.dto';
-import { Prisma } from '../../prisma/ualumni/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,

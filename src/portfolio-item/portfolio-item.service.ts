@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePortfolioItemDto } from './dto/create-portfolio-item.dto';
 import { UpdatePortfolioItemDto } from './dto/update-portfolio-item.dto';
-import { Prisma } from '../../prisma/ualumni/client';
+import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,

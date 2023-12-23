@@ -4,7 +4,7 @@ import {
   NotFoundError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
-import { Prisma } from '../../prisma/ualumni/client';
+import { Prisma } from 'prisma/ualumni/client';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Resume } from './resume.type';
 import * as path from 'path';

@@ -9,8 +9,8 @@ import {
   Resume as ResumeModel,
   ResumeSoftSkill,
   ResumeTechnicalSkill,
-} from '../../prisma/ualumni/client';
-import { WorkExperience } from '../../prisma/ualumni/client';
+} from 'prisma/ualumni/client';
+import { WorkExperience } from 'prisma/ualumni/client';
 
 export type Resume = ResumeModel & {
   ciapCourses: (CiapCourse &

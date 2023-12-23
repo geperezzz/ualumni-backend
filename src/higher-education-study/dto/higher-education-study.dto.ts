@@ -1,3 +1,3 @@
-import { HigherEducationStudy } from '../../../prisma/ualumni/client';
+import { HigherEducationStudy } from 'prisma/ualumni/client';
 
 export type HigherEducationStudyDto = HigherEducationStudy;

@@ -8,7 +8,7 @@ import {
   UnexpectedError,
 } from 'src/common/errors/service.error';
 import { IndustryOfInterestDto } from './dto/industry-of-interest.dto';
-import { Prisma } from '../../prisma/ualumni/client';
+import { Prisma } from 'prisma/ualumni/client';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 

@@ -1,3 +1,3 @@
-import { CiapCourse } from '../../../prisma/ualumni/client';
+import { CiapCourse } from 'prisma/ualumni/client';
 
 export type CiapCourseDto = CiapCourse;
