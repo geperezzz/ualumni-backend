@@ -106,7 +106,6 @@ export class AlumniToVerifyService {
 
   @Cron(CronExpression.EVERY_HOUR)
   async autoRemove() {
-    console.log('lmao');
     try {
       let expirationTime = new Date();
       expirationTime.setHours(expirationTime.getHours() - 5); // 5 hours to expire

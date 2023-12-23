@@ -114,6 +114,7 @@ model Resume {
   numberOfDownloads      Int                    @default(0)
   isVisible              Boolean                @default(false)
   visibleSince           DateTime               @default(now())
+  reminderSent           Boolean                @default(false)
   aboutMe                String?
   workExperiences        WorkExperience[]
   knownLanguages         ResumeLanguage[]

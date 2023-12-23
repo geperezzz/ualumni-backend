@@ -18,6 +18,7 @@ export class ResumeDto implements Resume {
   @Expose() numberOfDownloads: number;
   @Expose() isVisible: boolean;
   @Expose() visibleSince: Date;
+  @Expose() reminderSent: boolean;
   @Expose() aboutMe: string;
   @Expose() ciapCourses: (CiapCourse &
     Omit<ResumeCiapCourse, 'resumeOwnerEmail' | 'courseId'>)[];

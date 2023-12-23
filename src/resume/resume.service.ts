@@ -70,6 +70,7 @@ export class ResumeService {
           numberOfDownloads: true,
           isVisible: true,
           visibleSince: true,
+          reminderSent: true,
           aboutMe: true,
           ciapCourses: {
             select: {
@@ -148,6 +149,7 @@ export class ResumeService {
         numberOfDownloads: resume.numberOfDownloads,
         isVisible: resume.isVisible,
         visibleSince: resume.visibleSince,
+        reminderSent: resume.reminderSent,
         aboutMe: resume.aboutMe,
         ciapCourses: resume.ciapCourses.map((ciapCourse) => ({
           id: ciapCourse.course.id,
@@ -196,13 +198,14 @@ export class ResumeService {
   // send visibility reminder a week before hiding
   @Cron(CronExpression.EVERY_DAY_AT_10AM)
   async sendReminder() {
-    const reminderDate = new Date(); 
-    reminderDate.setDate(reminderDate.getDate() - 21); 
+    const reminderDate = new Date();
+    reminderDate.setDate(reminderDate.getDate() - 21);
 
     const alumniForReminder = await this.ualumniDbService.resume.findMany({
       where: {
         visibleSince: { lte: reminderDate },
         isVisible: true,
+        reminderSent: false,
       },
     });
 
@@ -210,6 +213,10 @@ export class ResumeService {
       const sentEmail = await this.mailingService.sendResumeVisibilityReminder(
         alumni.ownerEmail,
       );
+      await this.ualumniDbService.resume.update({
+        where: { ownerEmail: alumni.ownerEmail },
+        data: { reminderSent: true },
+      });
     }
   }
 }
