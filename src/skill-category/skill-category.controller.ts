@@ -78,10 +78,7 @@ export class SkillCategoryController {
       ) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -103,21 +100,15 @@ export class SkillCategoryController {
   ): Promise<PaginatedResponseDto<SkillCategoryDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const skillCategories = await this.skillCategoryService.findMany(
-        paginationParamsDto.pageNumber,
-        paginationParamsDto.itemsPerPage,
-      );
-      return {
-        statusCode: HttpStatus.OK,
-        data: skillCategories,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
-    }
+
+    const skillCategories = await this.skillCategoryService.findMany(
+      paginationParamsDto.pageNumber,
+      paginationParamsDto.itemsPerPage,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: skillCategories,
+    };
   }
 
   @Get('careers')
@@ -138,22 +129,16 @@ export class SkillCategoryController {
   ): Promise<PaginatedResponseDto<SkillCategoryDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const skillCategories =
-        await this.skillCategoryService.findManyWithCareers(
-          paginationParamsDto.pageNumber,
-          paginationParamsDto.itemsPerPage,
-        );
-      return {
-        statusCode: HttpStatus.OK,
-        data: skillCategories,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
+
+    const skillCategories =
+      await this.skillCategoryService.findManyWithCareers(
+        paginationParamsDto.pageNumber,
+        paginationParamsDto.itemsPerPage,
       );
-    }
+    return {
+      statusCode: HttpStatus.OK,
+      data: skillCategories,
+    };
   }
 
   @Get('career/:careerName')
@@ -175,23 +160,17 @@ export class SkillCategoryController {
   ): Promise<PaginatedResponseDto<SkillCategoryDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const skillCategories =
-        await this.skillCategoryService.findManyByCareerName(
-          careerName,
-          paginationParamsDto.pageNumber,
-          paginationParamsDto.itemsPerPage,
-        );
-      return {
-        statusCode: HttpStatus.OK,
-        data: skillCategories,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
+
+    const skillCategories =
+      await this.skillCategoryService.findManyByCareerName(
+        careerName,
+        paginationParamsDto.pageNumber,
+        paginationParamsDto.itemsPerPage,
       );
-    }
+    return {
+      statusCode: HttpStatus.OK,
+      data: skillCategories,
+    };
   }
 
   @Get(':name')
@@ -252,10 +231,7 @@ export class SkillCategoryController {
       if (error instanceof AlreadyExistsError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -282,10 +258,7 @@ export class SkillCategoryController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 }

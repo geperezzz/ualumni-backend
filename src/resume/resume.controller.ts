@@ -50,10 +50,7 @@ export class ResumeController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -70,10 +67,7 @@ export class ResumeController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -106,10 +100,7 @@ export class ResumeController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -142,10 +133,7 @@ export class ResumeController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 }

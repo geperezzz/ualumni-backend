@@ -76,10 +76,7 @@ export class ResumeLanguageController {
         throw new BadRequestException(error.message, { cause: error });
       if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -110,10 +107,7 @@ export class ResumeLanguageController {
         throw new BadRequestException(error.message, { cause: error });
       if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -170,20 +164,16 @@ export class ResumeLanguageController {
   ): Promise<any> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const paginationResponse = await this.resumeLanguageService.findMany(
-        resumeOwnerEmail,
-        paginationParamsDto.pageNumber,
-        paginationParamsDto.itemsPerPage,
-      );
-      return {
-        statusCode: HttpStatus.OK,
-        data: paginationResponse,
-      };
-    } catch (error) {
-      const message = error.response ? error.response : 'Bad Request';
-      throw new HttpException(message, HttpStatus.BAD_REQUEST);
-    }
+
+    const paginationResponse = await this.resumeLanguageService.findMany(
+      resumeOwnerEmail,
+      paginationParamsDto.pageNumber,
+      paginationParamsDto.itemsPerPage,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: paginationResponse,
+    };
   }
 
   @Get('me/resume/language/:languageName')
@@ -283,10 +273,7 @@ export class ResumeLanguageController {
       if (error instanceof AlreadyExistsError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -324,10 +311,7 @@ export class ResumeLanguageController {
       if (error instanceof AlreadyExistsError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -361,10 +345,7 @@ export class ResumeLanguageController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -398,10 +379,7 @@ export class ResumeLanguageController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 }

@@ -78,10 +78,7 @@ export class PositionOfInterestController {
         throw new BadRequestException(error.message, { cause: error });
       if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -115,10 +112,7 @@ export class PositionOfInterestController {
         throw new BadRequestException(error.message, { cause: error });
       if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -140,22 +134,16 @@ export class PositionOfInterestController {
   ): Promise<PaginatedResponseDto<PositionOfInterestDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const paginationResponse = await this.positionOfInterestService.findMany(
-        user.email,
-        paginationParamsDto.pageNumber,
-        paginationParamsDto.itemsPerPage,
-      );
-      return {
-        statusCode: HttpStatus.OK,
-        data: paginationResponse,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
-    }
+  
+    const paginationResponse = await this.positionOfInterestService.findMany(
+      user.email,
+      paginationParamsDto.pageNumber,
+      paginationParamsDto.itemsPerPage,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: paginationResponse,
+    };
   }
 
   @Get(':alumniEmail/positions-of-interest')
@@ -177,22 +165,16 @@ export class PositionOfInterestController {
   ): Promise<PaginatedResponseDto<PositionOfInterestDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const paginationResponse = await this.positionOfInterestService.findMany(
-        alumniEmail,
-        paginationParamsDto.pageNumber,
-        paginationParamsDto.itemsPerPage,
-      );
-      return {
-        statusCode: HttpStatus.OK,
-        data: paginationResponse,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
-    }
+
+    const paginationResponse = await this.positionOfInterestService.findMany(
+      alumniEmail,
+      paginationParamsDto.pageNumber,
+      paginationParamsDto.itemsPerPage,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: paginationResponse,
+    };
   }
 
   @Get('me/position-of-interest/:positionName')
@@ -294,10 +276,7 @@ export class PositionOfInterestController {
         throw new NotFoundException(error.message, { cause: error });
       if (error instanceof AlreadyExistsError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -337,10 +316,7 @@ export class PositionOfInterestController {
         throw new NotFoundException(error.message, { cause: error });
       if (error instanceof AlreadyExistsError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -373,10 +349,7 @@ export class PositionOfInterestController {
     } catch (error) {
       if (error instanceof NotFoundException)
         throw new NotFoundException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -409,10 +382,7 @@ export class PositionOfInterestController {
     } catch (error) {
       if (error instanceof NotFoundException)
         throw new NotFoundException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 }

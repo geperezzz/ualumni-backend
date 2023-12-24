@@ -78,10 +78,7 @@ export class TechnicalSkillController {
         throw new BadRequestException(error.message, { cause: error });
       if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -104,30 +101,24 @@ export class TechnicalSkillController {
   ): Promise<PaginatedResponseDto<TechnicalSkillDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const paginationResponse = await this.technicalSkillService.findMany(
-        categoryName,
-        paginationParamsDto.pageNumber,
-        paginationParamsDto.itemsPerPage,
-      );
-      return {
-        statusCode: HttpStatus.OK,
-        data: {
-          page: paginationResponse.page,
-          perPage: paginationResponse.perPage,
-          totalCount: paginationResponse.totalCount,
-          pageCount: paginationResponse.pageCount,
-          items: plainToInstance(TechnicalSkillDto, paginationResponse.items, {
-            excludeExtraneousValues: true,
-          }),
-        },
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
-    }
+
+    const paginationResponse = await this.technicalSkillService.findMany(
+      categoryName,
+      paginationParamsDto.pageNumber,
+      paginationParamsDto.itemsPerPage,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: {
+        page: paginationResponse.page,
+        perPage: paginationResponse.perPage,
+        totalCount: paginationResponse.totalCount,
+        pageCount: paginationResponse.pageCount,
+        items: plainToInstance(TechnicalSkillDto, paginationResponse.items, {
+          excludeExtraneousValues: true,
+        }),
+      },
+    };
   }
 
   @Get('/:name')
@@ -196,10 +187,7 @@ export class TechnicalSkillController {
       if (error instanceof AlreadyExistsError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -232,10 +220,7 @@ export class TechnicalSkillController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 }

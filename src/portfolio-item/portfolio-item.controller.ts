@@ -73,10 +73,7 @@ export class PortfolioItemController {
         throw new BadRequestException(error.message, { cause: error });
       if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -107,10 +104,7 @@ export class PortfolioItemController {
         throw new BadRequestException(error.message, { cause: error });
       if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -143,10 +137,7 @@ export class PortfolioItemController {
     } catch (error) {
       if (error instanceof NotFoundError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -180,10 +171,7 @@ export class PortfolioItemController {
     } catch (error) {
       if (error instanceof NotFoundError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -282,10 +270,7 @@ export class PortfolioItemController {
       if (error instanceof AlreadyExistsError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -324,10 +309,7 @@ export class PortfolioItemController {
       if (error instanceof AlreadyExistsError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -358,10 +340,7 @@ export class PortfolioItemController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -392,10 +371,7 @@ export class PortfolioItemController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 }

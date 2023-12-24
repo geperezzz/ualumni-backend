@@ -79,10 +79,7 @@ export class ResumeSoftSkillController {
         throw new BadRequestException(error.message, { cause: error });
       if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -113,10 +110,7 @@ export class ResumeSoftSkillController {
         throw new BadRequestException(error.message, { cause: error });
       if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -139,20 +133,16 @@ export class ResumeSoftSkillController {
   ): Promise<PaginatedResponseDto<ResumeSoftSkillDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const paginationResponse = await this.resumeSoftSkillService.findMany(
-        user.email,
-        paginationParamsDto.pageNumber,
-        paginationParamsDto.itemsPerPage,
-      );
-      return {
-        statusCode: HttpStatus.OK,
-        data: paginationResponse,
-      };
-    } catch (error) {
-      const message = error.response ? error.response : 'Bad Request';
-      throw new HttpException(message, HttpStatus.BAD_REQUEST);
-    }
+
+    const paginationResponse = await this.resumeSoftSkillService.findMany(
+      user.email,
+      paginationParamsDto.pageNumber,
+      paginationParamsDto.itemsPerPage,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: paginationResponse,
+    };
   }
 
   @Get(':email/resume/soft-skill')
@@ -175,20 +165,16 @@ export class ResumeSoftSkillController {
   ): Promise<PaginatedResponseDto<ResumeSoftSkillDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const paginationResponse = await this.resumeSoftSkillService.findMany(
-        resumeOwnerEmail,
-        paginationParamsDto.pageNumber,
-        paginationParamsDto.itemsPerPage,
-      );
-      return {
-        statusCode: HttpStatus.OK,
-        data: paginationResponse,
-      };
-    } catch (error) {
-      const message = error.response ? error.response : 'Bad Request';
-      throw new HttpException(message, HttpStatus.BAD_REQUEST);
-    }
+
+    const paginationResponse = await this.resumeSoftSkillService.findMany(
+      resumeOwnerEmail,
+      paginationParamsDto.pageNumber,
+      paginationParamsDto.itemsPerPage,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: paginationResponse,
+    };
   }
 
   @Get('me/resume/soft-skill/:title')
@@ -288,10 +274,7 @@ export class ResumeSoftSkillController {
       if (error instanceof AlreadyExistsError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -329,10 +312,7 @@ export class ResumeSoftSkillController {
       if (error instanceof AlreadyExistsError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -365,10 +345,7 @@ export class ResumeSoftSkillController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -401,10 +378,7 @@ export class ResumeSoftSkillController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 }

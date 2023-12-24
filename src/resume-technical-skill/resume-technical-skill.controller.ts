@@ -79,10 +79,7 @@ export class ResumeTechnicalSkillController {
         throw new BadRequestException(error.message, { cause: error });
       if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -113,10 +110,7 @@ export class ResumeTechnicalSkillController {
         throw new BadRequestException(error.message, { cause: error });
       if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -138,21 +132,17 @@ export class ResumeTechnicalSkillController {
   ): Promise<PaginatedResponseDto<ResumeTechnicalSkillDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const paginationResponse =
-        await this.resumeTechnicalSkillService.findMany(
-          user.email,
-          paginationParamsDto.pageNumber,
-          paginationParamsDto.itemsPerPage,
-        );
-      return {
-        statusCode: HttpStatus.OK,
-        data: paginationResponse,
-      };
-    } catch (error) {
-      const message = error.response ? error.response : 'Bad Request';
-      throw new HttpException(message, HttpStatus.BAD_REQUEST);
-    }
+
+    const paginationResponse =
+      await this.resumeTechnicalSkillService.findMany(
+        user.email,
+        paginationParamsDto.pageNumber,
+        paginationParamsDto.itemsPerPage,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      data: paginationResponse,
+    };
   }
 
   @Get(':email/resume/skill-category/technical-skill')
@@ -174,21 +164,17 @@ export class ResumeTechnicalSkillController {
   ): Promise<PaginatedResponseDto<ResumeTechnicalSkillDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const paginationResponse =
-        await this.resumeTechnicalSkillService.findMany(
-          resumeOwnerEmail,
-          paginationParamsDto.pageNumber,
-          paginationParamsDto.itemsPerPage,
-        );
-      return {
-        statusCode: HttpStatus.OK,
-        data: paginationResponse,
-      };
-    } catch (error) {
-      const message = error.response ? error.response : 'Bad Request';
-      throw new HttpException(message, HttpStatus.BAD_REQUEST);
-    }
+
+    const paginationResponse =
+      await this.resumeTechnicalSkillService.findMany(
+        resumeOwnerEmail,
+        paginationParamsDto.pageNumber,
+        paginationParamsDto.itemsPerPage,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      data: paginationResponse,
+    };
   }
 
   @Get('me/resume/skill-category/:skillCategory/technical-skill/:skillName')
@@ -294,10 +280,7 @@ export class ResumeTechnicalSkillController {
       if (error instanceof AlreadyExistsError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -339,10 +322,7 @@ export class ResumeTechnicalSkillController {
       if (error instanceof AlreadyExistsError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -379,10 +359,7 @@ export class ResumeTechnicalSkillController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -421,10 +398,7 @@ export class ResumeTechnicalSkillController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 }

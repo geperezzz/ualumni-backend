@@ -68,10 +68,7 @@ export class LanguageController {
     } catch (error) {
       if (error instanceof AlreadyExistsError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -93,21 +90,15 @@ export class LanguageController {
   ): Promise<PaginatedResponseDto<LanguageDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const paginationResponse = await this.languageService.findMany(
-        paginationParamsDto.pageNumber,
-        paginationParamsDto.itemsPerPage,
-      );
-      return {
-        statusCode: HttpStatus.OK,
-        data: paginationResponse,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
-    }
+
+    const paginationResponse = await this.languageService.findMany(
+      paginationParamsDto.pageNumber,
+      paginationParamsDto.itemsPerPage,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: paginationResponse,
+    };
   }
 
   @Get(':name')
@@ -166,10 +157,7 @@ export class LanguageController {
         throw new NotFoundException(error.message, { cause: error });
       if (error instanceof AlreadyExistsError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -193,10 +181,7 @@ export class LanguageController {
     } catch (error) {
       if (error instanceof NotFoundError)
         throw new NotFoundException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 }

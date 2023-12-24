@@ -76,10 +76,7 @@ export class ResumeCiapCoursesController {
         throw new BadRequestException(error.message, { cause: error });
       }
 
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -114,10 +111,7 @@ export class ResumeCiapCoursesController {
         throw new BadRequestException(error.message, { cause: error });
       }
 
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -138,22 +132,15 @@ export class ResumeCiapCoursesController {
     @SessionUser() user: User,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<ResumeCiapCourseDto>> {
-    try {
-      const resumeCiapCourses = await this.resumeCiapCoursesService.findMany(
-        user.email,
-        paginationParamsDto.pageNumber,
-        paginationParamsDto.itemsPerPage,
-      );
-      return {
-        statusCode: HttpStatus.OK,
-        data: resumeCiapCourses,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
-    }
+    const resumeCiapCourses = await this.resumeCiapCoursesService.findMany(
+      user.email,
+      paginationParamsDto.pageNumber,
+      paginationParamsDto.itemsPerPage,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: resumeCiapCourses,
+    };
   }
 
   @Get(':email/resume/ciap-courses')
@@ -174,22 +161,15 @@ export class ResumeCiapCoursesController {
     @Param('email') ownerEmail: string,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<ResumeCiapCourseDto>> {
-    try {
-      const resumeCiapCourses = await this.resumeCiapCoursesService.findMany(
-        ownerEmail,
-        paginationParamsDto.pageNumber,
-        paginationParamsDto.itemsPerPage,
-      );
-      return {
-        statusCode: HttpStatus.OK,
-        data: resumeCiapCourses,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
-    }
+    const resumeCiapCourses = await this.resumeCiapCoursesService.findMany(
+      ownerEmail,
+      paginationParamsDto.pageNumber,
+      paginationParamsDto.itemsPerPage,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: resumeCiapCourses,
+    };
   }
 
   @Get('me/resume/ciap-courses/:id')
@@ -292,10 +272,7 @@ export class ResumeCiapCoursesController {
       if (error instanceof ForeignKeyError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -332,10 +309,7 @@ export class ResumeCiapCoursesController {
       if (error instanceof ForeignKeyError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -367,10 +341,7 @@ export class ResumeCiapCoursesController {
       if (error instanceof ForeignKeyError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -402,10 +373,7 @@ export class ResumeCiapCoursesController {
       if (error instanceof ForeignKeyError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 }

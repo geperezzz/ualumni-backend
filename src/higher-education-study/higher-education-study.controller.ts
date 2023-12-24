@@ -40,7 +40,7 @@ import { SessionAuthGuard } from 'src/auth/session/session.guard';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
-import { User } from 'prisma/ualumni/client';
+import { User } from '../../prisma/ualumni/client';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 import { SessionNotRequired } from 'src/auth/session/session-not-required.decorator';
 
@@ -79,10 +79,7 @@ export class HigherEducationStudyController {
         throw new BadRequestException(error.message, { cause: error });
       if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -113,10 +110,7 @@ export class HigherEducationStudyController {
         throw new BadRequestException(error.message, { cause: error });
       if (error instanceof ForeignKeyError)
         throw new BadRequestException(error.message, { cause: error });
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -139,21 +133,17 @@ export class HigherEducationStudyController {
   ): Promise<PaginatedResponseDto<HigherEducationStudyDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const paginationResponse =
-        await this.higherEducationStudyService.findMany(
-          user.email,
-          paginationParamsDto.pageNumber,
-          paginationParamsDto.itemsPerPage,
-        );
-      return {
-        statusCode: HttpStatus.OK,
-        data: paginationResponse,
-      };
-    } catch (error) {
-      const message = error.response ? error.response : 'Bad Request';
-      throw new HttpException(message, HttpStatus.BAD_REQUEST);
-    }
+
+    const paginationResponse =
+      await this.higherEducationStudyService.findMany(
+        user.email,
+        paginationParamsDto.pageNumber,
+        paginationParamsDto.itemsPerPage,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      data: paginationResponse,
+    };
   }
 
   @Get(':alumniEmail/higher-education-studies')
@@ -176,21 +166,17 @@ export class HigherEducationStudyController {
   ): Promise<PaginatedResponseDto<HigherEducationStudyDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
-    try {
-      const paginationResponse =
-        await this.higherEducationStudyService.findMany(
-          resumeOwnerEmail,
-          paginationParamsDto.pageNumber,
-          paginationParamsDto.itemsPerPage,
-        );
-      return {
-        statusCode: HttpStatus.OK,
-        data: paginationResponse,
-      };
-    } catch (error) {
-      const message = error.response ? error.response : 'Bad Request';
-      throw new HttpException(message, HttpStatus.BAD_REQUEST);
-    }
+
+    const paginationResponse =
+      await this.higherEducationStudyService.findMany(
+        resumeOwnerEmail,
+        paginationParamsDto.pageNumber,
+        paginationParamsDto.itemsPerPage,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      data: paginationResponse,
+    };
   }
 
   @Get('me/higher-education-studies/:title')
@@ -294,10 +280,7 @@ export class HigherEducationStudyController {
       if (error instanceof AlreadyExistsError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -337,10 +320,7 @@ export class HigherEducationStudyController {
       if (error instanceof AlreadyExistsError) {
         throw new BadRequestException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -372,10 +352,7 @@ export class HigherEducationStudyController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 
@@ -407,10 +384,7 @@ export class HigherEducationStudyController {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(error.message, { cause: error });
       }
-      throw new InternalServerErrorException(
-        'An unexpected situation ocurred',
-        { cause: error },
-      );
+      throw error;
     }
   }
 }
