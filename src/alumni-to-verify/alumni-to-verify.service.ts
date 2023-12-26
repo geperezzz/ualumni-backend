@@ -31,7 +31,7 @@ export class AlumniToVerifyService {
       );
     }
 
-    const isAlreadyRegistrated = await this.alumniService.findOne(
+    const isAlreadyRegistrated = await this.alumniService.findOneByEmail(
       createAlumnitoVerifyDto.email,
     );
     if (isAlreadyRegistrated) {
@@ -44,9 +44,16 @@ export class AlumniToVerifyService {
     const token = Math.floor(1000 + Math.random() * 9000).toString();
 
     try {
-      const alumniToVerify = await this.ualumniDbService.alumniToVerify.create({
-        data: {
+      const alumniToVerify = await this.ualumniDbService.alumniToVerify.upsert({
+        where: {
+          email: createAlumnitoVerifyDto.email
+        },
+        create: {
           email: createAlumnitoVerifyDto.email,
+          password: createAlumnitoVerifyDto.password,
+          token,
+        },
+        update: {
           password: createAlumnitoVerifyDto.password,
           token,
         },
@@ -54,14 +61,6 @@ export class AlumniToVerifyService {
 
       return alumniToVerify;
     } catch (error) {
-      if (error instanceof PrismaUalumni.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new AlreadyExistsError(
-            `There already exists an alumni to verify with the given \`email\` (${createAlumnitoVerifyDto.email})`,
-            { cause: error },
-          );
-        }
-      }
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });
