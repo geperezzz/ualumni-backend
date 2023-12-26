@@ -56,7 +56,8 @@ enum Role {
 }
 
 model User {
-  email            String  @id
+  id               String  @id @default(uuid()) @db.Uuid
+  email            String  @unique
   password         String
   names            String
   surnames         String
@@ -65,8 +66,8 @@ model User {
 }
 
 model Alumni {
-  associatedUser  User             @relation(fields: [email], references: [email], onUpdate: Cascade, onDelete: Cascade)
-  email           String           @id
+  associatedUser  User             @relation(fields: [id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  id              String           @id @db.Uuid
   address         String?
   telephoneNumber String?
   jobApplications JobApplication[]
@@ -84,26 +85,26 @@ model Session {
 model Graduation {
   career         Career   @relation(fields: [careerName], references: [name])
   careerName     String
-  alumni         Alumni   @relation(fields: [alumniEmail], references: [email], onUpdate: Cascade, onDelete: Cascade)
-  alumniEmail    String
+  alumni         Alumni   @relation(fields: [alumniId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  alumniId       String   @db.Uuid
   graduationDate DateTime @db.Date
 
-  @@id([careerName, alumniEmail])
+  @@id([careerName, alumniId])
 }
 
 model JobApplication {
-  jobOffer              JobOffer @relation(fields: [jobOfferId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  jobOfferId            String   @db.Uuid
-  alumniWhoApplied      Alumni   @relation(fields: [alumniWhoAppliedEmail], references: [email], onUpdate: Cascade, onDelete: Cascade)
-  alumniWhoAppliedEmail String
-  applicationTimestamp  DateTime
+  jobOffer             JobOffer @relation(fields: [jobOfferId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  jobOfferId           String   @db.Uuid
+  alumniWhoApplied     Alumni   @relation(fields: [alumniWhoAppliedId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  alumniWhoAppliedId   String   @db.Uuid
+  applicationTimestamp DateTime
 
-  @@id([jobOfferId, alumniWhoAppliedEmail])
+  @@id([jobOfferId, alumniWhoAppliedId])
 }
 
 model Resume {
-  owner                  Alumni                 @relation(fields: [ownerEmail], references: [email], onUpdate: Cascade, onDelete: Cascade)
-  ownerEmail             String                 @id
+  owner                  Alumni                 @relation(fields: [ownerId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  ownerId                String                 @id @db.Uuid
   numberOfDownloads      Int                    @default(0)
   isVisible              Boolean                @default(false)
   visibleSince           DateTime               @default(now())
@@ -120,17 +121,17 @@ model Resume {
 }
 
 model WorkExperience {
-  resume           Resume   @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
-  resumeOwnerEmail String
-  number           Int      @default(autoincrement())
-  companyName      String
-  position         String
-  description      String
-  startDate        DateTime @db.Date
-  endDate          DateTime @db.Date
-  isVisible        Boolean
+  resume        Resume   @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
+  resumeOwnerId String   @db.Uuid
+  number        Int      @default(autoincrement())
+  companyName   String
+  position      String
+  description   String
+  startDate     DateTime @db.Date
+  endDate       DateTime @db.Date
+  isVisible     Boolean
 
-  @@id([resumeOwnerEmail, number])
+  @@id([resumeOwnerId, number])
 }
 
 model CiapCourse {
@@ -143,13 +144,13 @@ model CiapCourse {
 }
 
 model ResumeCiapCourse {
-  resume           Resume     @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
-  resumeOwnerEmail String
-  course           CiapCourse @relation(fields: [courseId], references: [id])
-  courseId         String     @db.Uuid
-  isVisible        Boolean
+  resume        Resume     @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
+  resumeOwnerId String     @db.Uuid
+  course        CiapCourse @relation(fields: [courseId], references: [id])
+  courseId      String     @db.Uuid
+  isVisible     Boolean
 
-  @@id([resumeOwnerEmail, courseId])
+  @@id([resumeOwnerId, courseId])
 }
 
 model SoftSkill {
@@ -158,13 +159,13 @@ model SoftSkill {
 }
 
 model ResumeSoftSkill {
-  resume           Resume    @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
-  resumeOwnerEmail String
-  skill            SoftSkill @relation(fields: [skillName], references: [name])
-  skillName        String
-  isVisible        Boolean
+  resume        Resume    @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
+  resumeOwnerId String    @db.Uuid
+  skill         SoftSkill @relation(fields: [skillName], references: [name])
+  skillName     String
+  isVisible     Boolean
 
-  @@id([resumeOwnerEmail, skillName])
+  @@id([resumeOwnerId, skillName])
 }
 
 model SkillCategory {
@@ -184,14 +185,14 @@ model TechnicalSkill {
 }
 
 model ResumeTechnicalSkill {
-  resume            Resume         @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
-  resumeOwnerEmail  String
+  resume            Resume         @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
+  resumeOwnerId     String         @db.Uuid
   skill             TechnicalSkill @relation(fields: [skillName, skillCategoryName], references: [name, categoryName])
   skillName         String
   skillCategoryName String
   isVisible         Boolean
 
-  @@id([resumeOwnerEmail, skillName, skillCategoryName])
+  @@id([resumeOwnerId, skillName, skillCategoryName])
 }
 
 model Language {
@@ -200,51 +201,51 @@ model Language {
 }
 
 model ResumeLanguage {
-  resume           Resume   @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
-  resumeOwnerEmail String
-  language         Language @relation(fields: [languageName], references: [name])
-  languageName     String
-  masteryLevel     Int
-  isVisible        Boolean
+  resume        Resume   @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
+  resumeOwnerId String   @db.Uuid
+  language      Language @relation(fields: [languageName], references: [name])
+  languageName  String
+  masteryLevel  Int
+  isVisible     Boolean
 
-  @@id([resumeOwnerEmail, languageName])
+  @@id([resumeOwnerId, languageName])
 }
 
 model PortfolioItem {
-  resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
-  resumeOwnerEmail String
-  title            String
-  sourceLink       String
-  isVisible        Boolean
+  resume        Resume  @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
+  resumeOwnerId String  @db.Uuid
+  title         String
+  sourceLink    String
+  isVisible     Boolean
 
-  @@id([resumeOwnerEmail, title])
+  @@id([resumeOwnerId, title])
 }
 
 model HigherEducationStudy {
-  resume           Resume   @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
-  resumeOwnerEmail String
-  title            String
-  institution      String
-  endDate          DateTime @db.Date
-  isVisible        Boolean
+  resume        Resume   @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
+  resumeOwnerId String   @db.Uuid
+  title         String
+  institution   String
+  endDate       DateTime @db.Date
+  isVisible     Boolean
 
-  @@id([resumeOwnerEmail, title])
+  @@id([resumeOwnerId, title])
 }
 
 model PositionOfInterest {
-  resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
-  resumeOwnerEmail String
-  positionName     String
-  isVisible        Boolean
+  resume        Resume  @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
+  resumeOwnerId String  @db.Uuid
+  positionName  String
+  isVisible     Boolean
 
-  @@id([resumeOwnerEmail, positionName])
+  @@id([resumeOwnerId, positionName])
 }
 
 model IndustryOfInterest {
-  resume           Resume  @relation(fields: [resumeOwnerEmail], references: [ownerEmail], onUpdate: Cascade, onDelete: Cascade)
-  resumeOwnerEmail String
-  industryName     String
-  isVisible        Boolean
+  resume        Resume  @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
+  resumeOwnerId String  @db.Uuid
+  industryName  String
+  isVisible     Boolean
 
-  @@id([resumeOwnerEmail, industryName])
+  @@id([resumeOwnerId, industryName])
 }

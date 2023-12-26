@@ -16,13 +16,13 @@ export class WorkExperiencesService {
   constructor(private ualumniDbService: UalumniDbService) {}
 
   async create(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     createWorkExperienceDto: CreateWorkExperienceDto,
   ): Promise<WorkExperience> {
     try {
       return await this.ualumniDbService.workExperience.create({
         data: {
-          resumeOwnerEmail,
+          resumeOwnerId,
           ...createWorkExperienceDto,
         },
       });
@@ -30,7 +30,7 @@ export class WorkExperiencesService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2003') {
           throw new NotFoundError(
-            `There is no alumni with email \`${resumeOwnerEmail}\``,
+            `There is no alumni with id \`${resumeOwnerId}\``,
             { cause: error },
           );
         }
@@ -42,14 +42,14 @@ export class WorkExperiencesService {
   }
 
   async findOne(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     workExperienceNumber: number,
   ): Promise<WorkExperience | null> {
     try {
       return await this.ualumniDbService.workExperience.findUnique({
         where: {
-          resumeOwnerEmail_number: {
-            resumeOwnerEmail,
+          resumeOwnerId_number: {
+            resumeOwnerId,
             number: workExperienceNumber,
           },
         },
@@ -62,13 +62,13 @@ export class WorkExperiencesService {
   }
 
   async findVisibleOne(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     workExperienceNumber: number,
   ): Promise<WorkExperience | null> {
     try {
       return await this.ualumniDbService.workExperience.findFirst({
         where: {
-          resumeOwnerEmail,
+          resumeOwnerId,
           number: workExperienceNumber,
           isVisible: true,
         },
@@ -81,14 +81,14 @@ export class WorkExperiencesService {
   }
 
   async findPage(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     { itemsPerPage, pageNumber }: PaginationParamsDto,
   ): Promise<Page<WorkExperience>> {
     try {
       const [items, numberOfItems] = await this.ualumniDbService.$transaction([
         this.ualumniDbService.workExperience.findMany({
           where: {
-            resumeOwnerEmail,
+            resumeOwnerId,
           },
           take: itemsPerPage,
           skip: itemsPerPage * (pageNumber - 1),
@@ -113,14 +113,14 @@ export class WorkExperiencesService {
   }
 
   async findVisiblePage(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     { itemsPerPage, pageNumber }: PaginationParamsDto,
   ): Promise<Page<WorkExperience>> {
     try {
       const [items, numberOfItems] = await this.ualumniDbService.$transaction([
         this.ualumniDbService.workExperience.findMany({
           where: {
-            resumeOwnerEmail,
+            resumeOwnerId,
             isVisible: true,
           },
           take: itemsPerPage,
@@ -150,15 +150,15 @@ export class WorkExperiencesService {
   }
 
   async update(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     workExperienceNumber: number,
     updateWorkExperienceDto: UpdateWorkExperienceDto,
   ): Promise<WorkExperience> {
     try {
       return await this.ualumniDbService.workExperience.update({
         where: {
-          resumeOwnerEmail_number: {
-            resumeOwnerEmail,
+          resumeOwnerId_number: {
+            resumeOwnerId,
             number: workExperienceNumber,
           },
         },
@@ -168,7 +168,7 @@ export class WorkExperiencesService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no work experience #${workExperienceNumber} for alumni with email \`${resumeOwnerEmail}\``,
+            `There is no work experience #${workExperienceNumber} for alumni with id \`${resumeOwnerId}\``,
             { cause: error },
           );
         }
@@ -180,14 +180,14 @@ export class WorkExperiencesService {
   }
 
   async remove(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     workExperienceNumber: number,
   ): Promise<WorkExperience> {
     try {
       return await this.ualumniDbService.workExperience.delete({
         where: {
-          resumeOwnerEmail_number: {
-            resumeOwnerEmail,
+          resumeOwnerId_number: {
+            resumeOwnerId,
             number: workExperienceNumber,
           },
         },
@@ -196,7 +196,7 @@ export class WorkExperiencesService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no work experience #${workExperienceNumber} for alumni with email \`${resumeOwnerEmail}\``,
+            `There is no work experience #${workExperienceNumber} for alumni with id \`${resumeOwnerId}\``,
             { cause: error },
           );
         }

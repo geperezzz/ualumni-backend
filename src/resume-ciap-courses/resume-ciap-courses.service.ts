@@ -19,76 +19,88 @@ export class ResumeCiapCoursesService {
     private ucabDbService: UcabDbService,
   ) {}
 
-  private async findUcabDbCiapCourse(name: string, date: Date) {
-    try {
-      const data = await this.ucabDbService.ciapCourse.findUnique({
-        where: {
-          name_completionDate: {
-            name: name,
-            completionDate: date,
-          },
-        },
-        include: {
-          enrolledStudents: true,
-        },
-      });
-      return data;
-    } catch (error) {
-      throw new UnexpectedError('An unexpected situation ocurred', {
-        cause: error,
-      });
-    }
-  }
-
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  async synchronize() {
+  async synchronizeBothDb() {
     try {
-      //find ualumniDb courses with enrolledStudents
-      const ualumniDbCiapCourses =
-        await this.ualumniDbService.ciapCourse.findMany({
-          include: {
-            resumesListingThis: true,
+      const registeredCoursesTakenPerAlumni = await this.ualumniDbService.alumni.findMany({
+        select: {
+          associatedUser: {
+            select: {
+              id: true,
+              email: true,
+            },
           },
-        });
-
-      //find course with enrolledStudents in ucabDb
-      for (let ualumniDbCiapCourse of ualumniDbCiapCourses) {
-        const ucabDbCiapCourse = await this.findUcabDbCiapCourse(
-          ualumniDbCiapCourse.name,
-          ualumniDbCiapCourse.date,
-        );
-
-        //check if alumni in ualumniDb is already enrolled
-        if (ucabDbCiapCourse) {
-          for (let ucabDbAlumni of ucabDbCiapCourse.enrolledStudents) {
-            const ualumniDbAlumniEnrolled =
-              ualumniDbCiapCourse.resumesListingThis.find(
-                (ualumniDbAlumni) =>
-                  ualumniDbAlumni.resumeOwnerEmail === ucabDbAlumni.email,
-              );
-
-            //create if not exists
-            if (!ualumniDbAlumniEnrolled) {
-              await this.ualumniDbService.resumeCiapCourse.create({
-                data: {
-                  isVisible: true,
-                  courseId: ualumniDbCiapCourse.id,
-                  resumeOwnerEmail: ucabDbAlumni.email,
-                },
-              });
+          resume: {
+            select: {
+              ciapCourses: {
+                select: {
+                  course: true,
+                }
+              }
             }
           }
         }
-      }
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2003') {
-          throw new ForeignKeyError(
-            `Cannot create. There is no ciap course or alumni in UalumniDB with the given \`data\``,
-            { cause: error },
+      });
+
+      const alumniEmails = registeredCoursesTakenPerAlumni.map(
+        ({ associatedUser }) => associatedUser.email
+      );
+
+      const ucabCoursesTakenPerAlumni = await this.ucabDbService.student.findMany({
+        select: {
+          email: true,
+          coursesTaken: {
+            select: {
+              name: true,
+              completionDate: true,
+            }
+          }
+        },
+        where: {
+          email: {
+            in: alumniEmails
+          },
+        }
+      });
+
+      for (const { email: currentAlumniEmail, coursesTaken: ucabCoursesTakenByCurrentAlumni } of ucabCoursesTakenPerAlumni) {
+        const registeredCoursesTakenByCurrentAlumni =
+          registeredCoursesTakenPerAlumni.find(
+            ({ associatedUser }) => associatedUser.email === currentAlumniEmail
+          )!;
+        const currentAlumniId = registeredCoursesTakenByCurrentAlumni.associatedUser.id;
+        const currentAlumniCourses = registeredCoursesTakenByCurrentAlumni.resume!.ciapCourses.map(({ course }) => course);
+
+        for (const ucabCourse of ucabCoursesTakenByCurrentAlumni) {
+          const isMissing = !currentAlumniCourses.some(
+            registeredCourse => registeredCourse.name === ucabCourse.name && registeredCourse.date === ucabCourse.completionDate
           );
+          if (!isMissing) {
+            continue;
+          }
+
+          const missingCourse = await this.ualumniDbService.ciapCourse.findUnique({
+            select: {
+              id: true
+            },
+            where: {
+              name_date: {
+                name: ucabCourse.name,
+                date: ucabCourse.completionDate
+              }
+            }
+          });
+
+          this.ualumniDbService.resumeCiapCourse.create({
+            data: {
+              resumeOwnerId: currentAlumniId,
+              courseId: missingCourse!.id,
+              isVisible: true,
+            }
+          });
         }
       }
+    } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });
@@ -96,7 +108,7 @@ export class ResumeCiapCoursesService {
   }
 
   async create(
-    ownerEmail: string,
+    resumeOwnerId: string,
     createResumeCiapCourseDto: CreateResumeCiapCourseDto,
   ): Promise<ResumeCiapCourseDto> {
     try {
@@ -104,14 +116,14 @@ export class ResumeCiapCoursesService {
         data: {
           isVisible: true,
           courseId: createResumeCiapCourseDto.id,
-          resumeOwnerEmail: ownerEmail,
+          resumeOwnerId,
         },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2003') {
           throw new ForeignKeyError(
-            `There is no alumni with the email (${ownerEmail}), or there is no CIAP course with the id (${createResumeCiapCourseDto.id}))`,
+            `There is no alumni with the id (${resumeOwnerId}), or there is no CIAP course with the id (${createResumeCiapCourseDto.id}))`,
             { cause: error },
           );
         }
@@ -123,13 +135,13 @@ export class ResumeCiapCoursesService {
   }
 
   async findMany(
-    ownerEmail: string,
+    resumeOwnerId: string,
     pageNumber: number,
     itemsPerPage: number,
   ): Promise<PageDto<ResumeCiapCourseDto>> {
     try {
       const totalCount = await this.ualumniDbService.resumeCiapCourse.count({
-        where: { resumeOwnerEmail: ownerEmail },
+        where: { resumeOwnerId },
       });
       const pageCount = Math.ceil(totalCount / itemsPerPage);
 
@@ -140,7 +152,7 @@ export class ResumeCiapCoursesService {
       }
       const data = await this.ualumniDbService.resumeCiapCourse.findMany({
         where: {
-          resumeOwnerEmail: ownerEmail,
+          resumeOwnerId,
         },
         take: itemsPerPage,
         skip: (pageNumber - 1) * itemsPerPage,
@@ -160,14 +172,14 @@ export class ResumeCiapCoursesService {
   }
 
   async findOne(
-    ownerEmail: string,
+    resumeOwnerId: string,
     id: string,
   ): Promise<ResumeCiapCourseDto | null> {
     try {
       return await this.ualumniDbService.resumeCiapCourse.findUnique({
         where: {
-          resumeOwnerEmail_courseId: {
-            resumeOwnerEmail: ownerEmail,
+          resumeOwnerId_courseId: {
+            resumeOwnerId,
             courseId: id,
           },
         },
@@ -180,15 +192,15 @@ export class ResumeCiapCoursesService {
   }
 
   async update(
-    ownerEmail: string,
+    resumeOwnerId: string,
     id: string,
     updateResumeCiapCourseDto: UpdateResumeCiapCourseDto,
   ): Promise<ResumeCiapCourseDto> {
     try {
       return await this.ualumniDbService.resumeCiapCourse.update({
         where: {
-          resumeOwnerEmail_courseId: {
-            resumeOwnerEmail: ownerEmail,
+          resumeOwnerId_courseId: {
+            resumeOwnerId,
             courseId: id,
           },
         },
@@ -200,7 +212,7 @@ export class ResumeCiapCoursesService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new ForeignKeyError(
-            `There is no ciap course did by alumni with the \`email\` (${ownerEmail}) with the given \`id\` (${id})`,
+            `There is no ciap course did by alumni with the \`email\` (${resumeOwnerId}) with the given \`id\` (${id})`,
             { cause: error },
           );
         }
@@ -211,12 +223,12 @@ export class ResumeCiapCoursesService {
     }
   }
 
-  async remove(ownerEmail: string, id: string): Promise<ResumeCiapCourseDto> {
+  async remove(resumeOwnerId: string, id: string): Promise<ResumeCiapCourseDto> {
     try {
       return await this.ualumniDbService.resumeCiapCourse.delete({
         where: {
-          resumeOwnerEmail_courseId: {
-            resumeOwnerEmail: ownerEmail,
+          resumeOwnerId_courseId: {
+            resumeOwnerId,
             courseId: id,
           },
         },
@@ -225,7 +237,7 @@ export class ResumeCiapCoursesService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new ForeignKeyError(
-            `There is no ciap course did by alumni with the \`email\` (${ownerEmail}) with the given \`id\` (${id})`,
+            `There is no ciap course did by alumni with the \`id\` (${resumeOwnerId}) with the given \`id\` (${id})`,
             { cause: error },
           );
         }

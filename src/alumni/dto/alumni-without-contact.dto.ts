@@ -6,7 +6,7 @@ export class AlumniGraduationDto {
 }
 
 export class AlumniWithoutContactDto {
-  @Expose() email: string;
+  @Expose() id: string;
   @Expose() names: string;
   @Expose() surnames: string;
   @Expose() graduations: AlumniGraduationDto[];

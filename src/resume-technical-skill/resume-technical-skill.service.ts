@@ -17,13 +17,13 @@ export class ResumeTechnicalSkillService {
   constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     createResumeTechnicalSkillDto: CreateResumeTechnicalSkillDto,
   ): Promise<ResumeTechnicalSkillDto> {
     try {
       return await this.ualumniDbService.resumeTechnicalSkill.create({
         data: {
-          resumeOwnerEmail: resumeOwnerEmail,
+          resumeOwnerId,
           skillCategoryName: createResumeTechnicalSkillDto.skillCategoryName,
           skillName: createResumeTechnicalSkillDto.skillName,
           isVisible: createResumeTechnicalSkillDto.isVisible,
@@ -33,13 +33,13 @@ export class ResumeTechnicalSkillService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `There already exists a technical skill with the given \`skillName\` (${createResumeTechnicalSkillDto.skillName}) for the user \`email\` (${resumeOwnerEmail})`,
+            `There already exists a technical skill with the given \`skillName\` (${createResumeTechnicalSkillDto.skillName}) for the alumni with \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
         if (error.code === 'P2003') {
           throw new ForeignKeyError(
-            `There is no user with the given \`email\` (${resumeOwnerEmail})`,
+            `There is no alumni with the given \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
@@ -51,14 +51,14 @@ export class ResumeTechnicalSkillService {
   }
 
   async findMany(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     page: number,
     perPage: number,
   ): Promise<PageDto<ResumeTechnicalSkillDto>> {
     try {
       const totalCount = await this.ualumniDbService.resumeTechnicalSkill.count(
         {
-          where: { resumeOwnerEmail },
+          where: { resumeOwnerId },
         },
       );
       const pageCount = Math.ceil(totalCount / perPage);
@@ -70,7 +70,7 @@ export class ResumeTechnicalSkillService {
       }
 
       const data = await this.ualumniDbService.resumeTechnicalSkill.findMany({
-        where: { resumeOwnerEmail },
+        where: { resumeOwnerId },
         take: perPage,
         skip: (page - 1) * perPage,
       });
@@ -90,16 +90,16 @@ export class ResumeTechnicalSkillService {
   }
 
   async findOne(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     skillCategoryName: string,
     skillName: string,
   ): Promise<ResumeTechnicalSkillDto | null> {
     try {
       return await this.ualumniDbService.resumeTechnicalSkill.findUnique({
         where: {
-          resumeOwnerEmail_skillName_skillCategoryName: {
+          resumeOwnerId_skillName_skillCategoryName: {
             skillName,
-            resumeOwnerEmail,
+            resumeOwnerId,
             skillCategoryName,
           },
         },
@@ -112,7 +112,7 @@ export class ResumeTechnicalSkillService {
   }
 
   async update(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     skillCategoryName: string,
     skillName: string,
     updateResumeTechnicalSkillDto: UpdateResumeTechnicalSkillDto,
@@ -120,9 +120,9 @@ export class ResumeTechnicalSkillService {
     try {
       return await this.ualumniDbService.resumeTechnicalSkill.update({
         where: {
-          resumeOwnerEmail_skillName_skillCategoryName: {
+          resumeOwnerId_skillName_skillCategoryName: {
             skillName,
-            resumeOwnerEmail,
+            resumeOwnerId,
             skillCategoryName,
           },
         },
@@ -138,7 +138,7 @@ export class ResumeTechnicalSkillService {
         }
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `Cannot update the technicall skill, there already exists a technicall skill with the given \`skillName\` (${updateResumeTechnicalSkillDto.skillName}) for the user \`email\` (${resumeOwnerEmail})`,
+            `Cannot update the technicall skill, there already exists a technicall skill with the given \`skillName\` (${updateResumeTechnicalSkillDto.skillName}) for the alumni with \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
@@ -150,15 +150,15 @@ export class ResumeTechnicalSkillService {
   }
 
   async remove(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     skillCategoryName: string,
     skillName: string,
   ): Promise<ResumeTechnicalSkillDto> {
     try {
       return await this.ualumniDbService.resumeTechnicalSkill.delete({
         where: {
-          resumeOwnerEmail_skillName_skillCategoryName: {
-            resumeOwnerEmail,
+          resumeOwnerId_skillName_skillCategoryName: {
+            resumeOwnerId,
             skillName,
             skillCategoryName,
           },

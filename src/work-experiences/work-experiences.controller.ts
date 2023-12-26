@@ -13,6 +13,7 @@ import {
   Query,
   InternalServerErrorException,
   BadRequestException,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { WorkExperiencesService } from './work-experiences.service';
 import { CreateWorkExperienceDto } from './dto/create-work-experience.dto';
@@ -46,7 +47,7 @@ export class WorkExperiencesController {
   ): Promise<ResponseDto<WorkExperienceDto>> {
     try {
       const createdWorkExperience = await this.workExperiencesService.create(
-        user.email,
+        user.id,
         createWorkExperienceDto,
       );
 
@@ -69,13 +70,13 @@ export class WorkExperiencesController {
     @Param('workExperienceNumber', ParseIntPipe) workExperienceNumber: number,
   ): Promise<ResponseDto<WorkExperienceDto>> {
     const workExperience = await this.workExperiencesService.findOne(
-      user.email,
+      user.id,
       workExperienceNumber,
     );
 
     if (!workExperience) {
       throw new NotFoundException(
-        `There is no work experience #${workExperienceNumber} for alumni with email \`${user.email}\``,
+        `There is no work experience #${workExperienceNumber} for alumni with id \`${user.id}\``,
         {},
       );
     }
@@ -86,30 +87,30 @@ export class WorkExperiencesController {
     };
   }
 
-  @Get(':resumeOwnerEmail/resume/work-experiences/:workExperienceNumber')
+  @Get(':alumniId/resume/work-experiences/:workExperienceNumber')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   async findOne(
-    @Param('resumeOwnerEmail') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('workExperienceNumber', ParseIntPipe) workExperienceNumber: number,
     @SessionUser() user?: User,
   ): Promise<ResponseDto<WorkExperienceDto>> {
     let workExperience: WorkExperienceDto | null;
     if (!user) {
       workExperience = await this.workExperiencesService.findOne(
-        resumeOwnerEmail,
+        alumniId,
         workExperienceNumber,
       );
     } else {
       workExperience = await this.workExperiencesService.findVisibleOne(
-        resumeOwnerEmail,
+        alumniId,
         workExperienceNumber,
       );
     }
 
     if (!workExperience) {
       throw new NotFoundException(
-        `There is no work experience #${workExperienceNumber} for alumni with email \`${resumeOwnerEmail}\``,
+        `There is no work experience #${workExperienceNumber} for alumni with id \`${alumniId}\``,
         {},
       );
     }
@@ -128,7 +129,7 @@ export class WorkExperiencesController {
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PagedResponseDto<WorkExperienceDto>> {
     const workExperiencesPage = await this.workExperiencesService.findPage(
-      user.email,
+      user.id,
       paginationParamsDto,
     );
 
@@ -138,23 +139,23 @@ export class WorkExperiencesController {
     };
   }
 
-  @Get(':resumeOwnerEmail/resume/work-experiences')
+  @Get(':alumniId/resume/work-experiences')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   async findPage(
-    @Param('resumeOwnerEmail') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Query() paginationParamsDto: PaginationParamsDto,
     @SessionUser() user?: User,
   ): Promise<PagedResponseDto<WorkExperienceDto>> {
     let workExperiencesPage: PageDto<WorkExperienceDto>;
     if (!user) {
       workExperiencesPage = await this.workExperiencesService.findVisiblePage(
-        resumeOwnerEmail,
+        alumniId,
         paginationParamsDto,
       );
     } else {
       workExperiencesPage = await this.workExperiencesService.findPage(
-        resumeOwnerEmail,
+        alumniId,
         paginationParamsDto,
       );
     }
@@ -174,7 +175,7 @@ export class WorkExperiencesController {
   ): Promise<ResponseDto<WorkExperienceDto>> {
     try {
       const updatedWorkExperience = await this.workExperiencesService.update(
-        user.email,
+        user.id,
         workExperienceNumber,
         updateWorkExperienceDto,
       );
@@ -191,16 +192,16 @@ export class WorkExperiencesController {
     }
   }
 
-  @Patch(':resumeOwnerEmail/resume/work-experiences/:workExperienceNumber')
+  @Patch(':alumniId/resume/work-experiences/:workExperienceNumber')
   @Allowed('admin')
   async updateOne(
-    @Param('resumeOwnerEmail') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('workExperienceNumber', ParseIntPipe) workExperienceNumber: number,
     @Body() updateWorkExperienceDto: UpdateWorkExperienceDto,
   ): Promise<ResponseDto<WorkExperienceDto>> {
     try {
       const updatedWorkExperience = await this.workExperiencesService.update(
-        resumeOwnerEmail,
+        alumniId,
         workExperienceNumber,
         updateWorkExperienceDto,
       );
@@ -225,7 +226,7 @@ export class WorkExperiencesController {
   ): Promise<ResponseDto<WorkExperienceDto>> {
     try {
       const removedWorkExperience = await this.workExperiencesService.remove(
-        user.email,
+        user.id,
         workExperienceNumber,
       );
 
@@ -241,15 +242,15 @@ export class WorkExperiencesController {
     }
   }
 
-  @Delete(':resumeOwnerEmail/resume/work-experiences/:workExperienceNumber')
+  @Delete(':alumniId/resume/work-experiences/:workExperienceNumber')
   @Allowed('admin')
   async removeOne(
-    @Param('resumeOwnerEmail') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('workExperienceNumber', ParseIntPipe) workExperienceNumber: number,
   ): Promise<ResponseDto<WorkExperienceDto>> {
     try {
       const removedWorkExperience = await this.workExperiencesService.remove(
-        resumeOwnerEmail,
+        alumniId,
         workExperienceNumber,
       );
 

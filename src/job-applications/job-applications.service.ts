@@ -16,13 +16,13 @@ export class JobApplicationsService {
   constructor(private ualumniDbService: UalumniDbService) {}
 
   async create(
-    alumniEmail: string,
+    alumniId: string,
     createJobApplicationDto: CreateJobApplicationDto,
   ): Promise<JobApplication> {
     try {
       return await this.ualumniDbService.jobApplication.create({
         data: {
-          alumniWhoAppliedEmail: alumniEmail,
+          alumniWhoAppliedId: alumniId,
           ...createJobApplicationDto,
         },
       });
@@ -30,7 +30,7 @@ export class JobApplicationsService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `There already exists a job application for offer with \`id\` equal to \`${createJobApplicationDto.jobOfferId}\` corresponding to alumni with \`email\` equal to \`${alumniEmail}\``,
+            `There already exists a job application for offer with \`id\` equal to \`${createJobApplicationDto.jobOfferId}\` corresponding to alumni with \`id\` equal to \`${alumniId}\``,
             { cause: error },
           );
         }
@@ -41,9 +41,9 @@ export class JobApplicationsService {
               `There is no job offer with \`id\` equal to \`${createJobApplicationDto.jobOfferId}\``,
             );
           }
-          if (fieldName.includes('alumniWhoAppliedEmail')) {
+          if (fieldName.includes('alumniWhoAppliedId')) {
             throw new NotFoundError(
-              `There is no alumni with \`email\` equal to \`${alumniEmail}\``,
+              `There is no alumni with \`id\` equal to \`${alumniId}\``,
             );
           }
         }
@@ -55,13 +55,13 @@ export class JobApplicationsService {
   }
 
   async findPage(
-    alumniEmail: string,
+    alumniId: string,
     { itemsPerPage, pageNumber }: PaginationParamsDto,
   ): Promise<Page<JobApplication>> {
     try {
       let [items, numberOfItems] = await this.ualumniDbService.$transaction([
         this.ualumniDbService.jobApplication.findMany({
-          where: { alumniWhoAppliedEmail: alumniEmail },
+          where: { alumniWhoAppliedId: alumniId },
           take: itemsPerPage,
           skip: itemsPerPage * (pageNumber - 1),
         }),
@@ -85,15 +85,15 @@ export class JobApplicationsService {
   }
 
   async findOne(
-    alumniEmail: string,
+    alumniId: string,
     jobOfferId: string,
   ): Promise<JobApplication | null> {
     try {
       return await this.ualumniDbService.jobApplication.findUnique({
         where: {
-          jobOfferId_alumniWhoAppliedEmail: {
+          jobOfferId_alumniWhoAppliedId: {
             jobOfferId,
-            alumniWhoAppliedEmail: alumniEmail,
+            alumniWhoAppliedId: alumniId,
           },
         },
       });
@@ -105,16 +105,16 @@ export class JobApplicationsService {
   }
 
   async update(
-    alumniEmail: string,
+    alumniId: string,
     jobOfferId: string,
     updateJobApplicationDto: UpdateJobApplicationDto,
   ): Promise<JobApplication> {
     try {
       return await this.ualumniDbService.jobApplication.update({
         where: {
-          jobOfferId_alumniWhoAppliedEmail: {
+          jobOfferId_alumniWhoAppliedId: {
             jobOfferId,
-            alumniWhoAppliedEmail: alumniEmail,
+            alumniWhoAppliedId: alumniId,
           },
         },
         data: updateJobApplicationDto,
@@ -123,13 +123,13 @@ export class JobApplicationsService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no job application for offer with \`id\` equal to \`${jobOfferId}\` corresponding to alumni with \`email\` equal to \`${alumniEmail}\``,
+            `There is no job application for offer with \`id\` equal to \`${jobOfferId}\` corresponding to alumni with \`id\` equal to \`${alumniId}\``,
             { cause: error },
           );
         }
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `Cannot update the \`jobOfferId\` to \`${updateJobApplicationDto.jobOfferId}\`, there already exists a job application for offer with \`id\` equal to \`${updateJobApplicationDto.jobOfferId}\` corresponding to alumni with \`email\` equal to \`${alumniEmail}\``,
+            `Cannot update the \`jobOfferId\` to \`${updateJobApplicationDto.jobOfferId}\`, there already exists a job application for offer with \`id\` equal to \`${updateJobApplicationDto.jobOfferId}\` corresponding to alumni with \`id\` equal to \`${alumniId}\``,
             { cause: error },
           );
         }
@@ -141,15 +141,15 @@ export class JobApplicationsService {
   }
 
   async remove(
-    alumniEmail: string,
+    alumniId: string,
     jobOfferId: string,
   ): Promise<JobApplication> {
     try {
       return await this.ualumniDbService.jobApplication.delete({
         where: {
-          jobOfferId_alumniWhoAppliedEmail: {
+          jobOfferId_alumniWhoAppliedId: {
             jobOfferId,
-            alumniWhoAppliedEmail: alumniEmail,
+            alumniWhoAppliedId: alumniId,
           },
         },
       });
@@ -157,7 +157,7 @@ export class JobApplicationsService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no job application for offer with \`id\` equal to \`${jobOfferId}\` corresponding to alumni with \`email\` equal to \`${alumniEmail}\``,
+            `There is no job application for offer with \`id\` equal to \`${jobOfferId}\` corresponding to alumni with \`id\` equal to \`${alumniId}\``,
             { cause: error },
           );
         }

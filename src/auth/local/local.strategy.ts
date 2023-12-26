@@ -14,7 +14,7 @@ export class LocalAuthStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(email: string, password: string) {
-    let user = await this.usersService.findOne(email);
+    let user = await this.usersService.findOneByEmail(email);
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials', {});

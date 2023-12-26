@@ -11,6 +11,7 @@ import {
   NotFoundException,
   BadRequestException,
   UseGuards,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { GraduationsService } from './graduations.service';
 import { CreateGraduationDto } from './dto/create-graduation.dto';
@@ -45,7 +46,7 @@ export class GraduationsController {
   ): Promise<ResponseDto<GraduationDto>> {
     try {
       let createdGraduation = await this.graduationsService.create(
-        user.email,
+        user.id,
         createGraduationDto,
       );
       return {
@@ -63,15 +64,15 @@ export class GraduationsController {
     }
   }
 
-  @Post(':alumniEmail/graduations')
+  @Post(':alumniId/graduations')
   @Allowed('admin')
   async create(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Body() createGraduationDto: CreateGraduationDto,
   ): Promise<ResponseDto<GraduationDto>> {
     try {
       let createdGraduation = await this.graduationsService.create(
-        alumniEmail,
+        alumniId,
         createGraduationDto,
       );
       return {
@@ -96,7 +97,7 @@ export class GraduationsController {
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PagedResponseDto<GraduationDto>> {
     let graduationsPage = await this.graduationsService.findPage(
-      user.email,
+      user.id,
       paginationParamsDto,
     );
     return {
@@ -105,15 +106,15 @@ export class GraduationsController {
     };
   }
 
-  @Get(':alumniEmail/graduations')
+  @Get(':alumniId/graduations')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   async findPage(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PagedResponseDto<GraduationDto>> {
     let graduationsPage = await this.graduationsService.findPage(
-      alumniEmail,
+      alumniId,
       paginationParamsDto,
     );
     return {
@@ -129,13 +130,13 @@ export class GraduationsController {
     @Param('careerName') careerName: string,
   ): Promise<ResponseDto<GraduationDto>> {
     let graduation = await this.graduationsService.findOne(
-      user.email,
+      user.id,
       careerName,
     );
 
     if (!graduation) {
       throw new NotFoundException(
-        `Alumni with \`email\` equal to \`${user.email}\` has not graduated from a career with \`name\` equal to \`${careerName}\``,
+        `Alumni with \`id\` equal to \`${user.id}\` has not graduated from a career with \`name\` equal to \`${careerName}\``,
       );
     }
 
@@ -145,21 +146,21 @@ export class GraduationsController {
     };
   }
 
-  @Get(':alumniEmail/graduations/:careerName')
+  @Get(':alumniId/graduations/:careerName')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   async findOne(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('careerName') careerName: string,
   ): Promise<ResponseDto<GraduationDto>> {
     let graduation = await this.graduationsService.findOne(
-      alumniEmail,
+      alumniId,
       careerName,
     );
 
     if (!graduation) {
       throw new NotFoundException(
-        `Alumni with \`email\` equal to \`${alumniEmail}\` has not graduated from a career with \`name\` equal to \`${careerName}\``,
+        `Alumni with \`id\` equal to \`${alumniId}\` has not graduated from a career with \`name\` equal to \`${careerName}\``,
       );
     }
 
@@ -177,7 +178,7 @@ export class GraduationsController {
     @Body() updateGraduationDto: UpdateGraduationDto,
   ): Promise<ResponseDto<GraduationDto>> {
     let updatedGraduation = await this.graduationsService.update(
-      user.email,
+      user.id,
       careerName,
       updateGraduationDto,
     );
@@ -187,15 +188,15 @@ export class GraduationsController {
     };
   }
 
-  @Patch(':alumniEmail/graduations/:careerName')
+  @Patch(':alumniId/graduations/:careerName')
   @Allowed('admin')
   async update(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('careerName') careerName: string,
     @Body() updateGraduationDto: UpdateGraduationDto,
   ): Promise<ResponseDto<GraduationDto>> {
     let updatedGraduation = await this.graduationsService.update(
-      alumniEmail,
+      alumniId,
       careerName,
       updateGraduationDto,
     );
@@ -212,7 +213,7 @@ export class GraduationsController {
     @Param('careerName') careerName: string,
   ): Promise<ResponseDto<GraduationDto>> {
     let removedGraduation = await this.graduationsService.remove(
-      user.email,
+      user.id,
       careerName,
     );
     return {
@@ -221,14 +222,14 @@ export class GraduationsController {
     };
   }
 
-  @Delete(':alumniEmail/graduations/:careerName')
+  @Delete(':alumniId/graduations/:careerName')
   @Allowed('admin')
   async remove(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('careerName') careerName: string,
   ): Promise<ResponseDto<GraduationDto>> {
     let removedGraduation = await this.graduationsService.remove(
-      alumniEmail,
+      alumniId,
       careerName,
     );
     return {

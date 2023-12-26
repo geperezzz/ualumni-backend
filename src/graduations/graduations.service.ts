@@ -16,13 +16,13 @@ export class GraduationsService {
   constructor(private ualumniDbService: UalumniDbService) {}
 
   async create(
-    alumniEmail: string,
+    alumniId: string,
     createGraduationDto: CreateGraduationDto,
   ): Promise<Graduation> {
     try {
       return await this.ualumniDbService.graduation.create({
         data: {
-          alumniEmail,
+          alumniId,
           ...createGraduationDto,
         },
       });
@@ -30,15 +30,15 @@ export class GraduationsService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `Alumni with \`email\` equal to \`${alumniEmail}\` has already graduated from a career with \`name\` equal to \`${createGraduationDto.careerName}\``,
+            `Alumni with \`id\` equal to \`${alumniId}\` has already graduated from a career with \`name\` equal to \`${createGraduationDto.careerName}\``,
             { cause: error },
           );
         }
         if (error.code === 'P2003') {
           let fieldName = error.meta?.field_name as string;
-          if (fieldName.includes('alumniEmail')) {
+          if (fieldName.includes('alumniId')) {
             throw new NotFoundError(
-              `There is no alumni with \`email\` equal to \`${alumniEmail}\``,
+              `There is no alumni with \`id\` equal to \`${alumniId}\``,
             );
           }
           if (fieldName.includes('careerName')) {
@@ -55,13 +55,13 @@ export class GraduationsService {
   }
 
   async findPage(
-    alumniEmail: string,
+    alumniId: string,
     { pageNumber, itemsPerPage }: PaginationParamsDto,
   ): Promise<Page<Graduation>> {
     try {
       let [items, numberOfItems] = await this.ualumniDbService.$transaction([
         this.ualumniDbService.graduation.findMany({
-          where: { alumniEmail },
+          where: { alumniId },
           take: itemsPerPage,
           skip: itemsPerPage * (pageNumber - 1),
         }),
@@ -85,15 +85,15 @@ export class GraduationsService {
   }
 
   async findOne(
-    alumniEmail: string,
+    alumniId: string,
     careerName: string,
   ): Promise<Graduation | null> {
     try {
       return await this.ualumniDbService.graduation.findUnique({
         where: {
-          careerName_alumniEmail: {
+          careerName_alumniId: {
             careerName,
-            alumniEmail,
+            alumniId,
           },
         },
       });
@@ -105,16 +105,16 @@ export class GraduationsService {
   }
 
   async update(
-    alumniEmail: string,
+    alumniId: string,
     careerName: string,
     updateGraduationDto: UpdateGraduationDto,
   ): Promise<Graduation> {
     try {
       return await this.ualumniDbService.graduation.update({
         where: {
-          careerName_alumniEmail: {
+          careerName_alumniId: {
             careerName,
-            alumniEmail,
+            alumniId,
           },
         },
         data: updateGraduationDto,
@@ -123,13 +123,13 @@ export class GraduationsService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `Alumni with \`email\` equal to \`${alumniEmail}\` has not graduated from a career with \`name\` equal to \`${careerName}\``,
+            `Alumni with \`id\` equal to \`${alumniId}\` has not graduated from a career with \`name\` equal to \`${careerName}\``,
             { cause: error },
           );
         }
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `Cannot update the \`careerName\` to \`${updateGraduationDto.careerName}\`, alumni with \`email\` equal to \`${alumniEmail}\` has already graduated from that career`,
+            `Cannot update the \`careerName\` to \`${updateGraduationDto.careerName}\`, alumni with \`id\` equal to \`${alumniId}\` has already graduated from that career`,
             { cause: error },
           );
         }
@@ -140,13 +140,13 @@ export class GraduationsService {
     }
   }
 
-  async remove(alumniEmail: string, careerName: string): Promise<Graduation> {
+  async remove(alumniId: string, careerName: string): Promise<Graduation> {
     try {
       return await this.ualumniDbService.graduation.delete({
         where: {
-          careerName_alumniEmail: {
+          careerName_alumniId: {
             careerName,
-            alumniEmail,
+            alumniId,
           },
         },
       });
@@ -154,7 +154,7 @@ export class GraduationsService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `Alumni with \`email\` equal to \`${alumniEmail}\` has not graduated from a career with \`name\` equal to \`${careerName}\``,
+            `Alumni with \`id\` equal to \`${alumniId}\` has not graduated from a career with \`name\` equal to \`${careerName}\``,
             { cause: error },
           );
         }

@@ -17,13 +17,13 @@ export class HigherEducationStudyService {
   constructor(private readonly ualumniDbService: UalumniDbService) {}
 
   async create(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     createHigherEducationStudyDto: CreateHigherEducationStudyDto,
   ) {
     try {
       return await this.ualumniDbService.higherEducationStudy.create({
         data: {
-          resumeOwnerEmail: resumeOwnerEmail,
+          resumeOwnerId,
           title: createHigherEducationStudyDto.title,
           institution: createHigherEducationStudyDto.institution,
           endDate: new Date(
@@ -36,13 +36,13 @@ export class HigherEducationStudyService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `There already exists a higher education study with the given \`title\` (${createHigherEducationStudyDto.title}) for the user \`email\` (${resumeOwnerEmail})`,
+            `There already exists a higher education study with the given \`title\` (${createHigherEducationStudyDto.title}) for the alumni with \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
         if (error.code === 'P2003') {
           throw new ForeignKeyError(
-            `There is no user with the given \`email\` (${resumeOwnerEmail})`,
+            `There is no alumni with the given \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
@@ -54,14 +54,14 @@ export class HigherEducationStudyService {
   }
 
   async findMany(
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     page: number,
     perPage: number,
   ): Promise<PageDto<HigherEducationStudyDto>> {
     try {
       const totalCount = await this.ualumniDbService.higherEducationStudy.count(
         {
-          where: { resumeOwnerEmail },
+          where: { resumeOwnerId },
         },
       );
       const pageCount = Math.ceil(totalCount / perPage);
@@ -73,7 +73,7 @@ export class HigherEducationStudyService {
       }
 
       const data = await this.ualumniDbService.higherEducationStudy.findMany({
-        where: { resumeOwnerEmail },
+        where: { resumeOwnerId },
         take: perPage,
         skip: (page - 1) * perPage,
       });
@@ -94,14 +94,14 @@ export class HigherEducationStudyService {
 
   async findOne(
     title: string,
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
   ): Promise<HigherEducationStudyDto | null> {
     try {
       return await this.ualumniDbService.higherEducationStudy.findUnique({
         where: {
-          resumeOwnerEmail_title: {
+          resumeOwnerId_title: {
             title,
-            resumeOwnerEmail,
+            resumeOwnerId,
           },
         },
       });
@@ -114,15 +114,15 @@ export class HigherEducationStudyService {
 
   async update(
     title: string,
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
     updateHigherEducationStudyDto: UpdateHigherEducationStudyDto,
   ): Promise<HigherEducationStudyDto> {
     try {
       return await this.ualumniDbService.higherEducationStudy.update({
         where: {
-          resumeOwnerEmail_title: {
+          resumeOwnerId_title: {
             title,
-            resumeOwnerEmail,
+            resumeOwnerId,
           },
         },
         data: {
@@ -144,7 +144,7 @@ export class HigherEducationStudyService {
         }
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `Cannot update the higher education study, there already exists a higher education study with the given \`title\` (${updateHigherEducationStudyDto.title}) for the user \`email\` (${resumeOwnerEmail})`,
+            `Cannot update the higher education study, there already exists a higher education study with the given \`title\` (${updateHigherEducationStudyDto.title}) for the alumni with \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
@@ -157,14 +157,14 @@ export class HigherEducationStudyService {
 
   async remove(
     title: string,
-    resumeOwnerEmail: string,
+    resumeOwnerId: string,
   ): Promise<HigherEducationStudyDto> {
     try {
       return await this.ualumniDbService.higherEducationStudy.delete({
         where: {
-          resumeOwnerEmail_title: {
+          resumeOwnerId_title: {
             title,
-            resumeOwnerEmail,
+            resumeOwnerId,
           },
         },
       });

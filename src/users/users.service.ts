@@ -7,7 +7,19 @@ import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 export class UsersService {
   constructor(private ualumniDbService: UalumniDbService) {}
 
-  async findOne(email: string): Promise<User | null> {
+  async findOne(id: string): Promise<User | null> {
+    try {
+      return await this.ualumniDbService.user.findUnique({
+        where: { id },
+      });
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
+  async findOneByEmail(email: string): Promise<User | null> {
     try {
       return await this.ualumniDbService.user.findUnique({
         where: { email },

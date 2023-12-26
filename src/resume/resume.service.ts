@@ -24,12 +24,12 @@ export class ResumeService {
     path.resolve(__dirname, 'templates/resume.pug'),
   );
 
-  async exportAsPdf(email: string): Promise<Buffer> {
+  async exportAsPdf(alumniId: string): Promise<Buffer> {
     const alumni =
-      await this.alumniService.findOneWithResumeOnlyVisibles(email);
+      await this.alumniService.findOneWithResumeOnlyVisibles(alumniId);
     if (!alumni) {
       throw new NotFoundError(
-        `There is no alumni with the given \`email\` (${email})`,
+        `There is no alumni with the given \`id\` (${alumniId})`,
       );
     }
     const browser = await puppeteer.launch({ headless: 'new' });
@@ -42,19 +42,19 @@ export class ResumeService {
 
     await browser.close();
     await this.ualumniDbService.resume.update({
-      where: { ownerEmail: email },
+      where: { ownerId: alumniId },
       data: { numberOfDownloads: { increment: 1 } },
     });
     return pdf;
   }
 
   async update(
-    email: string,
+    alumniId: string,
     updateResumeDto: UpdateResumeDto,
   ): Promise<Resume> {
     try {
       const resume = await this.ualumniDbService.resume.update({
-        where: { ownerEmail: email },
+        where: { ownerId: alumniId },
         data: {
           isVisible: updateResumeDto.isVisible,
           aboutMe: updateResumeDto.aboutMe,
@@ -63,7 +63,7 @@ export class ResumeService {
             : undefined,
         },
         select: {
-          ownerEmail: true,
+          ownerId: true,
           numberOfDownloads: true,
           isVisible: true,
           visibleSince: true,
@@ -141,7 +141,7 @@ export class ResumeService {
         },
       });
       return {
-        ownerEmail: resume.ownerEmail,
+        ownerId: resume.ownerId,
         numberOfDownloads: resume.numberOfDownloads,
         isVisible: resume.isVisible,
         visibleSince: resume.visibleSince,
@@ -295,7 +295,7 @@ export class ResumeService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no resume user with the given \`email\` (${email})`,
+            `There is no resume for an alumni with the given \`id\` (${alumniId})`,
             { cause: error },
           );
         }

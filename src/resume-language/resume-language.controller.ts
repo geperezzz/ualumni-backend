@@ -16,6 +16,7 @@ import {
   InternalServerErrorException,
   Query,
   UseGuards,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ResumeLanguageService } from './resume-language.service';
 import { CreateResumeLanguageDto } from './dto/create-resume-language.dto';
@@ -64,7 +65,7 @@ export class ResumeLanguageController {
   ): Promise<ResponseDto<ResumeLanguageDto>> {
     try {
       const data = await this.resumeLanguageService.create(
-        user.email,
+        user.id,
         createResumeLanguageDto,
       );
       return {
@@ -80,7 +81,7 @@ export class ResumeLanguageController {
     }
   }
 
-  @Post(':email/resume/language')
+  @Post(':alumniId/resume/language')
   @Allowed('admin')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
@@ -90,12 +91,12 @@ export class ResumeLanguageController {
     description: 'Already exists a language with the given name',
   })
   async add(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Body() CreateResumeLanguageDto: CreateResumeLanguageDto,
   ): Promise<ResponseDto<ResumeLanguageDto>> {
     try {
       const data = await this.resumeLanguageService.create(
-        resumeOwnerEmail,
+        alumniId,
         CreateResumeLanguageDto,
       );
       return {
@@ -131,7 +132,7 @@ export class ResumeLanguageController {
       throw new BadRequestException('Invalid number of items per page');
     try {
       const paginationResponse = await this.resumeLanguageService.findMany(
-        user.email,
+        user.id,
         paginationParamsDto.pageNumber,
         paginationParamsDto.itemsPerPage,
       );
@@ -145,7 +146,7 @@ export class ResumeLanguageController {
     }
   }
 
-  @Get(':email/resume/language')
+  @Get(':alumniId/resume/language')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -159,14 +160,14 @@ export class ResumeLanguageController {
     description: 'An unexpected situation ocurred',
   })
   async findPage(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<any> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
 
     const paginationResponse = await this.resumeLanguageService.findMany(
-      resumeOwnerEmail,
+      alumniId,
       paginationParamsDto.pageNumber,
       paginationParamsDto.itemsPerPage,
     );
@@ -194,7 +195,7 @@ export class ResumeLanguageController {
   ) {
     const resumeLanguage = await this.resumeLanguageService.findOne(
       languageName,
-      user.email,
+      user.id,
     );
 
     if (!resumeLanguage)
@@ -207,7 +208,7 @@ export class ResumeLanguageController {
     };
   }
 
-  @Get(':email/resume/language/:languageName')
+  @Get(':alumniId/resume/language/:languageName')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -221,12 +222,12 @@ export class ResumeLanguageController {
     description: 'An unexpected situation ocurred',
   })
   async findOne(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('languageName') languageName: string,
   ) {
     const resumeLanguage = await this.resumeLanguageService.findOne(
       languageName,
-      resumeOwnerEmail,
+      alumniId,
     );
 
     if (!resumeLanguage)
@@ -262,7 +263,7 @@ export class ResumeLanguageController {
     try {
       const updateLanguageName = await this.resumeLanguageService.update(
         languageName,
-        user.email,
+        user.id,
         updateLanguageNameDto,
       );
       return { statusCode: HttpStatus.OK, data: updateLanguageName };
@@ -277,7 +278,7 @@ export class ResumeLanguageController {
     }
   }
 
-  @Patch(':email/resume/language/:languageName')
+  @Patch(':alumniId/resume/language/:languageName')
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -293,14 +294,14 @@ export class ResumeLanguageController {
     description: 'An unexpected situation ocurred',
   })
   async update(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('languageName') languageName: string,
     @Body() updateLanguageNameDto: UpdateResumeLanguageDto,
   ) {
     try {
       const updateLanguageName = await this.resumeLanguageService.update(
         languageName,
-        resumeOwnerEmail,
+        alumniId,
         updateLanguageNameDto,
       );
       return { statusCode: HttpStatus.OK, data: updateLanguageName };
@@ -335,7 +336,7 @@ export class ResumeLanguageController {
     try {
       const deletedResumeLanguage = await this.resumeLanguageService.remove(
         languageName,
-        user.email,
+        user.id,
       );
       return {
         statusCode: HttpStatus.OK,
@@ -349,7 +350,7 @@ export class ResumeLanguageController {
     }
   }
 
-  @Delete(':email/resume/language/:languageName')
+  @Delete(':alumniId/resume/language/:languageName')
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -363,13 +364,13 @@ export class ResumeLanguageController {
     description: 'An unexpected situation ocurred',
   })
   async remove(
-    @Param('email') resumeOwnerEmail: string,
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
     @Param('languageName') languageName: string,
   ): Promise<ResponseDto<ResumeLanguageDto>> {
     try {
       const deletedResumeLanguage = await this.resumeLanguageService.remove(
         languageName,
-        resumeOwnerEmail,
+        alumniId,
       );
       return {
         statusCode: HttpStatus.OK,
