@@ -26,6 +26,8 @@ import { ResumeTechnicalSkillModule } from './resume-technical-skill/resume-tech
 import { UcabDbModule } from './ucab-db/ucab-db.module';
 import { WorkExperiencesModule } from './work-experiences/work-experiences.module';
 import { PositionOfInterestModule } from './position-of-interest/position-of-interest.module';
+import { MailingModule } from './mailing/mailing.module';
+import { AlumniToVerifyModule } from './alumni-to-verify/alumni-to-verify.module';
 
 @Module({
   imports: [
@@ -57,6 +59,8 @@ import { PositionOfInterestModule } from './position-of-interest/position-of-int
     UcabDbModule,
     WorkExperiencesModule,
     PositionOfInterestModule,
+    MailingModule,
+    AlumniToVerifyModule,
   ],
 })
 export class AppModule {}

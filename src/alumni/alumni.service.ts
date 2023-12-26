@@ -26,37 +26,24 @@ export class AlumniService {
     private ucabDbService: UcabDbService,
   ) {}
 
-  private async findUcabDbAlumni(email: string) {
-    try {
-      return await this.ucabDbService.student.findUniqueOrThrow({
-        where: {
-          email: email,
-          enrolledCareers: {
-            some: {
-              status: 'FINISHED',
-            },
+  public async findUcabDbAlumni(email: string) {
+    return await this.ucabDbService.student.findUnique({
+      where: {
+        email: email,
+        enrolledCareers: {
+          some: {
+            status: 'FINISHED',
           },
         },
-        include: {
-          enrolledCareers: {
-            where: {
-              status: 'FINISHED',
-            },
+      },
+      include: {
+        enrolledCareers: {
+          where: {
+            status: 'FINISHED',
           },
         },
-      });
-    } catch (error) {
-      if (error instanceof PrismaUcab.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new NotFoundError(
-            `The given email (${email}) doesn't belong to an UCAB alumni`,
-          );
-        }
-      }
-      throw new UnexpectedError('An unexpected situation ocurred', {
-        cause: error,
-      });
-    }
+      },
+    });
   }
 
   @Cron(CronExpression.EVERY_12_HOURS)
@@ -76,7 +63,7 @@ export class AlumniService {
 
       // Compare with ucab alumni
       for (let ualumniDbAlumni of allUalumni) {
-        const ucabDbAlumni = await this.findUcabDbAlumni(ualumniDbAlumni.associatedUser.email);
+        const ucabDbAlumni = (await this.findUcabDbAlumni(ualumniDbAlumni.associatedUser.email))!;
         for (let ucabDbCareer of ucabDbAlumni.enrolledCareers) {
           // Create graduation if not exists
           const ualumniDbCareer = ualumniDbAlumni.graduations.find(
@@ -114,6 +101,12 @@ export class AlumniService {
 
   async create(createAlumniDto: CreateAlumniDto): Promise<Alumni> {
     const ucabDbAlumni = await this.findUcabDbAlumni(createAlumniDto.email);
+    if (!ucabDbAlumni) {
+      throw new NotFoundError(
+        `The given email (${createAlumniDto.email}) doesn't belong to an UCAB alumni`,
+      );
+    }
+
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(createAlumniDto.password, salt);
 
@@ -561,6 +554,7 @@ export class AlumniService {
         return this.ualumniDbService.resume.findUniqueOrThrow({
           where: { ownerId: id },
           select: {
+            reminderSent: true,
             numberOfDownloads: true,
             isVisible: true,
             visibleSince: true,
@@ -679,6 +673,7 @@ export class AlumniService {
           telephoneNumber: resume.owner.telephoneNumber,
           graduations: resume.owner.graduations,
           resume: {
+            reminderSent: resume.reminderSent,
             aboutMe: resume.aboutMe,
             numberOfDownloads: resume.numberOfDownloads,
             isVisible: resume.isVisible,
@@ -726,6 +721,7 @@ export class AlumniService {
       const resume = await this.ualumniDbService.resume.findUnique({
         where: { ownerId: id },
         select: {
+          reminderSent: true,
           numberOfDownloads: true,
           isVisible: true,
           visibleSince: true,
@@ -832,6 +828,7 @@ export class AlumniService {
             telephoneNumber: resume.owner.telephoneNumber,
             graduations: resume.owner.graduations,
             resume: {
+              reminderSent: resume.reminderSent,
               aboutMe: resume.aboutMe,
               numberOfDownloads: resume.numberOfDownloads,
               isVisible: resume.isVisible,
@@ -869,6 +866,7 @@ export class AlumniService {
       const resume = await this.ualumniDbService.resume.findUnique({
         where: { ownerId: id },
         select: {
+          reminderSent: true,
           numberOfDownloads: true,
           isVisible: true,
           visibleSince: true,
@@ -984,6 +982,7 @@ export class AlumniService {
             telephoneNumber: resume.owner.telephoneNumber,
             graduations: resume.owner.graduations,
             resume: {
+              reminderSent: resume.reminderSent,
               aboutMe: resume.aboutMe,
               numberOfDownloads: resume.numberOfDownloads,
               isVisible: resume.isVisible,

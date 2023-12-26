@@ -23,7 +23,7 @@ export class UpdateJobOfferDto {
 
   @IsString()
   @IsOptional()
-  companyContact?: string;
+  companyEmail?: string;
 
   @IsBase64()
   @IsOptional()

@@ -29,6 +29,7 @@ import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from 'prisma/ualumni/client';
+import { MailingService } from 'src/mailing/mailing.service';
 
 @ApiTags('job-applications')
 @Controller('alumni')
@@ -36,6 +37,7 @@ import { User } from 'prisma/ualumni/client';
 export class JobApplicationsController {
   constructor(
     private readonly jobApplicationsService: JobApplicationsService,
+    private readonly mailingService: MailingService,
   ) {}
 
   @Post('me/job-applications')
@@ -49,6 +51,12 @@ export class JobApplicationsController {
         user.id,
         createJobApplicationDto,
       );
+
+      let sentEmail = await this.mailingService.sendResume(
+        user.email,
+        createJobApplicationDto.jobOfferId,
+      );
+
       return {
         statusCode: HttpStatus.CREATED,
         data: createdJobApplication,

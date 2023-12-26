@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "AlumniToVerify" ADD COLUMN     "creationDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

@@ -12,7 +12,7 @@ model JobOffer {
   id               String                   @id @default(uuid()) @db.Uuid
   description      String
   companyName      String
-  companyContact   String
+  companyEmail     String
   companyLogo      String
   department       String
   position         String
@@ -65,6 +65,13 @@ model User {
   associatedAlumni Alumni?
 }
 
+model AlumniToVerify {
+  email        String   @id
+  password     String
+  token        String
+  creationDate DateTime @default(now())
+}
+
 model Alumni {
   associatedUser  User             @relation(fields: [id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   id              String           @id @db.Uuid
@@ -108,6 +115,7 @@ model Resume {
   numberOfDownloads      Int                    @default(0)
   isVisible              Boolean                @default(false)
   visibleSince           DateTime               @default(now())
+  reminderSent           Boolean                @default(false)
   aboutMe                String?
   workExperiences        WorkExperience[]
   knownLanguages         ResumeLanguage[]

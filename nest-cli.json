@@ -3,7 +3,7 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "assets": ["**/*.css", "**/*.pug"],
+    "assets": ["**/*.pug", "**/*.css", "**/*.hbs", "**/*.png" ],
     "watchAssets": true,
     "deleteOutDir": true,
     "plugins": ["@nestjs/swagger"]
