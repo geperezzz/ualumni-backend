@@ -55,7 +55,7 @@ export class AlumniService {
           associatedUser: {
             select: {
               email: true,
-            }
+            },
           },
           graduations: true,
         },
@@ -63,7 +63,9 @@ export class AlumniService {
 
       // Compare with ucab alumni
       for (let ualumniDbAlumni of allUalumni) {
-        const ucabDbAlumni = (await this.findUcabDbAlumni(ualumniDbAlumni.associatedUser.email))!;
+        const ucabDbAlumni = (await this.findUcabDbAlumni(
+          ualumniDbAlumni.associatedUser.email,
+        ))!;
         for (let ucabDbCareer of ucabDbAlumni.enrolledCareers) {
           // Create graduation if not exists
           const ualumniDbCareer = ualumniDbAlumni.graduations.find(
@@ -116,7 +118,6 @@ export class AlumniService {
           const createdAlumni = await tx.alumni.create({
             data: {
               address: ucabDbAlumni.address,
-              telephoneNumber: ucabDbAlumni.telephoneNumber,
               associatedUser: {
                 create: {
                   email: createAlumniDto.email,
@@ -207,9 +208,7 @@ export class AlumniService {
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.ualumniDbService.$queryRaw<
-          { id: string; totalCount: number }[]
-        >`
+        this.ualumniDbService.$queryRaw<{ id: string; totalCount: number }[]>`
           WITH filtered_by_visibility AS (
             SELECT a."id", u."names", u."surnames", g."careerName", p."positionName", i."industryName", rt."skillName", rt."skillCategoryName"
             FROM "User" u INNER JOIN "Alumni" a USING("id")
@@ -412,9 +411,7 @@ export class AlumniService {
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.ualumniDbService.$queryRaw<
-          { id: string; totalCount: number }[]
-        >`
+        this.ualumniDbService.$queryRaw<{ id: string; totalCount: number }[]>`
           WITH filtered_by_visibility AS (
             SELECT a."id", u."names", u."surnames", g."careerName", p."positionName", i."industryName", rt."skillName", rt."skillCategoryName"
             FROM "User" u INNER JOIN "Alumni" a USING("id")
@@ -670,7 +667,6 @@ export class AlumniService {
           surnames: resume.owner.associatedUser.surnames,
           password: resume.owner.associatedUser.password,
           address: resume.owner.address,
-          telephoneNumber: resume.owner.telephoneNumber,
           graduations: resume.owner.graduations,
           resume: {
             reminderSent: resume.reminderSent,
@@ -825,7 +821,6 @@ export class AlumniService {
             surnames: resume.owner.associatedUser.surnames,
             password: resume.owner.associatedUser.password,
             address: resume.owner.address,
-            telephoneNumber: resume.owner.telephoneNumber,
             graduations: resume.owner.graduations,
             resume: {
               reminderSent: resume.reminderSent,
@@ -979,7 +974,6 @@ export class AlumniService {
             surnames: resume.owner.associatedUser.surnames,
             password: resume.owner.associatedUser.password,
             address: resume.owner.address,
-            telephoneNumber: resume.owner.telephoneNumber,
             graduations: resume.owner.graduations,
             resume: {
               reminderSent: resume.reminderSent,
@@ -1051,10 +1045,10 @@ export class AlumniService {
   async findOneByEmail(email: string) {
     try {
       let alumni = await this.ualumniDbService.alumni.findFirst({
-        where: { 
+        where: {
           associatedUser: {
-            email
-          }
+            email,
+          },
         },
         include: {
           associatedUser: {
@@ -1087,16 +1081,12 @@ export class AlumniService {
     }
   }
 
-  async update(
-    id: string,
-    updateAlumniDto: UpdateAlumniDto,
-  ): Promise<Alumni> {
+  async update(id: string, updateAlumniDto: UpdateAlumniDto): Promise<Alumni> {
     try {
       let updatedAlumni = await this.ualumniDbService.alumni.update({
         where: { id },
         data: {
           address: updateAlumniDto.address,
-          telephoneNumber: updateAlumniDto.telephoneNumber,
           associatedUser: {
             update: {
               email: updateAlumniDto.email,
