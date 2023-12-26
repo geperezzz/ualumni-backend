@@ -1048,6 +1048,45 @@ export class AlumniService {
     }
   }
 
+  async findOneByEmail(email: string) {
+    try {
+      let alumni = await this.ualumniDbService.alumni.findFirst({
+        where: { 
+          associatedUser: {
+            email
+          }
+        },
+        include: {
+          associatedUser: {
+            select: {
+              email: true,
+              password: true,
+              names: true,
+              surnames: true,
+            },
+          },
+          graduations: {
+            select: {
+              careerName: true,
+              graduationDate: true,
+            },
+          },
+        },
+      });
+
+      if (!alumni) {
+        return null;
+      }
+
+      const { associatedUser: userProps, ...rest } = alumni;
+      return { ...userProps, ...rest };
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
+  }
+
   async update(
     id: string,
     updateAlumniDto: UpdateAlumniDto,
