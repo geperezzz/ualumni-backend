@@ -199,6 +199,7 @@ export class ResumeService {
         },
         select: {
           ownerId: true,
+          reminderSent: true,
           numberOfDownloads: true,
           isVisible: true,
           visibleSince: true,
@@ -279,6 +280,7 @@ export class ResumeService {
       return {
         ownerId: resume.ownerId,
         numberOfDownloads: resume.numberOfDownloads,
+        reminderSent: resume.reminderSent,
         isVisible: resume.isVisible,
         visibleSince: resume.visibleSince,
         aboutMe: resume.aboutMe,
@@ -342,10 +344,10 @@ export class ResumeService {
 
     for (let alumni of alumniForReminder) {
       const sentEmail = await this.mailingService.sendResumeVisibilityReminder(
-        alumni.ownerEmail,
+        alumni.ownerId,
       );
       await this.ualumniDbService.resume.update({
-        where: { ownerEmail: alumni.ownerEmail },
+        where: { ownerId: alumni.ownerId },
         data: { reminderSent: true },
       });
     }
