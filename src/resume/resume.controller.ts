@@ -113,7 +113,7 @@ export class ResumeController {
     description: 'The visibility of the resume was succesfully updated',
   })
   @ApiNotFoundResponse({
-    description: 'The resume user with the requested email was not found',
+    description: 'The resume user with the requested id was not found',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
@@ -124,7 +124,7 @@ export class ResumeController {
   ): Promise<ResponseDto<ResumeDto>> {
     try {
       const updatedResume = await this.resumeService.toggleVisibility(
-        user.email,
+        user.id,
         toggleResumeVisibilityDto,
       );
       return {
@@ -144,25 +144,25 @@ export class ResumeController {
     }
   }
 
-  @Patch(':email/resume/visibility')
+  @Patch(':alumniId/resume/visibility')
   @HttpCode(HttpStatus.OK)
   @Allowed('admin')
   @ApiOkResponse({
     description: 'The visibility of the resume was succesfully updated',
   })
   @ApiNotFoundResponse({
-    description: 'The resume user with the requested email was not found',
+    description: 'The resume user with the requested id was not found',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
   })
   async toggleVisibility(
-    @Param('email') email: string,
+    @Param('alumniId') alumniId: string,
     @Body() toggleResumeVisibilityDto: ToggleResumeVisibilityDto,
   ): Promise<ResponseDto<ResumeDto>> {
     try {
       const updatedResume = await this.resumeService.toggleVisibility(
-        email,
+        alumniId,
         toggleResumeVisibilityDto,
       );
       return {

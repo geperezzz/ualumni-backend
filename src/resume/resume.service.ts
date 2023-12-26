@@ -49,12 +49,12 @@ export class ResumeService {
   }
 
   async update(
-    alumniId: string,
+    ownerId: string,
     updateResumeDto: UpdateResumeDto,
   ): Promise<Resume> {
     try {
       const resume = await this.ualumniDbService.resume.update({
-        where: { ownerId: alumniId },
+        where: { ownerId },
         data: {
           isVisible: updateResumeDto.isVisible,
           aboutMe: updateResumeDto.aboutMe,
@@ -165,7 +165,7 @@ export class ResumeService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no resume user with the given \`email\` (${email})`,
+            `There is no resume user with the given \`id\` (${ownerId})`,
             { cause: error },
           );
         }
@@ -179,20 +179,20 @@ export class ResumeService {
   // Automatically updates the resume visibility date when visibility is set to true.
 
   async toggleVisibility(
-    email: string,
+    ownerId: string,
     toggleResumeVisibilityDto: ToggleResumeVisibilityDto,
   ): Promise<Resume> {
     const { isVisible } = toggleResumeVisibilityDto;
 
     try {
       const resume = await this.ualumniDbService.resume.update({
-        where: { ownerEmail: email },
+        where: { ownerId },
         data: {
           isVisible: isVisible,
           visibleSince: isVisible ? new Date().toISOString() : undefined,
         },
         select: {
-          ownerEmail: true,
+          ownerId: true,
           numberOfDownloads: true,
           isVisible: true,
           visibleSince: true,
@@ -271,7 +271,7 @@ export class ResumeService {
       });
 
       return {
-        ownerEmail: resume.ownerEmail,
+        ownerId: resume.ownerId,
         numberOfDownloads: resume.numberOfDownloads,
         isVisible: resume.isVisible,
         visibleSince: resume.visibleSince,
@@ -295,7 +295,7 @@ export class ResumeService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no resume for an alumni with the given \`id\` (${alumniId})`,
+            `There is no resume for an alumni with the given \`id\` (${ownerId})`,
             { cause: error },
           );
         }

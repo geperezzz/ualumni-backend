@@ -66,7 +66,7 @@ export class PositionOfInterestController {
   ): Promise<ResponseDto<PositionOfInterestDto>> {
     try {
       const positionOfInterest = await this.positionOfInterestService.create(
-        user.email,
+        user.id,
         createPositionOfInterestDto,
       );
       return {
@@ -82,7 +82,7 @@ export class PositionOfInterestController {
     }
   }
 
-  @Post(':alumniEmail/positions-of-interest')
+  @Post(':alumniId/positions-of-interest')
   @Allowed('admin')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
@@ -95,12 +95,12 @@ export class PositionOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async create(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId') alumniId: string,
     @Body() createPositionOfInterestDto: CreatePositionOfInterestDto,
   ): Promise<ResponseDto<PositionOfInterestDto>> {
     try {
       const positionOfInterest = await this.positionOfInterestService.create(
-        alumniEmail,
+        alumniId,
         createPositionOfInterestDto,
       );
       return {
@@ -136,7 +136,7 @@ export class PositionOfInterestController {
       throw new BadRequestException('Invalid number of items per page');
   
     const paginationResponse = await this.positionOfInterestService.findMany(
-      user.email,
+      user.id,
       paginationParamsDto.pageNumber,
       paginationParamsDto.itemsPerPage,
     );
@@ -146,7 +146,7 @@ export class PositionOfInterestController {
     };
   }
 
-  @Get(':alumniEmail/positions-of-interest')
+  @Get(':alumniId/positions-of-interest')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -160,14 +160,14 @@ export class PositionOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async findPage(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId') alumniId: string,
     @Query() paginationParamsDto: PaginationParamsDto,
   ): Promise<PaginatedResponseDto<PositionOfInterestDto>> {
     if (paginationParamsDto.itemsPerPage < 1)
       throw new BadRequestException('Invalid number of items per page');
 
     const paginationResponse = await this.positionOfInterestService.findMany(
-      alumniEmail,
+      alumniId,
       paginationParamsDto.pageNumber,
       paginationParamsDto.itemsPerPage,
     );
@@ -195,7 +195,7 @@ export class PositionOfInterestController {
     @Param('positionName') positionName: string,
   ): Promise<ResponseDto<PositionOfInterestDto>> {
     const positionOfInterest = await this.positionOfInterestService.findOne(
-      user.email,
+      user.id,
       positionName,
     );
     if (!positionOfInterest)
@@ -208,7 +208,7 @@ export class PositionOfInterestController {
     };
   }
 
-  @Get(':alumniEmail/position-of-interest/:positionName')
+  @Get(':alumniId/position-of-interest/:positionName')
   @SessionNotRequired()
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
@@ -223,11 +223,11 @@ export class PositionOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async findOne(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId') alumniId: string,
     @Param('positionName') positionName: string,
   ): Promise<ResponseDto<PositionOfInterestDto>> {
     const positionOfInterest = await this.positionOfInterestService.findOne(
-      alumniEmail,
+      alumniId,
       positionName,
     );
     if (!positionOfInterest)
@@ -263,7 +263,7 @@ export class PositionOfInterestController {
   ): Promise<ResponseDto<PositionOfInterestDto>> {
     try {
       const positionOfInterest = await this.positionOfInterestService.update(
-        user.email,
+        user.id,
         positionName,
         updatePositionOfInterestDto,
       );
@@ -280,7 +280,7 @@ export class PositionOfInterestController {
     }
   }
 
-  @Patch(':alumniEmail/position-of-interest/:positionName')
+  @Patch(':alumniId/position-of-interest/:positionName')
   @Allowed('admin', 'visitor')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -297,13 +297,13 @@ export class PositionOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async update(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId') alumniId: string,
     @Param('positionName') positionName: string,
     @Body() updatePositionOfInterestDto: UpdatePositionOfInterestDto,
   ): Promise<ResponseDto<PositionOfInterestDto>> {
     try {
       const positionOfInterest = await this.positionOfInterestService.update(
-        alumniEmail,
+        alumniId,
         positionName,
         updatePositionOfInterestDto,
       );
@@ -339,7 +339,7 @@ export class PositionOfInterestController {
   ): Promise<ResponseDto<PositionOfInterestDto>> {
     try {
       const positionOfInterest = await this.positionOfInterestService.remove(
-        user.email,
+        user.id,
         positionName,
       );
       return {
@@ -353,7 +353,7 @@ export class PositionOfInterestController {
     }
   }
 
-  @Delete(':alumniEmail/position-of-interest/:positionName')
+  @Delete(':alumniId/position-of-interest/:positionName')
   @Allowed('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -367,12 +367,12 @@ export class PositionOfInterestController {
     description: 'An unexpected situation ocurred',
   })
   async remove(
-    @Param('alumniEmail') alumniEmail: string,
+    @Param('alumniId') alumniId: string,
     @Param('positionName') positionName: string,
   ): Promise<ResponseDto<PositionOfInterestDto>> {
     try {
       const positionOfInterest = await this.positionOfInterestService.remove(
-        alumniEmail,
+        alumniId,
         positionName,
       );
       return {
