@@ -13,7 +13,6 @@ model Student {
   names           String
   surnames        String
   address         String
-  telephoneNumber String
   enrolledCareers StudentCareer[]
   coursesTaken    CiapCourse[]
 }
