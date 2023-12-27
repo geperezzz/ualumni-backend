@@ -167,7 +167,7 @@ export class CiapCoursesService {
   }
 
   //Create ciap course if not exists in ualumni db
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async synchronize() {
     try {
       const ucabDbCiapCourses = await this.ucabDbService.ciapCourse.findMany();

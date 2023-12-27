@@ -55,7 +55,7 @@ export class AlumniService {
           associatedUser: {
             select: {
               email: true,
-            }
+            },
           },
           graduations: true,
         },
@@ -63,7 +63,9 @@ export class AlumniService {
 
       // Compare with ucab alumni
       for (let ualumniDbAlumni of allUalumni) {
-        const ucabDbAlumni = (await this.findUcabDbAlumni(ualumniDbAlumni.associatedUser.email))!;
+        const ucabDbAlumni = (await this.findUcabDbAlumni(
+          ualumniDbAlumni.associatedUser.email,
+        ))!;
         for (let ucabDbCareer of ucabDbAlumni.enrolledCareers) {
           // Create graduation if not exists
           const ualumniDbCareer = ualumniDbAlumni.graduations.find(
@@ -115,8 +117,8 @@ export class AlumniService {
         async (tx) => {
           const createdAlumni = await tx.alumni.create({
             data: {
+              birthDate: ucabDbAlumni.birthDate,
               address: ucabDbAlumni.address,
-              telephoneNumber: ucabDbAlumni.telephoneNumber,
               associatedUser: {
                 create: {
                   email: createAlumniDto.email,
@@ -207,9 +209,7 @@ export class AlumniService {
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.ualumniDbService.$queryRaw<
-          { id: string; totalCount: number }[]
-        >`
+        this.ualumniDbService.$queryRaw<{ id: string; totalCount: number }[]>`
           WITH filtered_by_visibility AS (
             SELECT a."id", u."names", u."surnames", g."careerName", p."positionName", i."industryName", rt."skillName", rt."skillCategoryName"
             FROM "User" u INNER JOIN "Alumni" a USING("id")
@@ -312,7 +312,7 @@ export class AlumniService {
             }
           ), 
           filtered_by_skills AS (
-            SELECT "id", COUNT("id") AS "filteredAlumniCount"
+            SELECT "id"
             FROM filtered_by_skill_categories
             GROUP BY "id"
             ${
@@ -327,9 +327,8 @@ export class AlumniService {
                 : PrismaUalumni.empty
             }
           ),filtered_total_count AS (
-            SELECT MAX("filteredAlumniCount") AS "totalCount"
+            SELECT COUNT("id") AS "totalCount"
             FROM filtered_by_skills
-        
           )
          
           SELECT "id", "totalCount"
@@ -412,9 +411,7 @@ export class AlumniService {
             SELECT setseed(${randomizationSeed})
           ) AS randomization_seed
         `,
-        this.ualumniDbService.$queryRaw<
-          { id: string; totalCount: number }[]
-        >`
+        this.ualumniDbService.$queryRaw<{ id: string; totalCount: number }[]>`
           WITH filtered_by_visibility AS (
             SELECT a."id", u."names", u."surnames", g."careerName", p."positionName", i."industryName", rt."skillName", rt."skillCategoryName"
             FROM "User" u INNER JOIN "Alumni" a USING("id")
@@ -517,7 +514,7 @@ export class AlumniService {
             }
           ), 
           filtered_by_skills AS (
-            SELECT "id", COUNT("id") AS "filteredAlumniCount"
+            SELECT "id"
             FROM filtered_by_skill_categories
             GROUP BY "id"
             ${
@@ -532,7 +529,7 @@ export class AlumniService {
                 : PrismaUalumni.empty
             }
           ),filtered_total_count AS (
-            SELECT MAX("filteredAlumniCount") AS "totalCount"
+            SELECT COUNT("id") AS "totalCount"
             FROM filtered_by_skills
         
           )
@@ -669,8 +666,8 @@ export class AlumniService {
           names: resume.owner.associatedUser.names,
           surnames: resume.owner.associatedUser.surnames,
           password: resume.owner.associatedUser.password,
+          birthDate: resume.owner.birthDate,
           address: resume.owner.address,
-          telephoneNumber: resume.owner.telephoneNumber,
           graduations: resume.owner.graduations,
           resume: {
             reminderSent: resume.reminderSent,
@@ -709,7 +706,6 @@ export class AlumniService {
         },
       };
     } catch (error) {
-      console.log(error);
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });
@@ -824,8 +820,8 @@ export class AlumniService {
             names: resume.owner.associatedUser.names,
             surnames: resume.owner.associatedUser.surnames,
             password: resume.owner.associatedUser.password,
+            birthDate: resume.owner.birthDate,
             address: resume.owner.address,
-            telephoneNumber: resume.owner.telephoneNumber,
             graduations: resume.owner.graduations,
             resume: {
               reminderSent: resume.reminderSent,
@@ -978,8 +974,8 @@ export class AlumniService {
             names: resume.owner.associatedUser.names,
             surnames: resume.owner.associatedUser.surnames,
             password: resume.owner.associatedUser.password,
+            birthDate: resume.owner.birthDate,
             address: resume.owner.address,
-            telephoneNumber: resume.owner.telephoneNumber,
             graduations: resume.owner.graduations,
             resume: {
               reminderSent: resume.reminderSent,
@@ -1051,10 +1047,10 @@ export class AlumniService {
   async findOneByEmail(email: string) {
     try {
       let alumni = await this.ualumniDbService.alumni.findFirst({
-        where: { 
+        where: {
           associatedUser: {
-            email
-          }
+            email,
+          },
         },
         include: {
           associatedUser: {
@@ -1087,16 +1083,12 @@ export class AlumniService {
     }
   }
 
-  async update(
-    id: string,
-    updateAlumniDto: UpdateAlumniDto,
-  ): Promise<Alumni> {
+  async update(id: string, updateAlumniDto: UpdateAlumniDto): Promise<Alumni> {
     try {
       let updatedAlumni = await this.ualumniDbService.alumni.update({
         where: { id },
         data: {
           address: updateAlumniDto.address,
-          telephoneNumber: updateAlumniDto.telephoneNumber,
           associatedUser: {
             update: {
               email: updateAlumniDto.email,

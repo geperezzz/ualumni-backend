@@ -36,7 +36,7 @@ export class CareerService {
   }
 
   //Create career if not exists in ualumni db
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async synchronize() {
     try {
       const ucabDbCareers = await this.ucabDbService.career.findMany();
