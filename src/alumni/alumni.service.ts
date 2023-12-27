@@ -312,7 +312,7 @@ export class AlumniService {
             }
           ), 
           filtered_by_skills AS (
-            SELECT "id", COUNT("id") AS "filteredAlumniCount"
+            SELECT "id"
             FROM filtered_by_skill_categories
             GROUP BY "id"
             ${
@@ -327,9 +327,8 @@ export class AlumniService {
                 : PrismaUalumni.empty
             }
           ),filtered_total_count AS (
-            SELECT MAX("filteredAlumniCount") AS "totalCount"
+            SELECT COUNT("id") AS "totalCount"
             FROM filtered_by_skills
-        
           )
          
           SELECT "id", "totalCount"
@@ -515,7 +514,7 @@ export class AlumniService {
             }
           ), 
           filtered_by_skills AS (
-            SELECT "id", COUNT("id") AS "filteredAlumniCount"
+            SELECT "id"
             FROM filtered_by_skill_categories
             GROUP BY "id"
             ${
@@ -530,7 +529,7 @@ export class AlumniService {
                 : PrismaUalumni.empty
             }
           ),filtered_total_count AS (
-            SELECT MAX("filteredAlumniCount") AS "totalCount"
+            SELECT COUNT("id") AS "totalCount"
             FROM filtered_by_skills
         
           )
@@ -707,7 +706,6 @@ export class AlumniService {
         },
       };
     } catch (error) {
-      console.log(error);
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });
