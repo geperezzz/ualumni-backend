@@ -117,6 +117,7 @@ export class AlumniService {
         async (tx) => {
           const createdAlumni = await tx.alumni.create({
             data: {
+              birthDate: ucabDbAlumni.birthDate,
               address: ucabDbAlumni.address,
               associatedUser: {
                 create: {
@@ -666,6 +667,7 @@ export class AlumniService {
           names: resume.owner.associatedUser.names,
           surnames: resume.owner.associatedUser.surnames,
           password: resume.owner.associatedUser.password,
+          birthDate: resume.owner.birthDate,
           address: resume.owner.address,
           graduations: resume.owner.graduations,
           resume: {
@@ -820,6 +822,7 @@ export class AlumniService {
             names: resume.owner.associatedUser.names,
             surnames: resume.owner.associatedUser.surnames,
             password: resume.owner.associatedUser.password,
+            birthDate: resume.owner.birthDate,
             address: resume.owner.address,
             graduations: resume.owner.graduations,
             resume: {
@@ -973,6 +976,7 @@ export class AlumniService {
             names: resume.owner.associatedUser.names,
             surnames: resume.owner.associatedUser.surnames,
             password: resume.owner.associatedUser.password,
+            birthDate: resume.owner.birthDate,
             address: resume.owner.address,
             graduations: resume.owner.graduations,
             resume: {

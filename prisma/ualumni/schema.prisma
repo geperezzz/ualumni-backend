@@ -76,6 +76,7 @@ model Alumni {
   associatedUser  User             @relation(fields: [id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   id              String           @id @db.Uuid
   address         String?
+  birthDate       DateTime         @db.Date
   jobApplications JobApplication[]
   resume          Resume?
   graduations     Graduation[]

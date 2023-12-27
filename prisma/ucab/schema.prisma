@@ -13,6 +13,7 @@ model Student {
   names           String
   surnames        String
   address         String
+  birthDate       DateTime        @db.Date
   enrolledCareers StudentCareer[]
   coursesTaken    CiapCourse[]
 }
