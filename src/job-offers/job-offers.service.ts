@@ -51,6 +51,7 @@ export class JobOffersService {
               `There is no contract type with \`name\` equal to \`${createJobOfferDto.contractTypeName}\``,
             );
           }
+          throw new NotFoundError('The given `contractTypeName` or `careerName` does not exist');
         }
       }
       throw new UnexpectedError('An unexpected situation ocurred', {
