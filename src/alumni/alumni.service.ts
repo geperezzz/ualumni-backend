@@ -293,27 +293,25 @@ export class AlumniService {
                 : PrismaUalumni.empty
             }
           ), filtered_by_skill_categories AS (
-            SELECT "id", "skillName", "skillCategoryName"
+            SELECT "id"
             FROM filtered_by_industry
+            GROUP BY "id"
             ${
               skillCategories
                 ? PrismaUalumni.sql`
-                    WHERE "skillCategoryName" IN (${PrismaUalumni.join(
-                      skillCategories,
-                    )}) `
-                : PrismaUalumni.empty
-            }
-            GROUP BY "id", "skillName", "skillCategoryName"
-            ${
-              skillCategories
-                ? PrismaUalumni.sql`
-                    HAVING COUNT(*) = ${skillCategories.length}`
+                    HAVING ${PrismaUalumni.join(
+                      skillCategories.map((skillCategory) => {
+                        return PrismaUalumni.sql`bool_or("skillCategoryName" ILIKE ${skillCategory})`;
+                      }),
+                      ' AND ',
+                    )}`
                 : PrismaUalumni.empty
             }
           ), 
           filtered_by_skills AS (
             SELECT "id"
-            FROM filtered_by_skill_categories
+            FROM filtered_by_industry
+            WHERE "id" IN (SELECT "id" FROM filtered_by_skill_categories)
             GROUP BY "id"
             ${
               skills
@@ -495,27 +493,25 @@ export class AlumniService {
                 : PrismaUalumni.empty
             }
           ), filtered_by_skill_categories AS (
-            SELECT "id", "skillName", "skillCategoryName"
+            SELECT "id"
             FROM filtered_by_industry
+            GROUP BY "id"
             ${
               skillCategories
                 ? PrismaUalumni.sql`
-                    WHERE "skillCategoryName" IN (${PrismaUalumni.join(
-                      skillCategories,
-                    )}) `
-                : PrismaUalumni.empty
-            }
-            GROUP BY "id", "skillName", "skillCategoryName"
-            ${
-              skillCategories
-                ? PrismaUalumni.sql`
-                    HAVING COUNT(*) = ${skillCategories.length}`
+                    HAVING ${PrismaUalumni.join(
+                      skillCategories.map((skillCategory) => {
+                        return PrismaUalumni.sql`bool_or("skillCategoryName" ILIKE ${skillCategory})`;
+                      }),
+                      ' AND ',
+                    )}`
                 : PrismaUalumni.empty
             }
           ), 
           filtered_by_skills AS (
             SELECT "id"
-            FROM filtered_by_skill_categories
+            FROM filtered_by_industry
+            WHERE "id" IN (SELECT "id" FROM filtered_by_skill_categories)
             GROUP BY "id"
             ${
               skills
@@ -706,6 +702,7 @@ export class AlumniService {
         },
       };
     } catch (error) {
+      console.log(error);
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });
