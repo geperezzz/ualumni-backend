@@ -49,6 +49,16 @@ export class JobOffersFilterParamsDto {
   })
   skills?: JobOfferFilterSkillDto[];
 
+  @ApiProperty({ name: 'categories' })
+  @IsString({ each: true })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') return [value];
+    return value;
+  })
+  @Expose({ name: 'categories' })
+  skillCategories?: string[];
+
   @IsString({ each: true })
   @IsOptional()
   @Transform(({ value }) => (typeof value === 'string' ? [value] : value))

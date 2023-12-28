@@ -111,20 +111,28 @@ export class JobOffersService {
                   : Prisma.empty
               }
             GROUP BY j."id"
+            HAVING
             ${
               filterParams.skills?.length
-                ? Prisma.sql`
-                    HAVING
-                      ${Prisma.join(
-                        filterParams.skills.map(
-                          ({ categoryName, skillName }) => {
-                            return Prisma.sql`bool_or(jots."technicalSkillCategoryName" ILIKE ${categoryName} AND jots."technicalSkillName" ILIKE ${skillName})`;
-                          },
-                        ),
-                        ' AND ',
-                      )}
-                  `
-                : Prisma.empty
+                ? Prisma.join(
+                    filterParams.skills.map(
+                      ({ categoryName, skillName }) => {
+                        return Prisma.sql`bool_or(jots."technicalSkillCategoryName" ILIKE ${categoryName} AND jots."technicalSkillName" ILIKE ${skillName})`;
+                      },
+                    ),
+                    ' AND ',
+                  )
+                : Prisma.sql`TRUE`
+            }
+            ${
+              filterParams.skillCategories?.length
+                ? Prisma.join(
+                    filterParams.skillCategories.map(
+                      (category) => Prisma.sql`AND bool_or(jots."technicalSkillCategoryName" ILIKE ${category})`,
+                      ' ',
+                    )
+                  )
+                : Prisma.sql`AND TRUE`
             }
           ), filtered_job_offers_count AS (
             SELECT COUNT(*) AS count
@@ -167,6 +175,7 @@ export class JobOffersService {
         },
       };
     } catch (error) {
+      console.log(error)
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });
