@@ -10,13 +10,55 @@ import { AlumniToVerify } from 'prisma/ualumni/client';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
 import { AlumniService } from 'src/alumni/alumni.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { MailerService } from '@nestjs-modules/mailer';
+import { UcabDbService } from 'src/ucab-db/ucab-db.service';
 
 @Injectable()
 export class AlumniToVerifyService {
   constructor(
     private alumniService: AlumniService,
     private ualumniDbService: UalumniDbService,
+    private ucabDbService: UcabDbService,
+    private mailerService: MailerService
   ) {}
+
+  private async sendVerificationEmail(alumniToVerify: AlumniToVerify) {
+    const alumni = await this.ucabDbService.student.findUnique({
+      where: { email: alumniToVerify.email },
+    });
+    const name = `${alumni?.names.split(' ')[0]} ${alumni?.surnames.split(
+      ' ',
+    )[0]}`;
+
+    const link = `http://localhost:3000/auth/verify-registration?token=${alumniToVerify.token}&email=${alumniToVerify.email}` // probablemente deba ser un link del front pero shh
+
+    try {
+      await this.mailerService.sendMail({
+        to: alumniToVerify.email,
+        subject: `Verificación  UAlumni - ${name}`,
+        template: './email-verification', 
+        context: {
+          alumni: name,
+          token: alumniToVerify.token,
+          link,
+        },
+        attachments: [
+          {
+            filename: 'logo.jpg',
+            path: __dirname + '/templates/images/logo.png',
+            cid: 'logo',
+          },
+          {
+            filename: 'instagram.jpg',
+            path: __dirname + '/templates/images/instagram.png',
+            cid: 'instagram',
+          },
+        ],
+      });
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred while sending the verification email');
+    }
+  }
 
   async create(
     createAlumnitoVerifyDto: CreateAlumniToVerifyDto,
@@ -43,8 +85,9 @@ export class AlumniToVerifyService {
 
     const token = Math.floor(1000 + Math.random() * 9000).toString();
 
+    let alumniToVerify: AlumniToVerify;
     try {
-      const alumniToVerify = await this.ualumniDbService.alumniToVerify.upsert({
+      alumniToVerify = await this.ualumniDbService.alumniToVerify.upsert({
         where: {
           email: createAlumnitoVerifyDto.email
         },
@@ -58,13 +101,14 @@ export class AlumniToVerifyService {
           token,
         },
       });
-
-      return alumniToVerify;
     } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
       });
     }
+
+    await this.sendVerificationEmail(alumniToVerify);
+    return alumniToVerify;
   }
 
   async findOne(alumniEmail: string): Promise<AlumniToVerify | null> {

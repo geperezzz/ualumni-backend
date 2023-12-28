@@ -29,7 +29,6 @@ import { Allowed } from 'src/permissions/allowed-roles.decorator';
 import { SessionUser } from 'src/auth/session/session-user.decorator';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from 'prisma/ualumni/client';
-import { MailingService } from 'src/mailing/mailing.service';
 
 @ApiTags('job-applications')
 @Controller('alumni')
@@ -37,7 +36,6 @@ import { MailingService } from 'src/mailing/mailing.service';
 export class JobApplicationsController {
   constructor(
     private readonly jobApplicationsService: JobApplicationsService,
-    private readonly mailingService: MailingService,
   ) {}
 
   @Post('me/job-applications')
@@ -50,11 +48,6 @@ export class JobApplicationsController {
       let createdJobApplication = await this.jobApplicationsService.create(
         user.id,
         createJobApplicationDto,
-      );
-
-      let sentEmail = await this.mailingService.sendResume(
-        user.email,
-        createJobApplicationDto.jobOfferId,
       );
 
       return {

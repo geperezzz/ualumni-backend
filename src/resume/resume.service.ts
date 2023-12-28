@@ -13,13 +13,12 @@ import * as pug from 'pug';
 import puppeteer from 'puppeteer';
 import { AlumniService } from 'src/alumni/alumni.service';
 import { UalumniDbService } from 'src/ualumni-db/ualumni-db.service';
-import { MailingService } from 'src/mailing/mailing.service';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class ResumeService {
   constructor(
-    @Inject(forwardRef(() => MailingService))
-    private readonly mailingService: MailingService,
+    private readonly mailerService: MailerService,
     private readonly ualumniDbService: UalumniDbService,
     private readonly alumniService: AlumniService,
   ) {}
@@ -328,9 +327,48 @@ export class ResumeService {
     });
   }
 
+  private async sendResumeVisibilityReminderEmail(alumniId: string) {
+    const alumni = await this.alumniService.findOne(alumniId);
+    if (!alumni) {
+      throw new UnexpectedError(`There is no alumni with the given \`id\` (${alumniId})`);
+    }
+
+    const name = `${alumni.names.split(' ')[0]} ${alumni.surnames.split(
+      ' ',
+    )[0]}`;
+
+    const link = `http://localhost:3000/auth/login` // homepage UAlumni
+
+    try {
+      await this.mailerService.sendMail({
+        to: alumni.email,
+        subject: `Renovación de Visibilidad de Currículum UAlumni - ${name}`,
+        template: './resume-reminder', 
+        context: {
+          alumni: name,
+          link,
+        },
+        attachments: [
+          {
+            filename: 'logo.jpg',
+            path: __dirname + '/templates/images/logo.png',
+            cid: 'logo',
+          },
+          {
+            filename: 'instagram.jpg',
+            path: __dirname + '/templates/images/instagram.png',
+            cid: 'instagram',
+          },
+        ],
+      });
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred while sending the resume visibility reminder email');
+    }
+  }
+
   // send visibility reminder a week before hiding
   @Cron(CronExpression.EVERY_DAY_AT_10AM)
-  async sendReminder() {
+  async sendResumeVisibilityReminder() {
     const reminderDate = new Date();
     reminderDate.setDate(reminderDate.getDate() - 21);
 
@@ -343,7 +381,7 @@ export class ResumeService {
     });
 
     for (let alumni of alumniForReminder) {
-      const sentEmail = await this.mailingService.sendResumeVisibilityReminder(
+      await this.sendResumeVisibilityReminderEmail(
         alumni.ownerId,
       );
       await this.ualumniDbService.resume.update({

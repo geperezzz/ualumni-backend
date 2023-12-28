@@ -4,20 +4,16 @@ import { AlumniToVerifyService } from 'src/alumni-to-verify/alumni-to-verify.ser
 import { InvalidCredentialsError } from './errors/auth.error';
 import { AlumniService } from 'src/alumni/alumni.service';
 import { RegisterDto } from './dto/register.dto';
-import { MailingService } from 'src/mailing/mailing.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private alumniToVerifyService: AlumniToVerifyService,
     private alumniService: AlumniService,
-    private mailingService: MailingService,
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const alumniToVerify = await this.alumniToVerifyService.create(registerDto);
-    await this.mailingService.sendVerification(alumniToVerify.email, alumniToVerify.token);
-    return alumniToVerify;
+    return await this.alumniToVerifyService.create(registerDto);
   }
   
   async verifyRegistration(verifyRegistrationParamsDto: VerifyRegistrationParamsDto) {

@@ -7,5 +7,6 @@ import { UalumniDbModule } from 'src/ualumni-db/ualumni-db.module';
   imports: [UalumniDbModule],
   controllers: [JobOffersController],
   providers: [JobOffersService],
+  exports: [JobOffersService]
 })
 export class JobOffersModule {}

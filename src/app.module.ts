@@ -5,7 +5,6 @@ import { JobApplicationsModule } from './job-applications/job-applications.modul
 import { JobOffersModule } from './job-offers/job-offers.module';
 import { GraduationsModule } from './graduations/graduations.module';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
 import { PermissionsModule } from './permissions/permissions.module';
 import { LanguageModule } from './language/language.module';
 import { CareerModule } from './career/career.module';
@@ -26,19 +25,16 @@ import { ResumeTechnicalSkillModule } from './resume-technical-skill/resume-tech
 import { UcabDbModule } from './ucab-db/ucab-db.module';
 import { WorkExperiencesModule } from './work-experiences/work-experiences.module';
 import { PositionOfInterestModule } from './position-of-interest/position-of-interest.module';
-import { MailingModule } from './mailing/mailing.module';
 import { AlumniToVerifyModule } from './alumni-to-verify/alumni-to-verify.module';
 
 @Module({
   imports: [
     SoftSkillsModule,
     AlumniModule,
-    JobApplicationsModule,
     JobOffersModule,
     GraduationsModule,
     AuthModule,
     PermissionsModule,
-    ConfigModule.forRoot(),
     PermissionsModule,
     ScheduleModule.forRoot(),
     LanguageModule,
@@ -59,8 +55,8 @@ import { AlumniToVerifyModule } from './alumni-to-verify/alumni-to-verify.module
     UcabDbModule,
     WorkExperiencesModule,
     PositionOfInterestModule,
-    MailingModule,
     AlumniToVerifyModule,
+    JobApplicationsModule,
   ],
 })
 export class AppModule {}
