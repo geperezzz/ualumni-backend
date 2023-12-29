@@ -54,13 +54,13 @@ export class JobApplicationsService {
         attachments: [
           { filename: `Currículum ${name}.pdf`, content: resumePdf },
           {
-            filename: 'logo.jpg',
-            path: __dirname + '/templates/images/logo.png',
+            filename: 'logo.png',
+            path: 'src/templates/images/logo.png',
             cid: 'logo',
           },
           {
-            filename: 'instagram.jpg',
-            path: __dirname + '/templates/images/instagram.png',
+            filename: 'instagram.png',
+            path: 'src/templates/images/instagram.png',
             cid: 'instagram',
           },
         ],
