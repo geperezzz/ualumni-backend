@@ -262,16 +262,17 @@ export class AlumniService {
             ${
               positionsOfInterest
                 ? PrismaUalumni.sql`
-                    WHERE "positionName" IN (${PrismaUalumni.join(
-                      positionsOfInterest,
-                    )})`
+                JOIN UNNEST(${positionsOfInterest.map(
+                  (position) => `%${position.replaceAll(' ', '%')}%`,
+                )}) AS position_pattern
+                ON UNACCENT("positionName") ILIKE UNACCENT(position_pattern)`
                 : PrismaUalumni.empty
             }
             GROUP BY "id", "industryName", "skillName", "skillCategoryName"
             ${
               positionsOfInterest
                 ? PrismaUalumni.sql`
-                    HAVING COUNT(*) = ${positionsOfInterest.length}`
+                HAVING COUNT(DISTINCT position_pattern) = ${positionsOfInterest.length}`
                 : PrismaUalumni.empty
             }
           ), filtered_by_industry AS (
@@ -280,16 +281,17 @@ export class AlumniService {
             ${
               industriesOfInterest
                 ? PrismaUalumni.sql`
-                    WHERE "industryName" IN (${PrismaUalumni.join(
-                      industriesOfInterest,
-                    )})`
+                    JOIN UNNEST(${industriesOfInterest.map(
+                      (industry) => `%${industry.replaceAll(' ', '%')}%`,
+                    )}) AS industry_pattern
+                    ON UNACCENT("industryName") ILIKE UNACCENT(industry_pattern)`
                 : PrismaUalumni.empty
             }
             GROUP BY "id", "skillName", "skillCategoryName"
             ${
               industriesOfInterest
                 ? PrismaUalumni.sql`
-                    HAVING COUNT(*) = ${industriesOfInterest.length}`
+                    HAVING COUNT(DISTINCT industry_pattern) = ${industriesOfInterest.length}`
                 : PrismaUalumni.empty
             }
           ), filtered_by_skill_categories AS (
@@ -462,16 +464,17 @@ export class AlumniService {
             ${
               positionsOfInterest
                 ? PrismaUalumni.sql`
-                    WHERE "positionName" IN (${PrismaUalumni.join(
-                      positionsOfInterest,
-                    )})`
+                JOIN UNNEST(${positionsOfInterest.map(
+                  (position) => `%${position.replaceAll(' ', '%')}%`,
+                )}) AS position_pattern
+                ON UNACCENT("positionName") ILIKE UNACCENT(position_pattern)`
                 : PrismaUalumni.empty
             }
             GROUP BY "id", "industryName", "skillName", "skillCategoryName"
             ${
               positionsOfInterest
                 ? PrismaUalumni.sql`
-                    HAVING COUNT(*) = ${positionsOfInterest.length}`
+                HAVING COUNT(DISTINCT position_pattern) = ${positionsOfInterest.length}`
                 : PrismaUalumni.empty
             }
           ), filtered_by_industry AS (
@@ -480,16 +483,17 @@ export class AlumniService {
             ${
               industriesOfInterest
                 ? PrismaUalumni.sql`
-                    WHERE "industryName" IN (${PrismaUalumni.join(
-                      industriesOfInterest,
-                    )})`
+                    JOIN UNNEST(${industriesOfInterest.map(
+                      (industry) => `%${industry.replaceAll(' ', '%')}%`,
+                    )}) AS industry_pattern
+                    ON UNACCENT("industryName") ILIKE UNACCENT(industry_pattern)`
                 : PrismaUalumni.empty
             }
             GROUP BY "id", "skillName", "skillCategoryName"
             ${
               industriesOfInterest
                 ? PrismaUalumni.sql`
-                    HAVING COUNT(*) = ${industriesOfInterest.length}`
+                    HAVING COUNT(DISTINCT industry_pattern) = ${industriesOfInterest.length}`
                 : PrismaUalumni.empty
             }
           ), filtered_by_skill_categories AS (
