@@ -46,7 +46,7 @@ export class JobApplicationsService {
       await this.mailerService.sendMail({
         to: jobOffer.companyEmail,
         subject: `Currículum ${alumni.names} ${alumni.surnames} - ${jobOffer.position}`,
-        template: './send-resume', 
+        template: './job-application', 
         context: {
           alumni: name,
           position: jobOffer.position,
