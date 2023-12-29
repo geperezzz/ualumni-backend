@@ -26,6 +26,10 @@ import { UcabDbModule } from './ucab-db/ucab-db.module';
 import { WorkExperiencesModule } from './work-experiences/work-experiences.module';
 import { PositionOfInterestModule } from './position-of-interest/position-of-interest.module';
 import { AlumniToVerifyModule } from './alumni-to-verify/alumni-to-verify.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { join } from 'path';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -57,6 +61,27 @@ import { AlumniToVerifyModule } from './alumni-to-verify/alumni-to-verify.module
     PositionOfInterestModule,
     AlumniToVerifyModule,
     JobApplicationsModule,
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: configService.getOrThrow('MAIL_HOST'),
+          secure: false,
+          auth: {
+            user: configService.getOrThrow('MAIL_USER'),
+            pass: configService.getOrThrow('MAIL_PASS'),
+          },
+        },
+        template: {
+          dir: join(__dirname, '/templates'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+      inject: [ConfigService]
+    }),
   ],
 })
 export class AppModule {}
