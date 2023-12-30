@@ -589,6 +589,9 @@ export class AlumniService {
                 endDate: true,
                 isVisible: true,
               },
+              orderBy: {
+                endDate: 'desc'
+              }
             },
             industriesOfInterest: {
               where: { isVisible: true },
@@ -630,6 +633,10 @@ export class AlumniService {
                 endDate: true,
                 isVisible: true,
               },
+              orderBy: [
+                { endDate: 'desc' },
+                { startDate: 'desc' },
+              ]
             },
             owner: {
               include: {
@@ -752,6 +759,9 @@ export class AlumniService {
               endDate: true,
               isVisible: true,
             },
+            orderBy: {
+              endDate: 'desc'
+            }
           },
           industriesOfInterest: {
             select: {
@@ -788,6 +798,10 @@ export class AlumniService {
               endDate: true,
               isVisible: true,
             },
+            orderBy: [
+              { endDate: 'desc' },
+              { startDate: 'desc' }
+            ]
           },
           owner: {
             include: {
@@ -901,6 +915,9 @@ export class AlumniService {
               endDate: true,
               isVisible: true,
             },
+            orderBy: {
+              endDate: 'desc'
+            }
           },
           industriesOfInterest: {
             where: { isVisible: true },
@@ -942,6 +959,10 @@ export class AlumniService {
               endDate: true,
               isVisible: true,
             },
+            orderBy: [
+              { endDate: 'desc' },
+              { startDate: 'desc' }
+            ]
           },
           owner: {
             include: {

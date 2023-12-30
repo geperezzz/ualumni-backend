@@ -92,6 +92,10 @@ export class WorkExperiencesService {
           },
           take: itemsPerPage,
           skip: itemsPerPage * (pageNumber - 1),
+          orderBy: [
+            { endDate: 'desc' },
+            { startDate: 'desc' }
+          ]
         }),
         this.ualumniDbService.workExperience.count(),
       ]);
@@ -125,6 +129,10 @@ export class WorkExperiencesService {
           },
           take: itemsPerPage,
           skip: itemsPerPage * (pageNumber - 1),
+          orderBy: [
+            { endDate: 'desc' },
+            { startDate: 'desc' }
+          ]
         }),
         this.ualumniDbService.workExperience.count({
           where: {

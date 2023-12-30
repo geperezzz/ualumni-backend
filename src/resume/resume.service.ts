@@ -105,6 +105,9 @@ export class ResumeService {
               endDate: true,
               isVisible: true,
             },
+            orderBy: {
+              endDate: 'desc'
+            }
           },
           industriesOfInterest: {
             select: {
@@ -141,6 +144,10 @@ export class ResumeService {
               endDate: true,
               isVisible: true,
             },
+            orderBy: [
+              { endDate: 'desc' },
+              { startDate: 'desc' }
+            ]
           },
         },
       });
@@ -236,6 +243,9 @@ export class ResumeService {
               endDate: true,
               isVisible: true,
             },
+            orderBy: {
+              endDate: 'desc'
+            }
           },
           industriesOfInterest: {
             select: {
@@ -272,6 +282,10 @@ export class ResumeService {
               endDate: true,
               isVisible: true,
             },
+            orderBy: [
+              { endDate: 'desc' },
+              { startDate: 'desc' }
+            ]
           },
         },
       });

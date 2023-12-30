@@ -76,6 +76,9 @@ export class HigherEducationStudyService {
         where: { resumeOwnerId },
         take: perPage,
         skip: (page - 1) * perPage,
+        orderBy: {
+          endDate: 'desc'
+        }
       });
 
       return {
