@@ -9,6 +9,7 @@ import {
   ForeignKeyError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
+import { PageDto } from 'src/common/dto/paginated-response.dto';
 
 @Injectable()
 export class JobOfferTechnicalSkillService {
@@ -48,8 +49,45 @@ export class JobOfferTechnicalSkillService {
     }
   }
 
-  findAll() {
-    return `This action returns all jobOfferTechnicalSkill`;
+  async findMany(
+    jobOfferId: string,
+    page: number,
+    perPage: number,
+  ): Promise<PageDto<JobOfferTechnicalSkillDto>> {
+    try {
+      const totalCount =
+        await this.ualumniDbService.jobOfferTechnicalSkill.count({
+          where: {
+            jobOfferId,
+          },
+        });
+      const pageCount = Math.ceil(totalCount / perPage);
+
+      if (page < 1) {
+        page = 1;
+      } else if (page > pageCount && pageCount > 0) {
+        page = pageCount;
+      }
+
+      const data = await this.ualumniDbService.jobOfferTechnicalSkill.findMany({
+        where: {
+          jobOfferId,
+        },
+        take: perPage,
+        skip: (page - 1) * perPage,
+      });
+      return {
+        page,
+        perPage: data.length,
+        pageCount,
+        totalCount,
+        items: data,
+      };
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
   }
 
   findOne(id: number) {
