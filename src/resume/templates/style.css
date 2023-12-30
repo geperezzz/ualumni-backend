@@ -75,6 +75,7 @@ body {
   width: 99%;
   height: 100%;
   object-fit: cover;
+  border-color: #007935;
 }
 
 .profileLeft h2 {
@@ -94,11 +95,13 @@ body {
 }
 
 .contactInfo {
-  padding-top: 40px;
+  padding-top: 5px;
+  margin-top: 0;
+  margin: 0px 0;
 }
 .title {
   color: #fff;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
   font-weight: 600;
   letter-spacing: 1px;
   margin-bottom: -5px;
@@ -112,9 +115,13 @@ body {
   list-style: none;
   margin: 5px 0;
   cursor: pointer;
+  min-width: 200px; 
+  white-space: nowrap; 
 }
+
 .contactInfo ul li .icon {
   display: inline-block;
+  vertical-align: middle;
   width: 30px;
   font-size: 18px;
   color: #fff;
@@ -123,44 +130,105 @@ body {
 .contactInfo ul li span {
   color: #fff;
   font-weight: 300;
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  white-space: nowrap;
+  font-size: calc(8 px + 1vw);
+
+
 }
 
 .contactInfo.portfolio li {
   margin-bottom: -5px;
 }
 
+.contactInfo.language li:not(:first-child)::before,
+.contactInfo.softskills li:not(:first-child)::before,
+.contactInfo.portfolio li:not(:first-child)::before {
+  content: "\00a0"; /* Unicode for non-breaking space */
+  font-family: 'Poppins', sans-serif; /* Replace with the font family of your icons */
+  color: transparent; /* Makes the icon invisible */
+  display: inline-block;
+  vertical-align: middle;
+  width: 30px; /* Same width as real icons */
+  font-size: 18px; /* Same font size as real icons */
+  margin-right: 5px; /* Adjust as needed */
+}
+
+.contactInfo.portfolio li span.text h5::before {
+  content: "\00a0"; /* Unicode for non-breaking space */
+  font-family: 'Poppins', sans-serif; /* Replace with the font family of your icons */
+  color: transparent; /* Makes the icon invisible */
+  display: inline-block;
+  vertical-align: middle;
+  width: 30px; /* Same width as real icons */
+  font-size: 18px; /* Same font size as real icons */
+  margin-right: 5px; /* Adjust as needed */
+}
+
+
+.project.sourceLink::before {
+  content: "\00a0"; /* Unicode for non-breaking space */
+  font-family: 'Poppins', sans-serif; /* Replace with the font family of your icons */
+  color: transparent; /* Makes the icon invisible */
+  display: inline-block;
+  vertical-align: middle;
+  width: 30px; /* Same width as real icons */
+  font-size: 18px; /* Same font size as real icons */
+  margin-right: 5px; /* Adjust as needed */
+}
+
 .container .right_Side {
   position: relative;
   background: #fff;
-  padding: 40px;
+  padding: 20px;
 }
 
 .name {
-  margin-bottom: 50px;
+  margin-bottom: 30px; 
   border-bottom: 1px solid #37b4e3;
+  position: relative;
 }
 
 .name h1 {
   color: #37b4e3;
   font-size: 2em;
-  margin-top: 20px;
+  margin-top: 10px; 
   text-transform: uppercase;
   text-align: left;
-  font-weight: 1000;
-  line-height: 1.4em;
-  margin-bottom: -11px;
+  /* font-size: 3vw; */ 
+  word-wrap: break-word;
+  padding-bottom: 30px;
 }
 
 .name h1 span {
   font-size: 0.8em;
   font-weight: 500;
+  text-transform:none;
 }
 
+
+.age{
+  color: #6b6a6a;
+  font-weight: normal;
+  
+  position: absolute;
+  right: 10px;
+  ;
+  font-weight: normal;
+  text-align: right;
+}
+.career-age {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  align-items: center;
+}
 .title2 {
   color: #007935;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
   letter-spacing: 1px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 p {
@@ -168,8 +236,9 @@ p {
 }
 
 .about {
-  margin-bottom: 50px;
+  margin-bottom: 10px;
 }
+
 
 .about:last-child {
   margin-bottom: 0;
@@ -178,9 +247,10 @@ p {
 .about .box {
   display: flex;
   flex-direction: column;
-  margin: 20px 0;
+  margin: 5px 0;
   padding-left: 8px;
   border-left: 8px solid #007935;
+  margin-bottom: 10px;
 }
 
 .about .box .year_company {
@@ -206,17 +276,25 @@ p {
   font-size: 16px;
 }
 .about .box .text h4 span {
-  text-transform: uppercase;
+  text-transform: uppercase; 
   color: black;
   font-size: 16px;
-  background: #37b4e3;
+  background: #A9DFF3;
+  font-weight: normal;
+  
 }
 .about .tecnicas ul {
   width: 50%;
   column-count: 2;
+  border-left: 8px solid #007935;
+  
+  padding-left: 30px;
 }
 
 .about .certificados ul {
   width: 50%;
   column-count: 1;
+  border-left: 8px solid #007935;
+  
+  padding-left: 30px;
 }
