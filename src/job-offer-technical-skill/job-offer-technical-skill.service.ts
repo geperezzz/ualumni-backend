@@ -90,8 +90,26 @@ export class JobOfferTechnicalSkillService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} jobOfferTechnicalSkill`;
+  async findOne(
+    jobOfferId: string,
+    skillCategoryName: string,
+    skillName: string,
+  ): Promise<JobOfferTechnicalSkillDto | null> {
+    try {
+      return await this.ualumniDbService.jobOfferTechnicalSkill.findUnique({
+        where: {
+          jobOfferId_technicalSkillName_technicalSkillCategoryName: {
+            jobOfferId,
+            technicalSkillCategoryName: skillCategoryName,
+            technicalSkillName: skillName,
+          },
+        },
+      });
+    } catch (error) {
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
   }
 
   update(id: number, updateJobOfferTechnicalSkillDto: UpdateJobOfferTechnicalSkillDto) {
