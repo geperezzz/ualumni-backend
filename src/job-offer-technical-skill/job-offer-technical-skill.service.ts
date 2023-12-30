@@ -7,6 +7,7 @@ import { Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,
+  NotFoundError,
   UnexpectedError,
 } from 'src/common/errors/service.error';
 import { PageDto } from 'src/common/dto/paginated-response.dto';
@@ -112,8 +113,53 @@ export class JobOfferTechnicalSkillService {
     }
   }
 
-  update(id: number, updateJobOfferTechnicalSkillDto: UpdateJobOfferTechnicalSkillDto) {
-    return `This action updates a #${id} jobOfferTechnicalSkill`;
+  update(
+    jobOfferId: string,
+    skillCategoryName: string,
+    skillName: string,
+    updateJobOfferTechnicalSkillDto: UpdateJobOfferTechnicalSkillDto,
+  ): Promise<JobOfferTechnicalSkillDto> {
+    try {
+      return this.ualumniDbService.jobOfferTechnicalSkill.update({
+        where: {
+          jobOfferId_technicalSkillName_technicalSkillCategoryName: {
+            jobOfferId,
+            technicalSkillCategoryName: skillCategoryName,
+            technicalSkillName: skillName,
+          },
+        },
+        data: {
+          jobOfferId: updateJobOfferTechnicalSkillDto.jobOfferId,
+          technicalSkillCategoryName:
+            updateJobOfferTechnicalSkillDto.skillCategoryName,
+          technicalSkillName: updateJobOfferTechnicalSkillDto.skillName,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundError(
+            `There is no technical skill with the given \`skillName\` (${skillName})`,
+            { cause: error },
+          );
+        }
+        if (error.code === 'P2002') {
+          throw new AlreadyExistsError(
+            `There already exists a technical skill with the given \`skillName\` (${updateJobOfferTechnicalSkillDto.skillName}) for the job offer with \`id\` (${updateJobOfferTechnicalSkillDto.jobOfferId})`,
+            { cause: error },
+          );
+        }
+        if (error.code === 'P2003') {
+          throw new ForeignKeyError(
+            `There is no job offer with the given \`id\` (${updateJobOfferTechnicalSkillDto.jobOfferId})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
   }
 
   remove(id: number) {
