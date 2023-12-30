@@ -162,7 +162,33 @@ export class JobOfferTechnicalSkillService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} jobOfferTechnicalSkill`;
+  async remove(
+    jobOfferId: string,
+    skillCategoryName: string,
+    skillName: string,
+  ): Promise<JobOfferTechnicalSkillDto> {
+    try {
+      return await this.ualumniDbService.jobOfferTechnicalSkill.delete({
+        where: {
+          jobOfferId_technicalSkillName_technicalSkillCategoryName: {
+            jobOfferId,
+            technicalSkillCategoryName: skillCategoryName,
+            technicalSkillName: skillName,
+          },
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundError(
+            `There is no technical skill with the given \`skillName\` (${skillName})`,
+            { cause: error },
+          );
+        }
+      }
+      throw new UnexpectedError('An unexpected situation ocurred', {
+        cause: error,
+      });
+    }
   }
 }
