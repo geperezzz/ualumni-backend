@@ -22,31 +22,41 @@ export class JobApplicationsService {
     private alumniService: AlumniService,
     private jobOffersService: JobOffersService,
     private resumeService: ResumeService,
-    private mailerService: MailerService
+    private mailerService: MailerService,
   ) {}
 
   private async sendJobApplicationEmail(jobApplication: JobApplication) {
-    const alumni = await this.alumniService.findOne(jobApplication.alumniWhoAppliedId);
+    const alumni = await this.alumniService.findOne(
+      jobApplication.alumniWhoAppliedId,
+    );
     if (!alumni) {
-      throw new NotFoundError(`There is no alumni with the given \`id\` (${jobApplication.alumniWhoAppliedId})`);
+      throw new NotFoundError(
+        `There is no alumni with the given \`id\` (${jobApplication.alumniWhoAppliedId})`,
+      );
     }
 
-    const jobOffer = await this.jobOffersService.findOne(jobApplication.jobOfferId);
+    const jobOffer = await this.jobOffersService.findOne(
+      jobApplication.jobOfferId,
+    );
     if (!jobOffer) {
-      throw new NotFoundError(`There is no job offer with the given \`id\` (${jobApplication.jobOfferId})`);
+      throw new NotFoundError(
+        `There is no job offer with the given \`id\` (${jobApplication.jobOfferId})`,
+      );
     }
 
-    const name = `${alumni.names.split(' ')[0]} ${alumni.surnames.split(
-      ' ',
-    )[0]}`;
+    const name = `${alumni.names.split(' ')[0]} ${
+      alumni.surnames.split(' ')[0]
+    }`;
 
-    const resumePdf = await this.resumeService.exportAsPdf(jobApplication.alumniWhoAppliedId);
+    const resumePdf = await this.resumeService.exportAsPdfAndIncreaseDownloads(
+      jobApplication.alumniWhoAppliedId,
+    );
 
     try {
       await this.mailerService.sendMail({
         to: jobOffer.companyEmail,
         subject: `Currículum ${alumni.names} ${alumni.surnames} - ${jobOffer.position}`,
-        template: './job-application', 
+        template: './job-application',
         context: {
           alumni: name,
           position: jobOffer.position,
@@ -66,7 +76,9 @@ export class JobApplicationsService {
         ],
       });
     } catch (error) {
-      throw new UnexpectedError('An unexpected situation ocurred while sending the application email');
+      throw new UnexpectedError(
+        'An unexpected situation ocurred while sending the application email',
+      );
     }
   }
 
@@ -76,12 +88,14 @@ export class JobApplicationsService {
   ): Promise<JobApplication> {
     let createdJobApplication: JobApplication;
     try {
-      createdJobApplication = await this.ualumniDbService.jobApplication.create({
-        data: {
-          alumniWhoAppliedId: alumniId,
-          ...createJobApplicationDto,
+      createdJobApplication = await this.ualumniDbService.jobApplication.create(
+        {
+          data: {
+            alumniWhoAppliedId: alumniId,
+            ...createJobApplicationDto,
+          },
         },
-      });
+      );
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -199,10 +213,7 @@ export class JobApplicationsService {
     }
   }
 
-  async remove(
-    alumniId: string,
-    jobOfferId: string,
-  ): Promise<JobApplication> {
+  async remove(alumniId: string, jobOfferId: string): Promise<JobApplication> {
     try {
       return await this.ualumniDbService.jobApplication.delete({
         where: {
