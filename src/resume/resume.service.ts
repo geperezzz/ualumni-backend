@@ -44,6 +44,26 @@ export class ResumeService {
     const pdf = await resumePage.pdf();
 
     await browser.close();
+    return pdf;
+  }
+
+  async exportAsPdfAndIncreaseDownloads(alumniId: string): Promise<Buffer> {
+    const alumni =
+      await this.alumniService.findOneWithResumeOnlyVisibles(alumniId);
+    if (!alumni) {
+      throw new NotFoundError(
+        `There is no alumni with the given \`id\` (${alumniId})`,
+      );
+    }
+    const browser = await puppeteer.launch({ headless: 'new' });
+
+    const resumePage = await browser.newPage();
+    await resumePage.setContent(this.buildResumeAsHtml({ alumni }), {
+      waitUntil: 'networkidle0',
+    });
+    const pdf = await resumePage.pdf();
+
+    await browser.close();
     await this.ualumniDbService.resume.update({
       where: { ownerId: alumniId },
       data: { numberOfDownloads: { increment: 1 } },

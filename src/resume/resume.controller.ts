@@ -61,9 +61,31 @@ export class ResumeController {
   @Allowed('admin', 'visitor')
   @Header('Content-Type', 'application/pdf')
   @Header('Content-Disposition', 'inline; filename=resume.pdf')
-  async exportAsPdf(@Param('alumniId', ParseUUIDPipe) alumniId: string): Promise<StreamableFile> {
+  async exportAsPdf(
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
+  ): Promise<StreamableFile> {
     try {
       const pdf = await this.resumeService.exportAsPdf(alumniId);
+      return new StreamableFile(pdf);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundException(error.message, { cause: error });
+      }
+      throw error;
+    }
+  }
+
+  @Get(':alumniId/resume/pdf/download')
+  @SessionNotRequired()
+  @Allowed('admin', 'visitor')
+  @Header('Content-Type', 'application/pdf')
+  @Header('Content-Disposition', 'inline; filename=resume.pdf')
+  async exportAsPdfToDownload(
+    @Param('alumniId', ParseUUIDPipe) alumniId: string,
+  ): Promise<StreamableFile> {
+    try {
+      const pdf =
+        await this.resumeService.exportAsPdfAndIncreaseDownloads(alumniId);
       return new StreamableFile(pdf);
     } catch (error) {
       if (error instanceof NotFoundError) {
@@ -78,7 +100,8 @@ export class ResumeController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Resume was succesfully updated' })
   @ApiNotFoundResponse({
-    description: 'The resume for the alumni with the requested id was not found',
+    description:
+      'The resume for the alumni with the requested id was not found',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
@@ -187,7 +210,8 @@ export class ResumeController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Resume was succesfully updated' })
   @ApiNotFoundResponse({
-    description: 'The resume for the alumni with the requested id was not found',
+    description:
+      'The resume for the alumni with the requested id was not found',
   })
   @ApiInternalServerErrorResponse({
     description: 'An unexpected situation ocurred',
