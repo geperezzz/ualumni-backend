@@ -106,8 +106,8 @@ export class ResumeService {
               isVisible: true,
             },
             orderBy: {
-              endDate: 'desc'
-            }
+              endDate: 'desc',
+            },
           },
           industriesOfInterest: {
             select: {
@@ -144,10 +144,7 @@ export class ResumeService {
               endDate: true,
               isVisible: true,
             },
-            orderBy: [
-              { endDate: 'desc' },
-              { startDate: 'desc' }
-            ]
+            orderBy: [{ endDate: 'desc' }, { startDate: 'desc' }],
           },
         },
       });
@@ -202,6 +199,7 @@ export class ResumeService {
         data: {
           isVisible: isVisible,
           visibleSince: isVisible ? new Date().toISOString() : undefined,
+          reminderSent: isVisible ? false : undefined,
         },
         select: {
           ownerId: true,
@@ -244,8 +242,8 @@ export class ResumeService {
               isVisible: true,
             },
             orderBy: {
-              endDate: 'desc'
-            }
+              endDate: 'desc',
+            },
           },
           industriesOfInterest: {
             select: {
@@ -282,10 +280,7 @@ export class ResumeService {
               endDate: true,
               isVisible: true,
             },
-            orderBy: [
-              { endDate: 'desc' },
-              { startDate: 'desc' }
-            ]
+            orderBy: [{ endDate: 'desc' }, { startDate: 'desc' }],
           },
         },
       });
@@ -344,20 +339,22 @@ export class ResumeService {
   private async sendResumeVisibilityReminderEmail(alumniId: string) {
     const alumni = await this.alumniService.findOne(alumniId);
     if (!alumni) {
-      throw new UnexpectedError(`There is no alumni with the given \`id\` (${alumniId})`);
+      throw new UnexpectedError(
+        `There is no alumni with the given \`id\` (${alumniId})`,
+      );
     }
 
-    const name = `${alumni.names.split(' ')[0]} ${alumni.surnames.split(
-      ' ',
-    )[0]}`;
+    const name = `${alumni.names.split(' ')[0]} ${
+      alumni.surnames.split(' ')[0]
+    }`;
 
-    const link = `http://localhost:3000/auth/login` // homepage UAlumni
+    const link = `http://localhost:3000/auth/login`; // homepage UAlumni
 
     try {
       await this.mailerService.sendMail({
         to: alumni.email,
         subject: `Renovación de Visibilidad de Currículum UAlumni - ${name}`,
-        template: './resume-reminder', 
+        template: './resume-reminder',
         context: {
           alumni: name,
           link,
@@ -376,7 +373,9 @@ export class ResumeService {
         ],
       });
     } catch (error) {
-      throw new UnexpectedError('An unexpected situation ocurred while sending the resume visibility reminder email');
+      throw new UnexpectedError(
+        'An unexpected situation ocurred while sending the resume visibility reminder email',
+      );
     }
   }
 
@@ -395,9 +394,7 @@ export class ResumeService {
     });
 
     for (let alumni of alumniForReminder) {
-      await this.sendResumeVisibilityReminderEmail(
-        alumni.ownerId,
-      );
+      await this.sendResumeVisibilityReminderEmail(alumni.ownerId);
       await this.ualumniDbService.resume.update({
         where: { ownerId: alumni.ownerId },
         data: { reminderSent: true },
