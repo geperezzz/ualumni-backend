@@ -8,6 +8,8 @@ import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);

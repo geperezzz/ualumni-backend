@@ -7,6 +7,9 @@ head
   link(rel='stylesheet' type='text/css' href='style.css')
   style 
     include style.css
+
+    // Calculo de la edad
+
 - var today = new Date();
 - var birthDate = new Date(alumni.birthDate);
 - var age = today.getFullYear() - birthDate.getFullYear();
@@ -14,6 +17,10 @@ head
 - if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
 -     age--;
 - }
+
+
+
+
 
 body
   .container
@@ -80,7 +87,7 @@ body
              div.career-age
                span 
                 |#{graduation.careerName}
-                h5.age #{age} años
+            h4.age #{age} años
       if alumni.resume.workExperiences.length > 0
         .about
           h3.title2 Experiencia Laboral

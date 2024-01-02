@@ -593,6 +593,9 @@ export class AlumniService {
                 endDate: true,
                 isVisible: true,
               },
+              orderBy: {
+                endDate: 'desc',
+              },
             },
             industriesOfInterest: {
               where: { isVisible: true },
@@ -633,6 +636,9 @@ export class AlumniService {
                 startDate: true,
                 endDate: true,
                 isVisible: true,
+              },
+              orderBy: {
+                endDate: 'desc',
               },
             },
             owner: {
@@ -755,6 +761,7 @@ export class AlumniService {
               endDate: true,
               isVisible: true,
             },
+           
           },
           industriesOfInterest: {
             select: {
@@ -791,6 +798,7 @@ export class AlumniService {
               endDate: true,
               isVisible: true,
             },
+           
           },
           owner: {
             include: {

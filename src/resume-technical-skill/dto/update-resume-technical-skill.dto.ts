@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsEmail, IsBoolean, IsOptional, MaxLength, Matches  } from 'class-validator';
 
 export class UpdateResumeTechnicalSkillDto {
   @IsEmail()
@@ -7,13 +7,24 @@ export class UpdateResumeTechnicalSkillDto {
 
   @IsOptional()
   @IsString()
-  skillName?: string;
+  @MaxLength(100)
+  @Matches(/^[a-zA-Z ]*$/, {
+    message: 'skillCategoryName must contain only letters and spaces',
+  })
+  skillCategoryName: string;
 
   @IsOptional()
   @IsString()
-  skillCategoryName?: string;
+  @MaxLength(100)
+  @Matches(/^[a-zA-Z ]*$/, {
+    message: 'skillName must contain only letters and spaces',
+  })
+  skillName: string;
+
 
   @IsOptional()
   @IsBoolean()
   isVisible?: boolean;
+
+
 }

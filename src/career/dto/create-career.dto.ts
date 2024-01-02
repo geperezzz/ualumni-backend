@@ -1,8 +1,29 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  Matches,
+  Validate,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
 
-// class is required for using DTO as a type
+@ValidatorConstraint({ name: 'isNotOnlyWhitespace', async: false })
+class IsNotOnlyWhitespace implements ValidatorConstraintInterface {
+  validate(text: string) {
+    return text.trim().length > 0;
+  }
+}
+
 export class CreateCareerDto {
-  @IsString()
   @IsNotEmpty()
+  @IsString()
+  @MaxLength(100)
+  @Matches(/^[a-zA-Z ]*$/, {
+    message: 'name must contain only letters and spaces',
+  })
+  @Validate(IsNotOnlyWhitespace, {
+    message: 'name must not be only whitespace',
+  })
   name: string;
 }
