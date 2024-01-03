@@ -594,8 +594,8 @@ export class AlumniService {
                 isVisible: true,
               },
               orderBy: {
-                endDate: 'desc'
-              }
+                endDate: 'desc',
+              },
             },
             industriesOfInterest: {
               where: { isVisible: true },

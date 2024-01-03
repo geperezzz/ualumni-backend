@@ -205,6 +205,8 @@ export class ResumeService {
     }
   }
 
+  
+
   // Automatically updates the resume visibility date when visibility is set to true.
 
   async toggleVisibility(
