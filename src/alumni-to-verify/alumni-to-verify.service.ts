@@ -12,6 +12,7 @@ import { AlumniService } from 'src/alumni/alumni.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { MailerService } from '@nestjs-modules/mailer';
 import { UcabDbService } from 'src/ucab-db/ucab-db.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AlumniToVerifyService {
@@ -19,7 +20,8 @@ export class AlumniToVerifyService {
     private alumniService: AlumniService,
     private ualumniDbService: UalumniDbService,
     private ucabDbService: UcabDbService,
-    private mailerService: MailerService
+    private mailerService: MailerService,
+    private configService: ConfigService,
   ) {}
 
   private async sendVerificationEmail(alumniToVerify: AlumniToVerify) {
@@ -30,13 +32,17 @@ export class AlumniToVerifyService {
       ' ',
     )[0]}`;
 
-    const link = `http://localhost:3000/auth/verify-registration?token=${alumniToVerify.token}&email=${alumniToVerify.email}` // probablemente deba ser un link del front pero shh
+    const link = `${this.configService.getOrThrow(
+      'FRONTEND_URL',
+    )}/confirm-email?token=${alumniToVerify.token}&email=${
+      alumniToVerify.email
+    }`; // probablemente deba ser un link del front pero shh
 
     try {
       await this.mailerService.sendMail({
         to: alumniToVerify.email,
         subject: `Verificación  UAlumni - ${name}`,
-        template: './email-verification', 
+        template: './email-verification',
         context: {
           alumni: name,
           token: alumniToVerify.token,
@@ -56,7 +62,9 @@ export class AlumniToVerifyService {
         ],
       });
     } catch (error) {
-      throw new UnexpectedError('An unexpected situation ocurred while sending the verification email');
+      throw new UnexpectedError(
+        'An unexpected situation ocurred while sending the verification email',
+      );
     }
   }
 
@@ -89,7 +97,7 @@ export class AlumniToVerifyService {
     try {
       alumniToVerify = await this.ualumniDbService.alumniToVerify.upsert({
         where: {
-          email: createAlumnitoVerifyDto.email
+          email: createAlumnitoVerifyDto.email,
         },
         create: {
           email: createAlumnitoVerifyDto.email,
@@ -153,9 +161,10 @@ export class AlumniToVerifyService {
       let expirationTime = new Date();
       expirationTime.setHours(expirationTime.getHours() - 5); // 5 hours to expire
 
-      const expiredRegisters = await this.ualumniDbService.alumniToVerify.deleteMany({
-        where: { creationDate: { lte: expirationTime } },
-      });
+      const expiredRegisters =
+        await this.ualumniDbService.alumniToVerify.deleteMany({
+          where: { creationDate: { lte: expirationTime } },
+        });
     } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,

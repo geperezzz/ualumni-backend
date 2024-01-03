@@ -4,18 +4,12 @@ import { AlumniToVerifyController } from './alumni-to-verify.controller';
 import { UalumniDbModule } from 'src/ualumni-db/ualumni-db.module';
 import { UcabDbModule } from 'src/ucab-db/ucab-db.module';
 import { AlumniService } from 'src/alumni/alumni.service';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { join } from 'path';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [
-    UalumniDbModule,
-    UcabDbModule
-  ],
+  imports: [UalumniDbModule, UcabDbModule, ConfigModule],
   controllers: [AlumniToVerifyController],
   providers: [AlumniToVerifyService, AlumniService],
-  exports: [AlumniToVerifyService]
+  exports: [AlumniToVerifyService],
 })
 export class AlumniToVerifyModule {}
