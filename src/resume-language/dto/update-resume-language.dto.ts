@@ -2,17 +2,18 @@ import {
   IsString,
   IsBoolean,
   IsOptional,
-  IsInt,
+  IsEnum,
 } from 'class-validator';
+import { MasteryLevel } from 'prisma/ualumni/client';
 
 export class UpdateResumeLanguageDto {
   @IsString()
   @IsOptional()
   languageName?: string;
 
-  @IsInt()
+  @IsEnum(MasteryLevel)
   @IsOptional()
-  masteryLevel?: number;
+  masteryLevel?: string;
 
   @IsBoolean()
   @IsOptional()

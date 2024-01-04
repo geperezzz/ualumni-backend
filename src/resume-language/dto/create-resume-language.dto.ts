@@ -1,11 +1,10 @@
 import {
   IsNotEmpty,
   IsString,
-  IsDateString,
-  IsEmail,
+  IsEnum,
   IsBoolean,
-  IsInt,
 } from 'class-validator';
+import { MasteryLevel } from 'prisma/ualumni/client';
 
 export class CreateResumeLanguageDto {
   @IsNotEmpty()
@@ -13,8 +12,8 @@ export class CreateResumeLanguageDto {
   languageName: string;
 
   @IsNotEmpty()
-  @IsInt()
-  masteryLevel: number;
+  @IsEnum(MasteryLevel)
+  masteryLevel: string;
 
   @IsNotEmpty()
   @IsBoolean()
