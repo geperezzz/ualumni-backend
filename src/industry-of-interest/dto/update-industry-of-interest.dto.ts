@@ -20,8 +20,8 @@ export class UpdateIndustryOfInterestDto {
   @IsOptional()
   @IsString()
   @MaxLength(50)
-  @Matches(/^[a-zA-Z ]*$/, {
-    message: 'industryName must contain only letters and spaces',
+  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
+    message: 'industryName can contain letters, accents, numbers, special characters, and spaces',
   })
   @Validate(IsNotOnlyWhitespace, {
     message: 'industryName must not be only whitespace',

@@ -23,8 +23,8 @@ export class UpdateHigherEducationStudyDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  @Matches(/^[a-zA-Z ]*$/, {
-    message: 'title must contain only letters and spaces',
+  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
+    message: 'Title can contain letters, accents, numbers, special characters, and spaces',
   })
   @Validate(IsNotOnlyWhitespace, {
     message: 'title must not be only whitespace',
@@ -33,7 +33,14 @@ export class UpdateHigherEducationStudyDto {
 
   @IsOptional()
   @IsString()
-  institution?: string;
+  @MaxLength(100)
+  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
+    message: 'institution can contain letters, accents, numbers, special characters, and spaces',
+  })
+  @Validate(IsNotOnlyWhitespace, {
+    message: 'institution must not be only whitespace',
+  })
+  institution: string;
 
   @IsOptional()
   @IsDateString()

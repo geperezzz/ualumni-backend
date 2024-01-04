@@ -19,8 +19,8 @@ export class UpdateCareerDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  @Matches(/^[a-zA-Z ]*$/, {
-    message: 'name must contain only letters and spaces',
+  @Matches(/^[a-zA-ZÁÉÍÓÚáéíóúÑñ ]*$/, {
+    message: 'name must contain only letters, accents, and spaces',
   })
   @Validate(IsNotOnlyWhitespace, {
     message: 'name must not be only whitespace',
