@@ -33,13 +33,13 @@ export class PortfolioItemService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `El link proporcionado ya existe \`sourceLink\` (${createPortfolioItemDto.sourceLink}) por el egresado con \`id\` (${resumeOwnerId})`,
+            `There already exists a portfolio item with the given \`title\` (${createPortfolioItemDto.title}) for the alumni with \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
         if (error.code === 'P2003') {
           throw new ForeignKeyError(
-            `No existe usuario con el siguiente \`id\` (${resumeOwnerId})`,
+            `There is no alumni with \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
@@ -110,13 +110,13 @@ export class PortfolioItemService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `No existe Item de portafolio con el siguiente titulo \`title\` (${title})`,
+            `There is no portfolio item with the given \`title\` (${title})`,
             { cause: error },
           );
         }
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `No puede actualizarse ya que ya existe \`title\` (${updatePortfolioItemDto.title}) para el egresado con \`id\` (${resumeOwnerId})`,
+            `Cannot update the portfolio item, there already exists a portfolio item with the given \`title\` (${updatePortfolioItemDto.title}) for the alumni with \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
@@ -164,7 +164,7 @@ export class PortfolioItemService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no higher education study with the given \`title\` (${title})`,
+            `There is no portfolio item with the given \`title\` (${title}) for the alumni with \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }

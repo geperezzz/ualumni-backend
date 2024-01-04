@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateResumeLanguageDto } from './dto/create-resume-language.dto';
 import { UpdateResumeLanguageDto } from './dto/update-resume-language.dto';
-import { Prisma } from 'prisma/ualumni/client';
+import { MasteryLevel, Prisma } from 'prisma/ualumni/client';
 import {
   AlreadyExistsError,
   ForeignKeyError,
@@ -25,7 +25,7 @@ export class ResumeLanguageService {
         data: {
           resumeOwnerId,
           languageName: createResumeLanguageDto.languageName,
-          masteryLevel: createResumeLanguageDto.masteryLevel,
+          masteryLevel: createResumeLanguageDto.masteryLevel as MasteryLevel,
           isVisible: createResumeLanguageDto.isVisible,
         },
       });
@@ -33,13 +33,13 @@ export class ResumeLanguageService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `There already exists a higher education study with the given \`languageName\` (${createResumeLanguageDto.languageName}) for the alumni with \`id\` (${resumeOwnerId})`,
+            `There already exists a language with the given \`languageName\` (${createResumeLanguageDto.languageName}) for the alumni with \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
         if (error.code === 'P2003') {
           throw new ForeignKeyError(
-            `There is no alumni with the given \`id\` (${resumeOwnerId})`,
+            `There is no language with the name (${createResumeLanguageDto.languageName}))`,
             { cause: error },
           );
         }
@@ -122,7 +122,7 @@ export class ResumeLanguageService {
         },
         data: {
           languageName: updateResumeLanguageDto.languageName,
-          masteryLevel: updateResumeLanguageDto.masteryLevel,
+          masteryLevel: updateResumeLanguageDto.masteryLevel as MasteryLevel,
           isVisible: updateResumeLanguageDto.isVisible,
         },
       });
@@ -130,13 +130,13 @@ export class ResumeLanguageService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no higher education study with the given \`languageName\` (${languageName})`,
+            `There is no language with the given \`languageName\` (${languageName}) for the alumni with \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
         if (error.code === 'P2002') {
           throw new AlreadyExistsError(
-            `Cannot update the higher education study, there already exists a higher education study with the given \`languageName\` (${updateResumeLanguageDto.languageName}) for the alumni with \`id\` (${resumeOwnerId})`,
+            `Cannot update the language, there already exists a language with the given \`languageName\` (${updateResumeLanguageDto.languageName}) for the alumni with \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }
@@ -164,7 +164,7 @@ export class ResumeLanguageService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError(
-            `There is no higher education study with the given \`languageName\` (${languageName})`,
+            `There is no language with the given \`languageName\` (${languageName}) for the alumni with \`id\` (${resumeOwnerId})`,
             { cause: error },
           );
         }

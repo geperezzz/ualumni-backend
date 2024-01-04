@@ -208,12 +208,21 @@ model Language {
   knownBy ResumeLanguage[]
 }
 
+enum MasteryLevel {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+}
+
 model ResumeLanguage {
   resume        Resume   @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
   resumeOwnerId String   @db.Uuid
   language      Language @relation(fields: [languageName], references: [name])
   languageName  String
-  masteryLevel  Int
+  masteryLevel  MasteryLevel
   isVisible     Boolean
 
   @@id([resumeOwnerId, languageName])
