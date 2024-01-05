@@ -70,7 +70,7 @@ export class ContractTypeController {
   }
 
   @Get()
-  @Allowed('admin')
+  @Allowed('admin', 'alumni')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'The list of contract types was succesfully obtained',
@@ -98,7 +98,7 @@ export class ContractTypeController {
   }
 
   @Get(':name')
-  @Allowed('admin')
+  @Allowed('admin', 'alumni')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Contract type was succesfully found' })
   @ApiNotFoundResponse({
