@@ -10,8 +10,7 @@ export async function seedDb(ualumniTransaction: UalumniTransaction, ucabTransac
   await seedCareers(ualumniTransaction, ucabTransaction);
   await seedContractTypes(ualumniTransaction);
   await seedSoftSkills(ualumniTransaction);
-  await seedTechnicalSkillsCategories(ualumniTransaction);
-  await seedTechnicalSkills(ualumniTransaction);
+  await seedTechnicalSkillsAndTheirCategories(ualumniTransaction);
   await seedLanguages(ualumniTransaction);
 }
 
@@ -92,89 +91,242 @@ async function seedSoftSkills(ualumniTransaction: UalumniTransaction): Promise<v
   });
 }
 
-async function seedTechnicalSkillsCategories(ualumniTransaction: UalumniTransaction): Promise<void> {
-  console.log('  ➥ Seeding technical skills categories...');
+async function seedTechnicalSkillsAndTheirCategories(ualumniTransaction: UalumniTransaction): Promise<void> {
+  console.log('  ➥ Seeding technical skills and their categories...');
 
-  await ualumniTransaction.skillCategory.createMany({
-    skipDuplicates: true,
-    data: [
-      { name: 'Lenguajes de Programación' },
-      { name: 'Desarrollo Web' },
-      { name: 'Frameworks de Java' },
-      { name: 'Control de Versiones' },
-      { name: 'Bases de Datos' },
-      { name: 'Ciencia de Datos' },
-      { name: 'Seguridad' },
-      { name: 'Infraestructura' },
-      { name: 'DevOps' },
-      { name: 'Computación en la Nube' },
-      { name: 'Sistemas Operativos' },
-      { name: 'Desarrollo de Videojuegos' },
-      { name: 'Desarrollo de Aplicaciones Móviles' },
-      { name: 'Gestión de Proyectos' },
-    ],
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'Lenguajes de Programación' },
+    update: {},
+    create: {
+      name: 'Lenguajes de Programación',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: [
+          { name: 'JavaScript' },
+          { name: 'Python' },
+          { name: 'Java' },
+          { name: 'C++' },
+          { name: 'Ruby' },
+          { name: 'Rust' },
+          { name: 'PHP' },
+          { name: 'Kotlin' },
+        ],
+      },
+    },
   });
-}
 
-async function seedTechnicalSkills(ualumniTransaction: UalumniTransaction): Promise<void> {
-  console.log('  ➥ Seeding technical skills...');
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'Desarrollo Web' },
+    update: {},
+    create: {
+      name: 'Desarrollo Web',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: [
+          { name: 'HTML' },
+          { name: 'CSS' },
+          { name: 'JavaScript' },
+          { name: 'Node.js' },
+          { name: 'React' },
+          { name: 'Django' },
+          { name: 'Vue.js' },
+          { name: 'Angular' },
+          { name: 'PHP' },
+        ],
+      },
+    },
+  });
   
-  await ualumniTransaction.technicalSkill.createMany({
-    skipDuplicates: true,
-    data: [
-      { categoryName: 'Lenguajes de Programación', name: 'JavaScript' },
-      { categoryName: 'Lenguajes de Programación', name: 'Python' },
-      { categoryName: 'Lenguajes de Programación', name: 'Java' },
-      { categoryName: 'Lenguajes de Programación', name: 'C++' },
-      { categoryName: 'Lenguajes de Programación', name: 'Ruby' },
-      { categoryName: 'Lenguajes de Programación', name: 'Rust' },
-      { categoryName: 'Lenguajes de Programación', name: 'PHP' },
-      { categoryName: 'Lenguajes de Programación', name: 'Kotlin' },
-      
-      { categoryName: 'Desarrollo Web', name: 'HTML' },
-      { categoryName: 'Desarrollo Web', name: 'CSS' },
-      { categoryName: 'Desarrollo Web', name: 'JavaScript' },
-      { categoryName: 'Desarrollo Web', name: 'Node.js' },
-      { categoryName: 'Desarrollo Web', name: 'React' },
-      { categoryName: 'Desarrollo Web', name: 'Django' },
-      { categoryName: 'Desarrollo Web', name: 'Vue.js' },
-      { categoryName: 'Desarrollo Web', name: 'Angular' },
-      { categoryName: 'Desarrollo Web', name: 'PHP' },
-      
-      { categoryName: 'Frameworks de Java', name: 'Spring Boot' },
-      { categoryName: 'Frameworks de Java', name: 'Hibernate' },
-      
-      { categoryName: 'Control de Versiones', name: 'Git' },
-      
-      { categoryName: 'Bases de Datos', name: 'SQL' },
-      { categoryName: 'Bases de Datos', name: 'MongoDB' },
-      { categoryName: 'Bases de Datos', name: 'PostgreSQL' },
-      { categoryName: 'Bases de Datos', name: 'MySQL' },
-      { categoryName: 'Bases de Datos', name: 'MariaDB' },
-      { categoryName: 'Bases de Datos', name: 'SQLite' },
-      
-      { categoryName: 'Ciencia de Datos', name: 'Machine Learning' },
-      { categoryName: 'Ciencia de Datos', name: 'TensorFlow' },
-      
-      { categoryName: 'Seguridad', name: 'Ciberseguridad' },
-      
-      { categoryName: 'Infraestructura', name: 'Networking' },
-      
-      { categoryName: 'DevOps', name: 'Docker' },
-      
-      { categoryName: 'Computación en la Nube', name: 'AWS' },
-      { categoryName: 'Computación en la Nube', name: 'Microsoft Azure' },
-      
-      { categoryName: 'Sistemas Operativos', name: 'Linux' },
-      
-      { categoryName: 'Desarrollo de Videojuegos', name: 'Unity' },
-      
-      { categoryName: 'Desarrollo de Aplicaciones Móviles', name: 'Flutter' },
-      { categoryName: 'Desarrollo de Aplicaciones Móviles', name: 'Swift' },
-      { categoryName: 'Desarrollo de Aplicaciones Móviles', name: 'Kotlin' },
-      
-      { categoryName: 'Gestión de Proyectos', name: 'Metodología Ágil' }
-    ],
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'Frameworks de Java' },
+    update: {},
+    create: {
+      name: 'Frameworks de Java',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: [
+          { name: 'Spring Boot' },
+          { name: 'Hibernate' },
+        ],
+      },
+    },
+  });
+  
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'Control de Versiones' },
+    update: {},
+    create: {
+      name: 'Control de Versiones',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: { name: 'Git' },
+      },
+    },
+  });
+  
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'Bases de Datos' },
+    update: {},
+    create: {
+      name: 'Bases de Datos',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: [
+          { name: 'SQL' },
+          { name: 'MongoDB' },
+          { name: 'PostgreSQL' },
+          { name: 'MySQL' },
+          { name: 'MariaDB' },
+          { name: 'SQLite' },
+        ],
+      },
+    },
+  });
+  
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'Ciencia de Datos' },
+    update: {},
+    create: {
+      name: 'Ciencia de Datos',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: [
+          { name: 'Machine Learning' },
+          { name: 'TensorFlow' },
+        ],
+      },
+    },
+  });
+  
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'Seguridad' },
+    update: {},
+    create: {
+      name: 'Seguridad',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: { name: 'Ciberseguridad' },
+      },
+    },
+  });
+  
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'Infraestructura' },
+    update: {},
+    create: {
+      name: 'Infraestructura',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: { name: 'Networking' },
+      },
+    },
+  });
+  
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'DevOps' },
+    update: {},
+    create: {
+      name: 'DevOps',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: { name: 'Docker' },
+      },
+    },
+  });
+  
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'Computación en la Nube' },
+    update: {},
+    create: {
+      name: 'Computación en la Nube',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: [
+          { name: 'AWS' },
+          { name: 'Microsoft Azure' },
+        ],
+      },
+    },
+  });
+  
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'Sistemas Operativos' },
+    update: {},
+    create: {
+      name: 'Sistemas Operativos',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: { name: 'Linux' },
+      },
+    },
+  });
+  
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'Desarrollo de Videojuegos' },
+    update: {},
+    create: {
+      name: 'Desarrollo de Videojuegos',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: { name: 'Unity' },
+      },
+    },
+  });
+  
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'Desarrollo de Aplicaciones Móviles' },
+    update: {},
+    create: {
+      name: 'Desarrollo de Aplicaciones Móviles',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: [
+          { name: 'Flutter' },
+          { name: 'Swift' },
+          { name: 'Kotlin' },
+        ],
+      },
+    },
+  });
+  
+  await ualumniTransaction.skillCategory.upsert({
+    where: { name: 'Gestión de Proyectos' },
+    update: {},
+    create: {
+      name: 'Gestión de Proyectos',
+      relatedCareers: {
+        connect: { name: 'Ingeniería Informática' },
+      },
+      technicalSkills: {
+        create: { name: 'Metodología Ágil' },
+      },
+    },
   });
 }
 
