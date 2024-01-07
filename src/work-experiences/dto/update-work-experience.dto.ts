@@ -70,13 +70,13 @@ export class UpdateWorkExperienceDto {
   })
   description?: string;
 
-  @IsDate()
+  @IsString()
   @IsOptional()
   @Type(() => Date)
   @Transform(({ value }) => new Date(value).toISOString())
   startDate?: string;
 
-  @IsDate()
+  @IsString()
   @IsOptional()
   @Type(() => Date)
   @Validate(IsDateBetween1950AndNow, {
