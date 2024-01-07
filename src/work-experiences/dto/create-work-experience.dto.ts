@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsDate,
@@ -13,7 +13,7 @@ import {
   Validate,
   IsDateString,
   ValidationOptions,
-  ValidateBy
+  ValidateBy,
 } from 'class-validator';
 
 @ValidatorConstraint({ name: 'IsDateBetween1950AndNow', async: false })
@@ -37,14 +37,13 @@ class IsNotOnlyWhitespace implements ValidatorConstraintInterface {
   }
 }
 
-
-
 export class CreateWorkExperienceDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
   @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message: 'companyName can contain letters, accents, numbers, special characters, and spaces',
+    message:
+      'companyName can contain letters, accents, numbers, special characters, and spaces',
   })
   @Validate(IsNotOnlyWhitespace, {
     message: 'companyName must not be only whitespace',
@@ -55,7 +54,8 @@ export class CreateWorkExperienceDto {
   @IsNotEmpty()
   @MaxLength(50)
   @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message: 'Position can contain letters, accents, numbers, special characters, and spaces',
+    message:
+      'Position can contain letters, accents, numbers, special characters, and spaces',
   })
   @Validate(IsNotOnlyWhitespace, {
     message: 'Position must not be only whitespace',
@@ -66,7 +66,8 @@ export class CreateWorkExperienceDto {
   @IsNotEmpty()
   @MaxLength(100)
   @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message: 'Description can contain letters, accents, numbers, special characters, and spaces',
+    message:
+      'Description can contain letters, accents, numbers, special characters, and spaces',
   })
   @Validate(IsNotOnlyWhitespace, {
     message: 'Description must not be only whitespace',
@@ -77,13 +78,15 @@ export class CreateWorkExperienceDto {
   @IsNotEmpty()
   @IsDateString()
   @Validate(IsDateBetween1950AndNow)
+  @Transform(({ value }) => new Date(value).toISOString())
   startDate: string;
 
   @IsString()
   @IsNotEmpty()
   @IsDateString()
   @Validate(IsDateBetween1950AndNow)
-   endDate: string;
+  @Transform(({ value }) => new Date(value).toISOString())
+  endDate: string;
 
   @IsBoolean()
   @IsDefined()

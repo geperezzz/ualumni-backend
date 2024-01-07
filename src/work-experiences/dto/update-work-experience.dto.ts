@@ -1,10 +1,16 @@
-import { Type } from 'class-transformer';
-import { IsBoolean, IsDate, IsOptional, IsString,ValidatorConstraintInterface,
+import { Transform, Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsDate,
+  IsOptional,
+  IsString,
+  ValidatorConstraintInterface,
   ValidationArguments,
   ValidatorConstraint,
   MaxLength,
   Matches,
-  Validate, } from 'class-validator';
+  Validate,
+} from 'class-validator';
 
 @ValidatorConstraint({ name: 'IsDateBetween1950AndNow', async: false })
 export class IsDateBetween1950AndNow implements ValidatorConstraintInterface {
@@ -27,46 +33,48 @@ class IsNotOnlyWhitespace implements ValidatorConstraintInterface {
   }
 }
 
-
-
 export class UpdateWorkExperienceDto {
   @IsString()
   @IsOptional()
   @MaxLength(50)
   @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message: 'companyName can contain letters, accents, numbers, special characters, and spaces',
+    message:
+      'companyName can contain letters, accents, numbers, special characters, and spaces',
   })
   @Validate(IsNotOnlyWhitespace, {
     message: 'companyName must not be only whitespace',
   })
-  companyName: string;
+  companyName?: string;
 
   @IsString()
   @IsOptional()
   @MaxLength(50)
   @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message: 'Position can contain letters, accents, numbers, special characters, and spaces',
+    message:
+      'Position can contain letters, accents, numbers, special characters, and spaces',
   })
   @Validate(IsNotOnlyWhitespace, {
     message: 'Position must not be only whitespace',
   })
-  position: string;
+  position?: string;
 
   @IsString()
   @IsOptional()
   @MaxLength(100)
   @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message: 'Description can contain letters, accents, numbers, special characters, and spaces',
+    message:
+      'Description can contain letters, accents, numbers, special characters, and spaces',
   })
   @Validate(IsNotOnlyWhitespace, {
     message: 'Description must not be only whitespace',
   })
-  description: string;
+  description?: string;
 
   @IsDate()
   @IsOptional()
   @Type(() => Date)
-  startDate: string;
+  @Transform(({ value }) => new Date(value).toISOString())
+  startDate?: string;
 
   @IsDate()
   @IsOptional()
@@ -74,10 +82,11 @@ export class UpdateWorkExperienceDto {
   @Validate(IsDateBetween1950AndNow, {
     message: 'endDate must be between 1950 and the current date',
   })
-  endDate: string;
+  @Transform(({ value }) => new Date(value).toISOString())
+  endDate?: string;
 
   @IsBoolean()
   @IsOptional()
   @Type(() => Boolean)
-  isVisible: boolean;
+  isVisible?: boolean;
 }
