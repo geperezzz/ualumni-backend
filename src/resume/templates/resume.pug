@@ -18,9 +18,15 @@ head
 -     age--;
 - }
 
-
-
-
+script.
+  window.onload = function() {
+    var rightHeight = document.querySelector('.right_Side').offsetHeight;
+    var leftHeight = document.querySelector('.left_Side').offsetHeight;
+    var contentHeight = Math.max(rightHeight, leftHeight);
+    var windowHeight = window.innerHeight;
+    var numberOfPages = Math.ceil(contentHeight / windowHeight);
+    document.body.style.height = `${Math.ceil(numberOfPages / 2) * 100}vh`;
+  }
 
 body
   .container
@@ -35,7 +41,7 @@ body
         h3.title Contacto
         ul
           li
-            
+
           li
             span.icon
               i.fa.fa-envelope-o(aria-hidden='true')
@@ -129,3 +135,4 @@ body
             ul
               each course, index in alumni.resume.ciapCourses
                 li #{course.name}
+
