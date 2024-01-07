@@ -73,7 +73,9 @@ export class UpdateWorkExperienceDto {
   @IsString()
   @IsOptional()
   @Type(() => Date)
-  @Transform(({ value }) => new Date(value).toISOString())
+  @Transform(({ value }) => {
+    if (value) return new Date(value).toISOString();
+  })
   startDate?: string;
 
   @IsString()
@@ -82,7 +84,9 @@ export class UpdateWorkExperienceDto {
   @Validate(IsDateBetween1950AndNow, {
     message: 'endDate must be between 1950 and the current date',
   })
-  @Transform(({ value }) => new Date(value).toISOString())
+  @Transform(({ value }) => {
+    if (value) return new Date(value).toISOString();
+  })
   endDate?: string;
 
   @IsBoolean()
