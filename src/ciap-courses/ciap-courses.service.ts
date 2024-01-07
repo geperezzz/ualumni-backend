@@ -195,7 +195,7 @@ export class CiapCoursesService {
           );
         }
       }
-      throw new UnexpectedError('An unexpected situation ocurred', {
+      throw new UnexpectedError('An unexpected situation ocurred while synchronizing ciap-courses', {
         cause: error,
       });
     }

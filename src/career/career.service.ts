@@ -54,7 +54,7 @@ export class CareerService {
         }
       }
     } catch (error) {
-      throw new UnexpectedError('An unexpected situation ocurred', {
+      throw new UnexpectedError('An unexpected situation ocurred while synchronizing careers', {
         cause: error,
       });
     }
