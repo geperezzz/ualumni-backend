@@ -215,17 +215,19 @@ body {
   width: 100%;
   position: relative;
   right: 10px;
-  ;
   font-weight: normal;
   text-align: right;
   border-bottom: 1px solid #37b4e3;
   margin-top: -20px;
 }
 .career-age {
-  display: flex;
+  display: block;
   justify-content: space-between;
-  flex-wrap: nowrap;
   align-items: center;
+   font-size: 0.6em;
+ /*  flex-wrap: wrap; */
+  white-space: pre-wrap;
+  
 }
 .title2 {
     color: #007935;

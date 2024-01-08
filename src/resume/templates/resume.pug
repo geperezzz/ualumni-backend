@@ -89,10 +89,10 @@ body
         h1
           | #{alumni.names} #{alumni.surnames}
           if alumni.graduations.length > 0
-            each graduation, index in alumni.graduations
+            - var careers = alumni.graduations.map(graduation => graduation.careerName).join(' / ')
              div.career-age
-               span 
-                |#{graduation.careerName}
+               span
+                | #{careers}
             h4.age #{age} años
       if alumni.resume.workExperiences.length > 0
         .about
