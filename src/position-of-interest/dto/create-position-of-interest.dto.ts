@@ -20,8 +20,9 @@ export class CreatePositionOfInterestDto {
   @IsNotEmpty()
   @IsString()
   @MaxLength(100)
-  @Matches(/^[a-zA-Z ]*$/, {
-    message: 'positionName must contain only letters and spaces',
+  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
+    message:
+      'Positioname can contain letters, accents, numbers, special characters, and spaces',
   })
   @Validate(IsNotOnlyWhitespace, {
     message: 'positionName must not be only whitespace',

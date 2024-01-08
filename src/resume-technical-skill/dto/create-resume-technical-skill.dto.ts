@@ -4,16 +4,18 @@ export class CreateResumeTechnicalSkillDto {
   @IsNotEmpty()
   @IsString()
   @MaxLength(100)
-  @Matches(/^[a-zA-Z ]*$/, {
-    message: 'skillCategoryName must contain only letters and spaces',
+  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
+    message:
+      'SkillCategoryName can contain letters, accents, numbers, special characters, and spaces',
   })
   skillCategoryName: string;
 
   @IsNotEmpty()
   @IsString()
   @MaxLength(100)
-  @Matches(/^[a-zA-Z ]*$/, {
-    message: 'skillName must contain only letters and spaces',
+  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
+    message:
+      'skillname contain letters, accents, numbers, special characters, and spaces',
   })
   skillName: string;
 
