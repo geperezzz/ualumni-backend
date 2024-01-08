@@ -95,7 +95,7 @@ export class AlumniService {
           );
         }
       }
-      throw new UnexpectedError('An unexpected situation ocurred', {
+      throw new UnexpectedError('An unexpected situation ocurred while synchronizing alumni', {
         cause: error,
       });
     }

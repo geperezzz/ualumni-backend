@@ -101,7 +101,7 @@ export class ResumeCiapCoursesService {
         }
       }
     } catch (error) {
-      throw new UnexpectedError('An unexpected situation ocurred', {
+      throw new UnexpectedError('An unexpected situation ocurred while synchronizing resume-ciap-courses', {
         cause: error,
       });
     }

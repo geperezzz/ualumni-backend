@@ -166,7 +166,7 @@ export class AlumniToVerifyService {
           where: { creationDate: { lte: expirationTime } },
         });
     } catch (error) {
-      throw new UnexpectedError('An unexpected situation ocurred', {
+      throw new UnexpectedError('An unexpected situation ocurred while autoRemoving alumni-to-verify', {
         cause: error,
       });
     }
