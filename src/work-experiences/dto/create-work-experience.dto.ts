@@ -64,7 +64,7 @@ export class CreateWorkExperienceDto {
 
   @IsString()
   @IsNotEmpty()
-  @MaxLength(100)
+  @MaxLength(500)
   @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
     message:
       'Description can contain letters, accents, numbers, special characters, and spaces',
