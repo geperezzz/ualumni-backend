@@ -1,8 +1,9 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDefined } from 'class-validator';
 
 
 export class ToggleResumeVisibilityDto {
     @IsBoolean()
+    @IsDefined()
     isVisible: boolean;
   }
   

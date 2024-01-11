@@ -1,28 +1,21 @@
-import { ArrayNotEmpty, IsArray, IsNotEmpty, IsString, MaxLength, Matches } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsNotEmpty, IsString, MaxLength, Validate, IsDefined } from 'class-validator';
+import { IsNotOnlyWhitespace } from 'src/common/validators/is-not-only-whitespace.validator';
 
 export class CreateSkillCategoryDto {
+  @MaxLength(100)
+  @Validate(IsNotOnlyWhitespace)
   @IsString()
   @IsNotEmpty()
-  @MaxLength(100)
-  @Matches(/^[a-zA-Z ]*$/, {
-    message: 'name must contain only letters and spaces',
-  })
   name: string;
 
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsString({ each: true })
   @MaxLength(100, { each: true })
-  @Matches(/^[a-zA-Z ]*$/, {
-    each: true,
-    message: 'Each item in relatedCareersNames must contain only letters and spaces',
-  })
+  @Validate(IsNotOnlyWhitespace, { each: true })
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  @ArrayNotEmpty()
+  @IsArray()
+  @IsDefined()
   relatedCareersNames: string[];
-
-  constructor(name: string, relatedCareersNames: string[]) {
-    this.name = name ? name.trim() : '';
-    this.relatedCareersNames = relatedCareersNames ? relatedCareersNames.map(name => name ? name.trim() : '') : [];
-  }
 }
 
  

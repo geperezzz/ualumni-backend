@@ -23,7 +23,7 @@ export class CiapCoursesService {
 
   private async findUalumniDbCiapCourse(name: string, date: Date) {
     try {
-      const data = await this.ualumniDbService.ciapCourse.findUnique({
+      return await this.ualumniDbService.ciapCourse.findUnique({
         where: {
           name_date: {
             name: name,
@@ -31,7 +31,6 @@ export class CiapCoursesService {
           },
         },
       });
-      return data ? data : undefined;
     } catch (error) {
       throw new UnexpectedError('An unexpected situation ocurred', {
         cause: error,
@@ -47,7 +46,7 @@ export class CiapCoursesService {
         data: {
           id: createCiapCourseDto.id,
           name: createCiapCourseDto.name,
-          date: new Date(createCiapCourseDto.date).toISOString(),
+          date: createCiapCourseDto.date,
         },
       });
     } catch (error) {
@@ -121,8 +120,6 @@ export class CiapCoursesService {
           id: updateCiapCourseDto.id,
           name: updateCiapCourseDto.name,
           date: updateCiapCourseDto.date
-            ? new Date(updateCiapCourseDto.date).toISOString()
-            : undefined,
         },
       });
     } catch (error) {

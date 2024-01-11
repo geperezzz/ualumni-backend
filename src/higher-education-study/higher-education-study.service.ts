@@ -26,9 +26,7 @@ export class HigherEducationStudyService {
           resumeOwnerId,
           title: createHigherEducationStudyDto.title,
           institution: createHigherEducationStudyDto.institution,
-          endDate: new Date(
-            createHigherEducationStudyDto.endDate,
-          ).toISOString(),
+          endDate: createHigherEducationStudyDto.endDate,
           isVisible: createHigherEducationStudyDto.isVisible,
         },
       });
@@ -131,9 +129,7 @@ export class HigherEducationStudyService {
         data: {
           title: updateHigherEducationStudyDto.title,
           institution: updateHigherEducationStudyDto.institution,
-          endDate: updateHigherEducationStudyDto.endDate
-            ? new Date(updateHigherEducationStudyDto.endDate).toISOString()
-            : undefined,
+          endDate: updateHigherEducationStudyDto.endDate,
           isVisible: updateHigherEducationStudyDto.isVisible,
         },
       });

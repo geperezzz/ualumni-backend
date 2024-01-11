@@ -2,28 +2,14 @@ import {
   IsOptional,
   IsString,
   MaxLength,
-  Matches,
   Validate,
-  ValidatorConstraint,
-  ValidatorConstraintInterface,
 } from 'class-validator';
-
-@ValidatorConstraint({ name: 'isNotOnlyWhitespace', async: false })
-class IsNotOnlyWhitespace implements ValidatorConstraintInterface {
-  validate(text: string) {
-    return text.trim().length > 0;
-  }
-}
+import { IsNotOnlyWhitespace } from 'src/common/validators/is-not-only-whitespace.validator';
 
 export class UpdateContractTypeDto {
-  @IsOptional()
-  @IsString()
   @MaxLength(100)
-  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message: 'name can contain letters, accents, numbers, special characters, and spaces',
-  })
-  @Validate(IsNotOnlyWhitespace, {
-    message: 'name must not be only whitespace',
-  })
+  @Validate(IsNotOnlyWhitespace)
+  @IsString()
+  @IsOptional()
   name?: string;
 }

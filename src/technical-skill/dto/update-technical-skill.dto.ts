@@ -1,11 +1,16 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, MaxLength, Validate } from 'class-validator';
+import { IsNotOnlyWhitespace } from 'src/common/validators/is-not-only-whitespace.validator';
 
 export class UpdateTechnicalSkillDto {
-  @IsOptional()
+  @MaxLength(100)
+  @Validate(IsNotOnlyWhitespace)
   @IsString()
+  @IsOptional()
   name?: string;
 
-  @IsOptional()
+  @MaxLength(100)
+  @Validate(IsNotOnlyWhitespace)
   @IsString()
+  @IsOptional()
   categoryName?: string;
 }

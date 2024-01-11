@@ -80,7 +80,7 @@ export class AlumniService {
                 careerName: ucabDbCareer.careerName,
                 graduationDate: ucabDbCareer.graduationDate
                   ? ucabDbCareer.graduationDate
-                  : new Date().toISOString(),
+                  : new Date(),
               },
             });
           }

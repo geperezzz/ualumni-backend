@@ -1,0 +1,1 @@
+export const UCAB_GUAYANA_CREATION_DATE = new Date(1995, 5, 1);

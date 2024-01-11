@@ -1,58 +1,34 @@
+import { Type } from 'class-transformer';
 import {
-  IsDateString,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
-  Matches,
   MaxLength,
   Validate,
-  ValidatorConstraint,
-  ValidatorConstraintInterface,
+  IsDefined,
+  IsDate,
   MinDate,
-  MaxDate,
-  ValidationArguments
+  MaxDate
 } from 'class-validator';
-
-@ValidatorConstraint({ name: 'isNotOnlyWhitespace', async: false })
-class IsNotOnlyWhitespace implements ValidatorConstraintInterface {
-  validate(text: string) {
-    return text.trim().length > 0;
-  }
-}
-
-@ValidatorConstraint({ name: 'IsDateBetween1950AndNow', async: false })
-export class IsDateBetween1950AndNow implements ValidatorConstraintInterface {
-  validate(text: string, args: ValidationArguments) {
-    const date = new Date(text);
-    const minDate = new Date(1950, 0, 1);
-    const maxDate = new Date();
-    return date >= minDate && date <= maxDate;
-  }
-
-  defaultMessage(args: ValidationArguments) {
-    return 'endDate must be between 1950 and the current date';
-  }
-}
+import { UCAB_GUAYANA_CREATION_DATE } from 'src/common/constants/ucab-creation-date.constant';
+import { IsNotOnlyWhitespace } from 'src/common/validators/is-not-only-whitespace.validator';
 
 export class CreateCiapCourseDto {
   @IsUUID()
   @IsOptional()
   id?: string;
 
-  @IsNotEmpty()
-  @IsString()
   @MaxLength(100)
-  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message: 'name can contain letters, accents, numbers, special characters, and spaces',
-  })
-  @Validate(IsNotOnlyWhitespace, {
-    message: 'name must not be only whitespace',
-  })
+  @Validate(IsNotOnlyWhitespace)
+  @IsString()
+  @IsNotEmpty()
   name: string;
 
-  @Validate(IsDateBetween1950AndNow, {
-    message: 'endDate must be between 1950 and the current date',
-  })
-  date: string;
+  @MaxDate(() => new Date())
+  @MinDate(UCAB_GUAYANA_CREATION_DATE)
+  @IsDate()
+  @Type(() => Date)
+  @IsDefined()
+  date: Date;
 }

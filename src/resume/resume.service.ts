@@ -82,7 +82,7 @@ export class ResumeService {
           isVisible: updateResumeDto.isVisible,
           aboutMe: updateResumeDto.aboutMe,
           visibleSince: updateResumeDto.isVisible
-            ? new Date().toISOString()
+            ? new Date()
             : undefined,
         },
         select: {
@@ -220,7 +220,7 @@ export class ResumeService {
         where: { ownerId },
         data: {
           isVisible: isVisible,
-          visibleSince: isVisible ? new Date().toISOString() : undefined,
+          visibleSince: isVisible ? new Date() : undefined,
           reminderSent: isVisible ? false : undefined,
         },
         select: {

@@ -9,5 +9,4 @@ export class AlumniDto implements Omit<Alumni, 'password'> {
   @Expose() birthDate: Date;
   @Expose() graduations: Graduation[];
   @Expose() address: string | null;
-  @Expose() telephoneNumber: string | null;
 }

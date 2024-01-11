@@ -1,26 +1,22 @@
-import { IsArray, IsOptional, IsString, MaxLength, Matches } from 'class-validator';
+import { IsArray, IsOptional, IsString, MaxLength, Matches, Validate, IsNotEmpty, ArrayNotEmpty } from 'class-validator';
+import { IsNotOnlyWhitespace } from 'src/common/validators/is-not-only-whitespace.validator';
 
 export class UpdateRelatedCareersDto {
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
   @MaxLength(100, { each: true })
-  @Matches(/^[a-zA-Z ]*$/, {
-    each: true,
-    message: 'Each item in removeRelatedCareersNames must contain only letters and spaces',
-  })
+  @Validate(IsNotOnlyWhitespace, { each: true })
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  @ArrayNotEmpty()
+  @IsArray()
+  @IsOptional()
   removeRelatedCareersNames?: string[];
 
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
   @MaxLength(100, { each: true })
-  @Matches(/^[a-zA-Z ]*$/, {
-    each: true,
-    message: 'Each item in addRelatedCareersNames must contain only letters and spaces',
-  })
+  @Validate(IsNotOnlyWhitespace, { each: true })
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  @ArrayNotEmpty()
+  @IsArray()
+  @IsOptional()
   addRelatedCareersNames?: string[];
-
-  
-
 }

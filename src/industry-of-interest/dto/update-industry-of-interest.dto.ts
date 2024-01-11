@@ -3,32 +3,18 @@ import {
   IsString,
   IsBoolean,
   MaxLength,
-  Matches,
   Validate,
-  ValidatorConstraint,
-  ValidatorConstraintInterface,
 } from 'class-validator';
-
-@ValidatorConstraint({ name: 'isNotOnlyWhitespace', async: false })
-class IsNotOnlyWhitespace implements ValidatorConstraintInterface {
-  validate(text: string) {
-    return text.trim().length > 0;
-  }
-}
+import { IsNotOnlyWhitespace } from 'src/common/validators/is-not-only-whitespace.validator';
 
 export class UpdateIndustryOfInterestDto {
-  @IsOptional()
+  @MaxLength(100)
+  @Validate(IsNotOnlyWhitespace)
   @IsString()
-  @MaxLength(50)
-  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message: 'industryName can contain letters, accents, numbers, special characters, and spaces',
-  })
-  @Validate(IsNotOnlyWhitespace, {
-    message: 'industryName must not be only whitespace',
-  })
+  @IsOptional()
   industryName?: string;
 
-  @IsOptional()
   @IsBoolean()
+  @IsOptional()
   isVisible?: boolean;
 }

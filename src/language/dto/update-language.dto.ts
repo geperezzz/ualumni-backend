@@ -1,11 +1,10 @@
-import { IsOptional, IsString, MaxLength, Matches } from 'class-validator';
+import { IsOptional, IsString, MaxLength, Validate } from 'class-validator';
+import { IsNotOnlyWhitespace } from 'src/common/validators/is-not-only-whitespace.validator';
 
 export class UpdateLanguageDto {
-  @IsOptional()
+  @MaxLength(100)
+  @Validate(IsNotOnlyWhitespace)
   @IsString()
-  @MaxLength(50)
-  @Matches(/^[a-zA-Z ]*$/, {
-    message: 'name must contain only letters and spaces',
-  })
+  @IsOptional()
   name?: string;
 }

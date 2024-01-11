@@ -1,18 +1,14 @@
-import { IsOptional, IsString, IsBoolean, MaxLength, Matches } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, MaxLength, Matches, Validate, IsNotEmpty } from 'class-validator';
+import { IsNotOnlyWhitespace } from 'src/common/validators/is-not-only-whitespace.validator';
 
 export class UpdateResumeSoftSkillDto {
-  @IsOptional()
-  @IsString()
   @MaxLength(100)
-  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message:
-      'Skillname can contain letters, accents, numbers, special characters, and spaces',
-  })
-  skillName: string;
-
+  @Validate(IsNotOnlyWhitespace)
+  @IsString()
   @IsOptional()
+  skillName?: string;
+
   @IsBoolean()
-  isVisible: boolean;
-
-
+  @IsOptional()
+  isVisible?: boolean;
 }

@@ -1,70 +1,38 @@
+import { Type } from 'class-transformer';
 import {
   IsOptional,
   IsString,
-  IsDateString,
   IsBoolean,
   MaxLength,
-  Matches,
   Validate,
-  ValidatorConstraint,
-  ValidatorConstraintInterface,
-  ValidationArguments,
   MinDate,
-  MaxDate
+  MaxDate,
+  IsDate,
 } from 'class-validator';
-
-@ValidatorConstraint({ name: 'isNotOnlyWhitespace', async: false })
-class IsNotOnlyWhitespace implements ValidatorConstraintInterface {
-  validate(text: string) {
-    return text.trim().length > 0;
-  }
-}
-
-@ValidatorConstraint({ name: 'IsDateBetween1950AndNow', async: false })
-export class IsDateBetween1950AndNow implements ValidatorConstraintInterface {
-  validate(text: string, args: ValidationArguments) {
-    const date = new Date(text);
-    const minDate = new Date(1950, 0, 1);
-    const maxDate = new Date();
-    return date >= minDate && date <= maxDate;
-  }
-
-  defaultMessage(args: ValidationArguments) {
-    return 'endDate must be between 1950 and the current date';
-  }
-}
+import { UCAB_GUAYANA_CREATION_DATE } from 'src/common/constants/ucab-creation-date.constant';
+import { IsNotOnlyWhitespace } from 'src/common/validators/is-not-only-whitespace.validator';
 
 export class UpdateHigherEducationStudyDto {
-  @IsOptional()
-  @IsString()
   @MaxLength(100)
-  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message: 'Title can contain letters, accents, numbers, special characters, and spaces',
-  })
-  @Validate(IsNotOnlyWhitespace, {
-    message: 'title must not be only whitespace',
-  })
+  @Validate(IsNotOnlyWhitespace)
+  @IsString()
+  @IsOptional()
   title?: string;
 
-  @IsOptional()
-  @IsString()
   @MaxLength(100)
-  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message: 'institution can contain letters, accents, numbers, special characters, and spaces',
-  })
-  @Validate(IsNotOnlyWhitespace, {
-    message: 'institution must not be only whitespace',
-  })
-  institution: string;
-
+  @Validate(IsNotOnlyWhitespace)
+  @IsString()
   @IsOptional()
-  @IsDateString()
-  @Validate(IsDateBetween1950AndNow, {
-    message: 'endDate must be between 1950 and the current date',
-  })
+  institution?: string;
+
+  @MaxDate(() => new Date())
+  @MinDate(UCAB_GUAYANA_CREATION_DATE)
+  @IsDate()
+  @Type(() => Date)
+  @IsOptional()
   endDate?: string;
 
-  @IsOptional()
   @IsBoolean()
+  @IsOptional()
   isVisible?: boolean;
 }

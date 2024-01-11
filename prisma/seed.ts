@@ -13,6 +13,7 @@ main();
 async function main(): Promise<void> {
   let seedUcabDb: (transaction: UcabTransaction) => Promise<void>;
   let seedUalumniDb: (ualumniTransaction: UalumniTransaction, ucabTransaction: UcabTransaction) => Promise<void>;
+
   switch (process.env.NODE_ENV) {
     case undefined:
       console.error('⚠ Cannot seed the databases without a specified environment: NODE_ENV environment variable not set');

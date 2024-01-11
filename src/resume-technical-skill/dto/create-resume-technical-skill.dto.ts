@@ -1,31 +1,20 @@
-import { IsNotEmpty, IsString, IsBoolean, MaxLength, Matches } from 'class-validator';
+import { IsNotEmpty, IsString, IsBoolean, MaxLength, Matches, Validate, IsDefined } from 'class-validator';
+import { IsNotOnlyWhitespace } from 'src/common/validators/is-not-only-whitespace.validator';
 
 export class CreateResumeTechnicalSkillDto {
-  @IsNotEmpty()
-  @IsString()
   @MaxLength(100)
-  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message:
-      'SkillCategoryName can contain letters, accents, numbers, special characters, and spaces',
-  })
+  @Validate(IsNotOnlyWhitespace)
+  @IsString()
+  @IsNotEmpty()
   skillCategoryName: string;
 
-  @IsNotEmpty()
-  @IsString()
   @MaxLength(100)
-  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message:
-      'skillname contain letters, accents, numbers, special characters, and spaces',
-  })
+  @Validate(IsNotOnlyWhitespace)
+  @IsString()
+  @IsNotEmpty()
   skillName: string;
 
-  @IsNotEmpty()
   @IsBoolean()
+  @IsDefined()
   isVisible: boolean;
-
-  constructor(skillName: string, skillCategoryName: string, isVisible: boolean) {
-    this.skillName = skillName ? skillName.trim() : '';
-    this.isVisible = isVisible;
-    this.skillCategoryName = skillCategoryName ? skillCategoryName.trim() : '';
-  }
 }

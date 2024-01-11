@@ -1,96 +1,54 @@
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsDate,
   IsOptional,
   IsString,
-  ValidatorConstraintInterface,
-  ValidationArguments,
-  ValidatorConstraint,
   MaxLength,
-  Matches,
   Validate,
+  MinDate,
+  MaxDate,
 } from 'class-validator';
-
-@ValidatorConstraint({ name: 'IsDateBetween1950AndNow', async: false })
-export class IsDateBetween1950AndNow implements ValidatorConstraintInterface {
-  validate(text: string, args: ValidationArguments) {
-    const date = new Date(text);
-    const minDate = new Date(1950, 0, 1);
-    const maxDate = new Date();
-    return date >= minDate && date <= maxDate;
-  }
-
-  defaultMessage(args: ValidationArguments) {
-    return 'endDate must be between 1950 and the current date';
-  }
-}
-
-@ValidatorConstraint({ name: 'isNotOnlyWhitespace', async: false })
-class IsNotOnlyWhitespace implements ValidatorConstraintInterface {
-  validate(text: string) {
-    return text.trim().length > 0;
-  }
-}
+import { UCAB_GUAYANA_CREATION_DATE } from 'src/common/constants/ucab-creation-date.constant';
+import { IsBefore } from 'src/common/validators/is-before.validator';
+import { IsNotOnlyWhitespace } from 'src/common/validators/is-not-only-whitespace.validator';
 
 export class UpdateWorkExperienceDto {
+  @MaxLength(100)
+  @Validate(IsNotOnlyWhitespace)
   @IsString()
   @IsOptional()
-  @MaxLength(50)
-  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message:
-      'companyName can contain letters, accents, numbers, special characters, and spaces',
-  })
-  @Validate(IsNotOnlyWhitespace, {
-    message: 'companyName must not be only whitespace',
-  })
   companyName?: string;
 
+  @MaxLength(100)
+  @Validate(IsNotOnlyWhitespace)
   @IsString()
   @IsOptional()
-  @MaxLength(50)
-  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message:
-      'Position can contain letters, accents, numbers, special characters, and spaces',
-  })
-  @Validate(IsNotOnlyWhitespace, {
-    message: 'Position must not be only whitespace',
-  })
   position?: string;
 
+  @MaxLength(1000)
+  @Validate(IsNotOnlyWhitespace)
   @IsString()
   @IsOptional()
-  @MaxLength(2000)
-  @Matches(/^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\s\W]*$/, {
-    message:
-      'Description can contain letters, accents, numbers, special characters, and spaces',
-  })
-  @Validate(IsNotOnlyWhitespace, {
-    message: 'Description must not be only whitespace',
-  })
   description?: string;
 
-  @IsString()
-  @IsOptional()
+  @Validate(IsBefore, [{ propertyName: 'endDate', isOptional: true }])
+  @MaxDate(() => new Date())
+  @MinDate(UCAB_GUAYANA_CREATION_DATE)
+  @IsDate()
   @Type(() => Date)
-  @Transform(({ value }) => {
-    if (value) return new Date(value).toISOString();
-  })
-  startDate?: string;
+  @IsOptional()
+  startDate?: Date;
 
-  @IsString()
-  @IsOptional()
+  @MaxDate(() => new Date())
+  @MinDate(UCAB_GUAYANA_CREATION_DATE)
+  @IsDate()
   @Type(() => Date)
-  @Validate(IsDateBetween1950AndNow, {
-    message: 'endDate must be between 1950 and the current date',
-  })
-  @Transform(({ value }) => {
-    if (value) return new Date(value).toISOString();
-  })
-  endDate?: string;
+  @IsOptional()
+  endDate?: Date;
 
   @IsBoolean()
-  @IsOptional()
   @Type(() => Boolean)
+  @IsOptional()
   isVisible?: boolean;
 }
