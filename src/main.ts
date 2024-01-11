@@ -27,7 +27,6 @@ async function bootstrap() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        path: configService.getOrThrow('FRONTEND_URL'),
         maxAge: parseInt(configService.getOrThrow('SESSION_COOKIE_MAX_AGE_MS')),
         httpOnly: configService.getOrThrow('SESSION_COOKIE_HTTP_ONLY'),
         sameSite: configService.getOrThrow('SESSION_COOKIE_SAME_SITE'),
