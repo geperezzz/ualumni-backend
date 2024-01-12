@@ -7,17 +7,20 @@ import { UalumniDbService } from './ualumni-db/ualumni-db.service';
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
 
   app.enableCors({
     origin: configService.getOrThrow('FRONTEND_URL'),
     credentials: true,
   });
+
+  app.set('trust proxy', 1);
 
   const prismaClient = app.get(UalumniDbService);
   app.use(
