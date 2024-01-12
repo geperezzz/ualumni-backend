@@ -30,6 +30,7 @@ async function bootstrap() {
         maxAge: parseInt(configService.getOrThrow('SESSION_COOKIE_MAX_AGE_MS')),
         httpOnly: configService.getOrThrow('SESSION_COOKIE_HTTP_ONLY'),
         sameSite: configService.getOrThrow('SESSION_COOKIE_SAME_SITE'),
+        secure: configService.getOrThrow('SESSION_COOKIE_SECURE'),
       },
       store: new PrismaSessionStore(prismaClient, {
         checkPeriod: parseInt(
