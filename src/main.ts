@@ -28,9 +28,9 @@ async function bootstrap() {
       saveUninitialized: false,
       cookie: {
         maxAge: parseInt(configService.getOrThrow('SESSION_COOKIE_MAX_AGE_MS')),
-        httpOnly: configService.getOrThrow('SESSION_COOKIE_HTTP_ONLY'),
+        httpOnly: configService.getOrThrow('SESSION_COOKIE_HTTP_ONLY') === 'true',
         sameSite: configService.getOrThrow('SESSION_COOKIE_SAME_SITE'),
-        secure: configService.getOrThrow('SESSION_COOKIE_SECURE'),
+        secure: configService.getOrThrow('SESSION_COOKIE_SECURE') === 'true',
       },
       store: new PrismaSessionStore(prismaClient, {
         checkPeriod: parseInt(
