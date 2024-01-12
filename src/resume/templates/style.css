@@ -133,8 +133,9 @@ body {
   font-weight: 300;
   overflow: hidden; 
   text-overflow: ellipsis; 
-  white-space: nowrap;
+  white-space: normal;
   font-size: calc(8 px + 1vw);
+  word-wrap: break-word;
 
 
 }
