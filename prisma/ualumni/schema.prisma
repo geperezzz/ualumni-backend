@@ -129,14 +129,14 @@ model Resume {
 }
 
 model WorkExperience {
-  resume        Resume   @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
-  resumeOwnerId String   @db.Uuid
-  number        Int      @default(autoincrement())
+  resume        Resume    @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
+  resumeOwnerId String    @db.Uuid
+  number        Int       @default(autoincrement())
   companyName   String
   position      String
   description   String
-  startDate     DateTime @db.Date
-  endDate       DateTime @db.Date
+  startDate     DateTime  @db.Date
+  endDate       DateTime? @db.Date
   isVisible     Boolean
 
   @@id([resumeOwnerId, number])
@@ -218,9 +218,9 @@ enum MasteryLevel {
 }
 
 model ResumeLanguage {
-  resume        Resume   @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
-  resumeOwnerId String   @db.Uuid
-  language      Language @relation(fields: [languageName], references: [name])
+  resume        Resume       @relation(fields: [resumeOwnerId], references: [ownerId], onUpdate: Cascade, onDelete: Cascade)
+  resumeOwnerId String       @db.Uuid
+  language      Language     @relation(fields: [languageName], references: [name])
   languageName  String
   masteryLevel  MasteryLevel
   isVisible     Boolean

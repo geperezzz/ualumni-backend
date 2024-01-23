@@ -9,6 +9,7 @@ import {
   Validate,
   MinDate,
   MaxDate,
+  IsOptional,
 } from 'class-validator';
 import { UCAB_GUAYANA_CREATION_DATE } from 'src/common/constants/ucab-creation-date.constant';
 import { IsBefore } from 'src/common/validators/is-before.validator';
@@ -45,8 +46,8 @@ export class CreateWorkExperienceDto {
   @MinDate(UCAB_GUAYANA_CREATION_DATE)
   @IsDate()
   @Type(() => Date)
-  @IsDefined()
-  endDate: string;
+  @IsOptional()
+  endDate?: string;
 
   @IsBoolean()
   @Type(() => Boolean)
